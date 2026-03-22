@@ -76,7 +76,7 @@ const api = {
 
 const ACTIVITY_TYPES = {
   TRAVEL_PRO: { label: 'Trajet pro',  icon: '🚗', color: 'bg-blue-100 text-blue-800' },
-  WORK_SITE:  { label: 'Chantier',    icon: '🔨', color: 'bg-amber-100 text-amber-800' },
+  WORK_SITE:  { label: 'Chantier',    icon: '�(', color: 'bg-amber-100 text-amber-800' },
   WORK_OFFICE:{ label: 'Bureau',      icon: '💼', color: 'bg-purple-100 text-purple-800' },
   BREAK:      { label: 'Pause',       icon: '☕', color: 'bg-slate-100 text-slate-600' },
   TRAINING:   { label: 'Formation',   icon: '📚', color: 'bg-green-100 text-green-800' },
@@ -86,7 +86,7 @@ const ACTIVITY_TYPES = {
 const ABSENCE_TYPES = {
   HOLIDAY:  { label: 'Vacances',       icon: '🏖️', color: 'bg-sky-100 text-sky-800' },
   SICK:     { label: 'Maladie',        icon: '🤒', color: 'bg-red-100 text-red-800' },
-  ACCIDENT: { label: 'Accident',       icon: '🏥', color: 'bg-orange-100 text-orange-800' },
+  ACCIDENT: { label: 'Accident',       icon: '💥', color: 'bg-orange-100 text-orange-800' },
   TRAINING: { label: 'Formation',      icon: '📚', color: 'bg-green-100 text-green-800' },
   UNPAID:   { label: 'Non payé',       icon: '📄', color: 'bg-gray-100 text-gray-700' },
   OTHER:    { label: 'Autre',          icon: '📋', color: 'bg-purple-100 text-purple-800' },
@@ -1220,7 +1220,7 @@ function TeamScreen() {
                 ? <div className="p-6 text-center text-slate-400">Aucune entrée</div>
                 : entries.map(e => (
                   <div key={e.id} className="px-4 py-3 flex items-center gap-3">
-                    <span>{ACTIVITY_TYPES[e.activity_type]?.icon || '📋'}|/span>
+                    <span>{ACTIVITY_TYPES[e.activity_type]?.icon || '📋'}</span>
                     <div className="flex-1">
                       <div className="text-sm font-medium">{ACTIVITY_TYPES[e.activity_type]?.label}</div>
                       <div className="text-xs text-slate-400">
