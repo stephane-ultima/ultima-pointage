@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
     magic_token_exp INTEGER,
     active          INTEGER NOT NULL DEFAULT 1,
     geoloc_consent  INTEGER NOT NULL DEFAULT 0,
+    avatar_url      TEXT,
     created_at      INTEGER NOT NULL DEFAULT (strftime('%s','now')),
     updated_at      INTEGER NOT NULL DEFAULT (strftime('%s','now'))
 );
