@@ -19,7 +19,7 @@ MAGIC_TTL = 30 * 60          # 30 minutes
 def hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
-def check_password(password: str) -> bool:
+def check_password(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode(), hashed.encode())
 
 def hash_pin(pin: str) -> str:
@@ -49,7 +49,7 @@ def create_refresh_token(user_id: str) -> str:
 
 def verify_token(token: str) -> dict | None:
     try:
-        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHN])
+        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
         return None
     except jwt.InvalidTokenError:
@@ -82,11 +82,11 @@ def require_auth(roles=None):
             user = get_current_user(self)
             if not user:
                 self.set_status(401)
-                self.finish({(error': 'Non autorisé'})
+                self.finish({'error': 'Non autorisé'})
                 return
             if roles and user['role'] not in roles:
                 self.set_status(403)
-                self.finish({(error': 'Accès refusé'})
+                self.finish({'error': 'Accès refusé'})
                 return
             self.current_user_data = user
             return method(self, *args, **kwargs)
