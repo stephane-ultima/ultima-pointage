@@ -3,8 +3,8 @@ builder = "dockerfile"
 
 [deploy]
 startCommand = "python server.py --seed"
-healthcheckPath = "/api/auth/me"
-healthcheckTimeout = 10
+healthcheckPath = "/"
+healthcheckTimeout = 60
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
 
