@@ -169,6 +169,30 @@ class LogoutHandler(BaseHandler):
         self.json({'message': 'Déconnecté'})
 
 
+class ChangePasswordHandler(BaseHandler):
+    """Change password for password-based users."""
+    def post(self):
+        user = self.require_auth()
+        if not user: return
+        data = self.body()
+        current_pw = data.get('current_password', '')
+        new_pw = data.get('new_password', '')
+        if not new_pw:
+            return self.error('Nouveau mot de passe requis')
+        if len(new_pw) < 8:
+            return self.error('Le mot de passe doit faire au moins 8 caractères')
+        # If user has an existing password, require current password
+        if user['password_hash']:
+            if not current_pw:
+                return self.error('Mot de passe actuel requis')
+            if not auth_module.check_password(current_pw, user['password_hash']):
+                return self.error('Mot de passe actuel incorrect', 401)
+        db.execute("UPDATE users SET password_hash=? WHERE id=?",
+                   (auth_module.hash_password(new_pw), user['id']))
+        self.audit('CHANGE_PASSWORD', 'users', user['id'])
+        self.json({'message': 'Mot de passe modifie avec succes'})
+
+
 class MeHandler(BaseHandler):
     def get(self):
         user = self.require_auth()
@@ -187,7 +211,7 @@ class MeHandler(BaseHandler):
         from utils import get_week_bounds
         start_ts, end_ts = get_week_bounds(week, year)
         week_min = db.fetchone("""
-            SELECT COALESCE(SUM(duration_min), 0) as total
+            SELECT COALESCE(SUM(d uration_min), 0) as total
             FROM time_entries
             WHERE user_id=? AND week_number=? AND week_year=?
             AND activity_type != 'BREAK' AND ended_at IS NOT NULL
