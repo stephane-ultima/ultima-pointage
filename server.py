@@ -12,7 +12,8 @@ import db
 # Import handlers
 from handlers.auth_handler import (
     LoginHandler, MagicLinkHandler, VerifyLinkHandler,
-    VerifyPinHandler, RefreshHandler, LogoutHandler, MeHandler
+    VerifyPinHandler, RefreshHandler, LogoutHandler, MeHandler,
+    ChangePasswordHandler
 )
 from handlers.time_handler import (
     TimeEntriesHandler, TimeEntryDetailHandler,
@@ -46,8 +47,9 @@ def make_app():
         (r'/api/auth/verify-link',  VerifyLinkHandler),
         (r'/api/auth/verify-pin',   VerifyPinHandler),
         (r'/api/auth/refresh',      RefreshHandler),
-        (r'/api/auth/logout',       LogoutHandler),
-        (r'/api/auth/me',           MeHandler),
+        (r'/api/auth/logout',           LogoutHandler),
+        (r'/api/auth/me',               MeHandler),
+        (r'/api/auth/change-password',  ChangePasswordHandler),
 
         # ─── TIME ENTRIES ────────────────────────────────────
         (r'/api/time-entries',              TimeEntriesHandler),
@@ -82,6 +84,13 @@ def make_app():
 if __name__ == '__main__':
     # Initialize database
     db.init_db()
+
+    # Run migrations (safe — idempotent)
+    try:
+        db.execute("ALTER TABLE users ADD COLUMN avatar_url TEXT")
+        print("✓ Migration: avatar_url column added")
+    except Exception:
+        pass  # Column already exists
 
     port = int(os.environ.get('PORT', 8000))
     app = make_app()
