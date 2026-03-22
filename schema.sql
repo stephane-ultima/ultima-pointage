@@ -6,7 +6,7 @@
 PRAGMA journal_mode=WAL;
 PRAGMA foreign_keys=ON;
 
--- ─── USERS ──────────────────────────────────────────────────
+-- ─── USERS ───────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS users (
     id              TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
     email           TEXT UNIQUE,
