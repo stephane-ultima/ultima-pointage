@@ -7,44 +7,54 @@ from utils import ts_now
 
 
 class ProjectsHandler(BaseHandler):
+
     def get(self):
         user = self.require_auth()
         if not user: return
+        status = self.get_argument('status', 'ACTIVE')
         projects = db.fetchall("""
-            SELECT * FROM projects
-            WHERE status IN ('ACTIVE','PAUSED')
-            ORDER BY created_at DESC
-        """)
+            SELECT p.*, u.first_name as manager_first, u.last_name as manager_last
+            FROM projects p
+            LEFT JOIN users u ON p.manager_id = u.id
+            WHERE p.status=?
+            ORDER BY p.name
+        """, (status,))
         self.json({'projects': projects})
-    
+
     def post(self):
-        user = self.require_auth(['MANAGER', 'ADMIN'])
+        user = self.require_auth(['MANAGER', 'ADMIN', 'SUPERADMIN'])
         if not user: return
         data = self.body()
-        project_id = db.fetchone("SELECT lower(hex)randomblob(16)) as id")['id']
+        if not data.get('code') or not data.get('name'):
+            return self.error('Code et nom requis')
+        proj_id = db.fetchone("SELECT lower(hex(randomblob(16))) as id")['id']
         db.execute("""
-            INSERT INTO projects (code, name, client_name, address, status, manager_id)
-            VALUES (?,?,?,?,?,?)
-        """, (data.get('code'), data.get('name'), data.get('client_name'),
-                data.get('address'), 'ACTIVE', user['id']))
-        self.audit('PROJECT_CREATED', 'projects', project_id)
-        self.json({'code': data.get('code')}, 201)
+            INSERT INTO projects (id, code, name, client_name, address, status,
+                                  start_date, end_date, manager_id)
+            VALUES (?,?,?,?,?,?,?,?,?)
+        """, (proj_id, data['code'], data['name'],
+              data.get('client_name'), data.get('address'),
+              data.get('status', 'ACTIVE'),
+              data.get('start_date'), data.get('end_date'),
+              data.get('manager_id', user['id'])))
+        self.audit('PROJECT_CREATED', 'projects', proj_id)
+        project = db.fetchone("SELECT * FROM projects WHERE id=?", (proj_id,))
+        self.json(project, 201)
+
 
 class ProjectDetailHandler(BaseHandler):
-    def get(self, project_id):
-        user = self.require_auth()
-        if not user: return
-        project = db.fetchone("SELECT * FROM projects WHERE id=?", (project_id,))
-        if not project:
-            return self.error('Chrojet introuvable', 404)
-        self.json(project)
-    
-    def put(self, project_id):
-        user = self.require_auth(['MANAGER', 'ADMIN'])
+
+    def patch(self, proj_id):
+        user = self.require_auth(['MANAGER', 'ADMIN', 'SUPERADMIN'])
         if not user: return
         data = self.body()
-        db.execute("""
-            UPDATE projects SET status=? WHERE id=?
-        """, (data.get('status'), project_id))
-        self.audit('PROJECT_UPDATED', 'projects', project_id)
-        self.json({'status': data.get('status')})
+        now = ts_now()
+        fields = {k: v for k, v in data.items()
+                  if k in ('name','client_name','address','status','start_date','end_date')}
+        if not fields:
+            return self.error('Aucun champ à modifier')
+        sets = ', '.join(f"{k}=?" for k in fields)
+        vals = list(fields.values()) + [now, proj_id]
+        db.execute(f"UPDATE projects SET {sets}, updated_at=? WHERE id=?", vals)
+        project = db.fetchone("SELECT * FROM projects WHERE id=?", (proj_id,))
+        self.json(project)
