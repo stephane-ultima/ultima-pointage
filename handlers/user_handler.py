@@ -15,13 +15,13 @@ class UsersHandler(BaseHandler):
         if user['role'] == 'MANAGER':
             users = db.fetchall("""
                 SELECT id, first_name, last_name, email, phone, role,
-                       employee_type, weekly_target_h, annual_leave_d, active
+                       employee_type, weekly_target_h, annual_leave_d, active, avatar_url
                 FROM users WHERE manager_id=? ORDER BY last_name
             """, (user['id'],))
         else:
             users = db.fetchall("""
                 SELECT id, first_name, last_name, email, phone, role,
-                       employee_type, weekly_target_h, annual_leave_d, active
+                       employee_type, weekly_target_h, annual_leave_d, active, avatar_url
                 FROM users ORDER BY last_name
             """)
         self.json({'users': users})
@@ -64,9 +64,9 @@ class UserDetailHandler(BaseHandler):
         if not user: return
         # Users can update their own profile; admins can update anyone
         if uid != user['id'] and user['role'] not in ('ADMIN', 'SUPERADMIN'):
-            return self.error('Accès refusé', 403)
+            return self.error('Acces refuse', 403)
         data = self.body()
-        allowed = ['first_name', 'last_name', 'phone', 'geoloc_consent']
+        allowed = ['first_name', 'last_name', 'phone', 'geoloc_consent', 'avatar_url']
         if user['role'] in ('ADMIN', 'SUPERADMIN'):
             allowed += ['email', 'role', 'employee_type', 'weekly_target_h',
                         'annual_leave_d', 'manager_id', 'active']
@@ -79,7 +79,7 @@ class UserDetailHandler(BaseHandler):
         db.execute(f"UPDATE users SET {sets}, updated_at=? WHERE id=?", vals)
         updated = db.fetchone("""
             SELECT id, first_name, last_name, email, role, employee_type,
-                   weekly_target_h, annual_leave_d, phone, active, geoloc_consent
+                   weekly_target_h, annual_leave_d, phone, active, geoloc_consent, avatar_url
             FROM users WHERE id=?
         """, (uid,))
         self.json(updated)
