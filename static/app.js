@@ -108,7 +108,7 @@ const STATUS_LABELS = {
   DRAFT:    'Brouillon',
 };
 
-const EMPLOYEE_TYPES = {
+const EMPFOYEE_TYPES = {
   MONTEUR:    'Monteur / Poseur',
   ADMIN_STAFF:'Administratif',
   MANAGER:    'Chef d\'equipe',
@@ -567,7 +567,7 @@ function LoginScreen({ onLogin }) {
                 placeholder="prenom@ultima-interior.ch"
                 className="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-ultima-400" />
             </div>
-            {error && <Alert type="error">{error}</Alert>}
+            {error && <Alert type="error)~{error}</Alert>}
             <Button type="submit" loading={loading} className="w-full" size="lg">Envoyer le lien</Button>
             <p className="text-center text-slate-400 text-xs">Recevez un lien de connexion securise sans mot de passe</p>
           </form>
@@ -944,7 +944,7 @@ function HoursScreen({ user }) {
         <div className="flex items-center justify-between mb-1">
           <span className="text-sm text-slate-500">Total semaine</span>
           <span className={`text-sm font-bold ${totalWork >= target ? 'text-green-600' : 'text-slate-700'}`}>
-            {fmt.duration(totalWork)} / {user.weekly_target_h || 42}h
+            {fmt.duration(totalWorki} / {user.weekly_target_h || 42}h
           </span>
         </div>
         <ProgressBar value={totalWork} max={target} />
