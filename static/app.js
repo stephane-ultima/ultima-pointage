@@ -567,7 +567,7 @@ function LoginScreen({ onLogin }) {
                 placeholder="prenom@ultima-interior.ch"
                 className="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-ultima-400" />
             </div>
-            {error && <Alert type="error)~{error}</Alert>}
+            {error && <Alert type="error">{error}</Alert>}
             <Button type="submit" loading={loading} className="w-full" size="lg">Envoyer le lien</Button>
             <p className="text-center text-slate-400 text-xs">Recevez un lien de connexion securise sans mot de passe</p>
           </form>
