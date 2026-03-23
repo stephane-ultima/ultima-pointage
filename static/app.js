@@ -92,6 +92,12 @@ const ABSENCE_TYPES = {
   OTHER:    { label: 'Autre',       icon: '📋', color: 'bg-purple-100 text-purple-800' },
 };
 
+const EMPLOYEE_TYPES = {
+  MONTEUR:    'Monteur',
+  ADMIN_STAFF: 'Admin / Staff',
+  MANAGER:    'Manager'
+};
+
 const STATUS_COLORS = {
   PENDING:   'bg-yellow-100 text-yellow-800',
   APPROVED:  'bg-green-100 text-green-800',
