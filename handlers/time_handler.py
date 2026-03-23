@@ -220,13 +220,15 @@ class TeamEntriesHandler(BaseHandler):
                     'id': emp['id'],
                     'first_name': emp['first_name'],
                     'last_name': emp['last_name'],
-                    'weekly_target_h': emp['weekly_target_h']
+                    'weekly_target_h': emp['weekly_target_h'],
+                    'employee_type': emp.get('employee_type', 'MONTEUR'),
                 },
                 'total_min': total_min,
                 'target_min': emp['weekly_target_h'] * 60,
                 'alerts': alerts,
                 'alert_count': len(alerts),
                 'pending_count': pending_count,
+                'has_pending': pending_count > 0,
                 'entries': entries
             })
 
@@ -240,20 +242,30 @@ class ValidateWeekHandler(BaseHandler):
         user = self.require_auth(['MANAGER', 'ADMIN', 'SUPERADMIN'])
         if not user: return
         data = self.body()
-        emp_id = data.get('user_id')
+        emp_id = data.get('user_id')   # optional – omit to validate ALL employees
         week = data.get('week')
         year = data.get('year')
-        if not all([emp_id, week, year]):
-            return self.error('user_id, week, year requis')
+        if not week or not year:
+            return self.error('week et year requis')
         now = ts_now()
-        db.execute("""
-            UPDATE time_entries
-            SET status='APPROVED', validated_by=?, validated_at=?, updated_at=?
-            WHERE user_id=? AND week_number=? AND week_year=?
-            AND status IN ('PENDING','CORRECTED')
-        """, (user['id'], now, now, emp_id, int(week), int(year)))
-        self.audit('WEEK_VALIDATED', 'time_entries', f"{emp_id}_{week}_{year}")
-        self.json({'message': 'Semaine validée'})
+        if emp_id:
+            db.execute("""
+                UPDATE time_entries
+                SET status='APPROVED', validated_by=?, validated_at=?, updated_at=?
+                WHERE user_id=? AND week_number=? AND week_year=?
+                AND status IN ('PENDING','CORRECTED')
+            """, (user['id'], now, now, emp_id, int(week), int(year)))
+            self.audit('WEEK_VALIDATED', 'time_entries', f"{emp_id}_{week}_{year}")
+        else:
+            # Validate entire week for all employees at once
+            db.execute("""
+                UPDATE time_entries
+                SET status='APPROVED', validated_by=?, validated_at=?, updated_at=?
+                WHERE week_number=? AND week_year=?
+                AND status IN ('PENDING','CORRECTED')
+            """, (user['id'], now, now, int(week), int(year)))
+            self.audit('WEEK_VALIDATED_ALL', 'time_entries', f"all_{week}_{year}")
+        self.json({'message': 'Semaine validée', 'validated': True})
 
 
 class ExportHandler(BaseHandler):
