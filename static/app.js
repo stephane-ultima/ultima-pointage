@@ -98,6 +98,21 @@ const EMPLOYEE_TYPES = {
   MANAGER:    'Manager'
 };
 
+// Helper: convert ISO week + year to "24 - 30 mars 2026"
+function weekLabel(week, year) {
+  if (!week || !year) return `Semaine ${week} / ${year}`;
+  const jan4 = new Date(year, 0, 4);
+  const weekStart = new Date(jan4);
+  weekStart.setDate(jan4.getDate() - jan4.getDay() + 1 + (week - 1) * 7);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  const fmt = d => d.toLocaleDateString('fr-CH', { day: 'numeric', month: 'long' });
+  const fmtY = d => d.toLocaleDateString('fr-CH', { day: 'numeric', month: 'long', year: 'numeric' });
+  return weekStart.getMonth() === weekEnd.getMonth()
+    ? `${weekStart.getDate()} – ${fmtY(weekEnd)}`
+    : `${fmt(weekStart)} – ${fmtY(weekEnd)}`;
+}
+
 const STATUS_COLORS = {
   PENDING:   'bg-yellow-100 text-yellow-800',
   APPROVED:  'bg-green-100 text-green-800',
@@ -943,7 +958,7 @@ function HoursScreen({ user }) {
         <div className="flex items-center justify-between mb-3">
           <button onClick={() => changeWeek(-1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 text-xl">‹</button>
           <div className="text-center">
-            <div className="font-bold text-slate-800">Semaine {week} / {year}</div>
+            <div className="font-bold text-slate-800">{weekLabel(week, year)}</div>
           </div>
           <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 text-xl">›</button>
         </div>
@@ -1431,7 +1446,12 @@ function TeamScreen() {
     if (!week || !year) return;
     setLoading(true);
     api.get(`/time-entries/team?week=${week}&year=${year}`)
-      .then(d => setData(d.team || []))
+      .then(d => setData((d.team || []).map(m => ({
+      ...m, ...(m.employee || {}),
+      user_id: m.employee ? m.employee.id : m.user_id,
+      total_work_min: m.total_min || 0,
+      has_pending: (m.pending_count || 0) > 0,
+    }))))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [week, year]);
@@ -1505,7 +1525,7 @@ function TeamScreen() {
       <Card className="p-4">
         <div className="flex items-center justify-between">
           <button onClick={() => changeWeek(-1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl">‹</button>
-          <span className="font-bold text-slate-800">Semaine {week} / {year}</span>
+          <span className="font-bold text-slate-800">{weekLabel(week, year)}</span>
           <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl">›</button>
         </div>
       </Card>
@@ -1580,7 +1600,12 @@ function ValidationScreen() {
     if (!week || !year) return;
     setLoading(true);
     api.get(`/time-entries/team?week=${week}&year=${year}`)
-      .then(d => setData(d.team || []))
+      .then(d => setData((d.team || []).map(m => ({
+      ...m, ...(m.employee || {}),
+      user_id: m.employee ? m.employee.id : m.user_id,
+      total_work_min: m.total_min || 0,
+      has_pending: (m.pending_count || 0) > 0,
+    }))))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [week, year]);
@@ -1599,7 +1624,12 @@ function ValidationScreen() {
       const d = await api.post('/time-entries/validate-week', { week, year });
       setSuccess(`${d.validated} entree(s) approuvee(s)`);
       const res = await api.get(`/time-entries/team?week=${week}&year=${year}`);
-      setData(res.team || []);
+      setData((res.team || []).map(m => ({
+      ...m, ...(m.employee || {}),
+      user_id: m.employee ? m.employee.id : m.user_id,
+      total_work_min: m.total_min || 0,
+      has_pending: (m.pending_count || 0) > 0,
+    })));
     } catch (err) { alert(err.message); }
     finally { setValidating(false); }
   };
@@ -1611,7 +1641,7 @@ function ValidationScreen() {
       <Card className="p-4">
         <div className="flex items-center justify-between">
           <button onClick={() => changeWeek(-1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl">‹</button>
-          <span className="font-bold text-slate-800">Semaine {week} / {year}</span>
+          <span className="font-bold text-slate-800">{weekLabel(week, year)}</span>
           <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl">›</button>
         </div>
       </Card>
