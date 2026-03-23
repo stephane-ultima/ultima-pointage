@@ -15,13 +15,13 @@ class UsersHandler(BaseHandler):
         if user['role'] == 'MANAGER':
             users = db.fetchall("""
                 SELECT id, first_name, last_name, email, phone, role,
-                       employee_type, weekly_target_h, annual_leave_d, active, avatar_url
+                       employee_type, weekly_target_h, annual_leave_d, active
                 FROM users WHERE manager_id=? ORDER BY last_name
             """, (user['id'],))
         else:
             users = db.fetchall("""
                 SELECT id, first_name, last_name, email, phone, role,
-                       employee_type, weekly_target_h, annual_leave_d, active, avatar_url
+                       employee_type, weekly_target_h, annual_leave_d, active
                 FROM users ORDER BY last_name
             """)
         self.json({'users': users})
@@ -64,22 +64,29 @@ class UserDetailHandler(BaseHandler):
         if not user: return
         # Users can update their own profile; admins can update anyone
         if uid != user['id'] and user['role'] not in ('ADMIN', 'SUPERADMIN'):
-            return self.error('Acces refuse', 403)
+            return self.error('Accès refusé', 403)
         data = self.body()
-        allowed = ['first_name', 'last_name', 'phone', 'geoloc_consent', 'avatar_url']
+        allowed = ['first_name', 'last_name', 'phone', 'geoloc_consent']
         if user['role'] in ('ADMIN', 'SUPERADMIN'):
             allowed += ['email', 'role', 'employee_type', 'weekly_target_h',
                         'annual_leave_d', 'manager_id', 'active']
         fields = {k: v for k, v in data.items() if k in allowed}
-        if not fields:
+        # Handle password update separately (must be hashed)
+        new_password = data.get('password') if user['role'] in ('ADMIN', 'SUPERADMIN') else None
+        if not fields and not new_password:
             return self.error('Aucun champ modifiable fourni')
         now = ts_now()
-        sets = ', '.join(f"{k}=?" for k in fields)
-        vals = list(fields.values()) + [now, uid]
-        db.execute(f"UPDATE users SET {sets}, updated_at=? WHERE id=?", vals)
+        if fields:
+            sets = ', '.join(f"{k}=?" for k in fields)
+            vals = list(fields.values()) + [now, uid]
+            db.execute(f"UPDATE users SET {sets}, updated_at=? WHERE id=?", vals)
+        if new_password:
+            ph = auth_module.hash_password(new_password)
+            db.execute("UPDATE users SET password_hash=?, updated_at=? WHERE id=?",
+                       (ph, now, uid))
         updated = db.fetchone("""
             SELECT id, first_name, last_name, email, role, employee_type,
-                   weekly_target_h, annual_leave_d, phone, active, geoloc_consent, avatar_url
+                   weekly_target_h, annual_leave_d, phone, active, geoloc_consent
             FROM users WHERE id=?
         """, (uid,))
         self.json(updated)
