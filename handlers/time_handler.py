@@ -57,7 +57,7 @@ class TimeEntriesHandler(BaseHandler):
         data = self.body()
 
         activity = data.get('activity_type')
-        if activity not in ('WORK_SITE','WORK_DEPOT','WORK_OFFICE','TRAVEL_PRO','WORK_SAV','WORK_REMOTE','BREAK','TRAINING','OTHER'):
+        if activity not in ('WORK_SITE','WORK_DEPOT','TRAVEL_PRO','WORK_SAV','WORK_REMOTE','BREAK'):
             return self.error('Type d\'activité invalide')
 
         # Close any open session first
@@ -244,7 +244,7 @@ class ValidateWeekHandler(BaseHandler):
         week = data.get('week')
         year = data.get('year')
         if not all([emp_id, week, year]):
-            return self.error('user_id, week,year requis')
+            return self.error('user_id, week, year requis')
         now = ts_now()
         db.execute("""
             UPDATE time_entries
@@ -252,7 +252,7 @@ class ValidateWeekHandler(BaseHandler):
             WHERE user_id=? AND week_number=? AND week_year=?
             AND status IN ('PENDING','CORRECTED')
         """, (user['id'], now, now, emp_id, int(week), int(year)))
-        self.audit('WEEK_VALIDATED', 'time_entries', f"{e{mp_id}_{week}_{year}")
+        self.audit('WEEK_VALIDATED', 'time_entries', f"{emp_id}_{week}_{year}")
         self.json({'message': 'Semaine validée'})
 
 
