@@ -944,7 +944,7 @@ function HoursScreen({ user }) {
         <div className="flex items-center justify-between mb-1">
           <span className="text-sm text-slate-500">Total semaine</span>
           <span className={`text-sm font-bold ${totalWork >= target ? 'text-green-600' : 'text-slate-700'}`}>
-            {fmt.duration(totalWorki} / {user.weekly_target_h || 42}h
+            {fmt.duration(totalWork)} / {user.weekly_target_h || 42}h
           </span>
         </div>
         <ProgressBar value={totalWork} max={target} />
