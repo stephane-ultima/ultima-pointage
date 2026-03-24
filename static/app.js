@@ -9,7 +9,7 @@ const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
 const api = {
   token: null,
-  refreshToken: null,
+  refreshToken: null
 
   setTokens(access, refresh) {
     this.token = access;
@@ -937,7 +937,7 @@ function HoursScreen({ user }) {
                         <span>{ACTIVITY_TYPES[e.activity_type]?.icon || '📋'}</span>
                         <div className="flex-1">
                           <div className="text-sm text-slate-700">{ACTIVITY_TYPES[e.activity_type]?.label}</div>
-                          <div className="text-xs text-slate-400">{fmt.time(e.started_at)} – {e.ended_at ? fmt.time(e.ended_at) : '…'}|/div>
+                          <div className="text-xs text-slate-400">{fmt.time(e.started_at)} – {e.ended_at ? fmt.time(e.ended_at) : '…'}</div>
                         </div>
                         <div className="text-right space-y-1">
                           {e.ended_at && <div className="text-sm font-medium text-slate-600">{fmt.duration(e.duration_min)}</div>}
