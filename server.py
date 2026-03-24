@@ -12,15 +12,15 @@ import db
 # Import handlers
 from handlers.auth_handler import (
     LoginHandler, MagicLinkHandler, VerifyLinkHandler,
-    VerifyPinHandler, RefreshHandler, LogoutHandler, MeHandler,
-    ChangePasswordHandler
+    VerifyPinHandler, RefreshHandler, LogoutHandler, MeHandler
 )
 from handlers.time_handler import (
     TimeEntriesHandler, TimeEntryDetailHandler,
     TeamEntriesHandler, ValidateWeekHandler, ExportHandler
 )
 from handlers.absence_handler import (
-    AbsencesHandler, AbsenceDetailHandler, TeamAbsencesHandler
+    AbsencesHandler, AbsenceDetailHandler, TeamAbsencesHandler,
+    AbsenceCalendarHandler, AbsenceBalancesHandler
 )
 from handlers.project_handler import ProjectsHandler, ProjectDetailHandler
 from handlers.user_handler import UsersHandler, UserDetailHandler, StatsHandler
@@ -47,9 +47,8 @@ def make_app():
         (r'/api/auth/verify-link',  VerifyLinkHandler),
         (r'/api/auth/verify-pin',   VerifyPinHandler),
         (r'/api/auth/refresh',      RefreshHandler),
-        (r'/api/auth/logout',           LogoutHandler),
-        (r'/api/auth/me',               MeHandler),
-        (r'/api/auth/change-password',  ChangePasswordHandler),
+        (r'/api/auth/logout',       LogoutHandler),
+        (r'/api/auth/me',           MeHandler),
 
         # ─── TIME ENTRIES ────────────────────────────────────
         (r'/api/time-entries',              TimeEntriesHandler),
@@ -61,6 +60,8 @@ def make_app():
         # ─── ABSENCES ────────────────────────────────────────
         (r'/api/absences',              AbsencesHandler),
         (r'/api/absences/team',         TeamAbsencesHandler),
+        (r'/api/absences/calendar',     AbsenceCalendarHandler),
+        (r'/api/absences/balances',     AbsenceBalancesHandler),
         (r'/api/absences/([^/]+)/(\w+)',AbsenceDetailHandler),
 
         # ─── PROJECTS ────────────────────────────────────────
@@ -85,24 +86,23 @@ if __name__ == '__main__':
     # Initialize database
     db.init_db()
 
-    # Run migrations (safe — idempotent)
-    try:
-        db.execute("ALTER TABLE users ADD COLUMN avatar_url TEXT")
-        print("✓ Migration: avatar_url column added")
-    except Exception:
-        pass  # Column already exists
+    # Seed demo data if requested
+    if '--seed' in sys.argv or os.environ.get('SEED_DB') == '1':
+        import seed
+        seed.run()
 
     port = int(os.environ.get('PORT', 8000))
     app = make_app()
     app.listen(port)
-    print(f"✓ Ultima Pointage RH démarré sur le port {port}", flush=True)
-
-    # Seed demo data after server starts (via callback so healthcheck can pass)
-    if '--seed' in sys.argv or os.environ.get('SEED_DB') == '1':
-        def do_seed():
-            import seed
-            seed.run()
-            print("✓ Données de démonstration chargées", flush=True)
-        tornado.ioloop.IOLoop.current().call_later(0.5, do_seed)
-
+    print(f"""
+╔══════════════════════════════════════════════════════╗
+║  ULTIMA INTERIOR SA — Pointage RH                    ║
+║  Server running on http://localhost:{port}               ║
+║                                                      ║
+║  Demo accounts:                                      ║
+║  Manager : marc@ultima.ch / Manager123!              ║
+║  Admin   : sophie@ultima.ch / Admin123!              ║
+║  Employee: Lien magic link (voir seed output)        ║
+╚══════════════════════════════════════════════════════╝
+""")
     tornado.ioloop.IOLoop.current().start()
