@@ -9,7 +9,7 @@ const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
 const api = {
   token: null,
-  refreshToken: null
+  refreshToken: null,
 
   setTokens(access, refresh) {
     this.token = access;
@@ -983,7 +983,7 @@ function HoursScreen({ user }) {
           : <Card><div className="divide-y divide-slate-50">
               {entries.map(e => (
                 <div key={e.id} className="px-4 py-3 flex items-center gap-3">
-                  <span>{ACTIVITY_TYPES[e.activity_type]?.icon || '📋'}|/span>
+                  <span>{ACTIVITY_TYPES[e.activity_type]?.icon || '📋'}</span>
                   <div className="flex-1">
                     <div className="text-sm text-slate-700">{ACTIVITY_TYPES[e.activity_type]?.label}</div>
                     <div className="text-xs text-slate-400">{fmt.time(e.started_at)} – {e.ended_at ? fmt.time(e.ended_at) : '…'}</div>
@@ -1608,7 +1608,7 @@ function TeamScreen() {
                 ? <div className="p-6 text-center text-slate-400">Aucune entrée</div>
                 : entries.map(e => (
                   <div key={e.id} className="px-4 py-3 flex items-center gap-3">
-                    <span>{ACTIVITY_TYPES[e.activity_type]?.icon || '📋'}|/span>
+                    <span>{ACTIVITY_TYPES[e.activity_type]?.icon || '📋'}</span>
                     <div className="flex-1">
                       <div className="text-sm font-medium">{ACTIVITY_TYPES[e.activity_type]?.label}</div>
                       <div className="text-xs text-slate-400">
