@@ -16,40 +16,150 @@ class TimeEntriesHandler(BaseHandler):
         user = self.require_auth()
         if not user: return
 
-        week = self.get_argument('week', None)
-        year = self.get_argument('year', None)
+        import datetime
+        mode = self.get_argument('mode', 'week')  # week | day | month | year
         status = self.get_argument('status', None)
 
-        if not week or not year:
-            w, y = get_week_number()
-            week, year = str(w), str(y)
+        if mode == 'day':
+            date_str = self.get_argument('date', datetime.date.today().isoformat())
+            try:
+                d = datetime.date.fromisoformat(date_str)
+            except ValueError:
+                return self.error('Format de date invalide (YYYY-MM-DD)')
+            start_ts = int(datetime.datetime.combine(d, datetime.time.min).timestamp())
+            end_ts = int(datetime.datetime.combine(d, datetime.time.max).timestamp())
+            params = [user['id'], start_ts, end_ts]
+            q = """
+                SELECT te.*, p.name as project_name, p.code as project_code,
+                       u.first_name, u.last_name
+                FROM time_entries te
+                LEFT JOIN projects p ON te.project_id = p.id
+                LEFT JOIN users u ON te.user_id = u.id
+                WHERE te.user_id=? AND te.started_at>=? AND te.started_at<=?
+            """
+            if status:
+                q += " AND te.status=?"
+                params.append(status)
+            q += " ORDER BY te.started_at DESC"
+            entries = db.fetchall(q, params)
+            total_min = sum(e['duration_min'] or 0 for e in entries
+                            if e['ended_at'] and e['activity_type'] != 'BREAK')
+            week, year = get_week_number(start_ts)
+            alerts = check_alerts(user['id'], week, year)
+            self.json({
+                'entries': entries,
+                'total_min': total_min,
+                'alerts': alerts,
+                'date': date_str,
+                'mode': 'day'
+            })
 
-        params = [user['id'], int(week), int(year)]
-        q = """
-            SELECT te.*, p.name as project_name, p.code as project_code,
-                   u.first_name, u.last_name
-            FROM time_entries te
-            LEFT JOIN projects p ON te.project_id = p.id
-            LEFT JOIN users u ON te.user_id = u.id
-            WHERE te.user_id=? AND te.week_number=? AND te.week_year=?
-        """
-        if status:
-            q += " AND te.status=?"
-            params.append(status)
-        q += " ORDER BY te.started_at DESC"
-        entries = db.fetchall(q, params)
+        elif mode == 'month':
+            month = int(self.get_argument('month', datetime.date.today().month))
+            year = int(self.get_argument('year', datetime.date.today().year))
+            start_ts = int(datetime.datetime(year, month, 1, 0, 0, 0).timestamp())
+            if month == 12:
+                end_ts = int(datetime.datetime(year + 1, 1, 1, 0, 0, 0).timestamp()) - 1
+            else:
+                end_ts = int(datetime.datetime(year, month + 1, 1, 0, 0, 0).timestamp()) - 1
+            params = [user['id'], start_ts, end_ts]
+            q = """
+                SELECT te.*, p.name as project_name, p.code as project_code
+                FROM time_entries te
+                LEFT JOIN projects p ON te.project_id = p.id
+                WHERE te.user_id=? AND te.started_at>=? AND te.started_at<=?
+                AND te.ended_at IS NOT NULL AND te.status != 'REJECTED'
+            """
+            if status:
+                q += " AND te.status=?"
+                params.append(status)
+            q += " ORDER BY te.started_at"
+            entries = db.fetchall(q, params)
 
-        # Add alerts
-        alerts = check_alerts(user['id'], int(week), int(year))
-        total_min = sum(e['duration_min'] or 0 for e in entries
-                        if e['ended_at'] and e['activity_type'] != 'BREAK')
-        self.json({
-            'entries': entries,
-            'total_min': total_min,
-            'alerts': alerts,
-            'week': int(week),
-            'year': int(year)
-        })
+            # Aggregate by day
+            by_day = {}
+            for e in entries:
+                d = datetime.date.fromtimestamp(e['started_at']).isoformat()
+                if d not in by_day:
+                    by_day[d] = {'date': d, 'work_min': 0, 'break_min': 0, 'entries': []}
+                if e['activity_type'] == 'BREAK':
+                    by_day[d]['break_min'] += e['duration_min'] or 0
+                else:
+                    by_day[d]['work_min'] += e['duration_min'] or 0
+                by_day[d]['entries'].append(dict(e))
+
+            days = sorted(by_day.values(), key=lambda x: x['date'])
+            total_min = sum(d['work_min'] for d in days)
+            self.json({
+                'days': days,
+                'total_min': total_min,
+                'month': month,
+                'year': year,
+                'mode': 'month'
+            })
+
+        elif mode == 'year':
+            year = int(self.get_argument('year', datetime.date.today().year))
+            start_ts = int(datetime.datetime(year, 1, 1, 0, 0, 0).timestamp())
+            end_ts = int(datetime.datetime(year + 1, 1, 1, 0, 0, 0).timestamp()) - 1
+            entries = db.fetchall("""
+                SELECT te.started_at, te.duration_min, te.activity_type
+                FROM time_entries te
+                WHERE te.user_id=? AND te.started_at>=? AND te.started_at<=?
+                AND te.activity_type != 'BREAK' AND te.ended_at IS NOT NULL
+                AND te.status != 'REJECTED'
+            """, (user['id'], start_ts, end_ts))
+
+            # Aggregate by month
+            by_month = {}
+            for e in entries:
+                m = datetime.date.fromtimestamp(e['started_at']).month
+                by_month[m] = by_month.get(m, 0) + (e['duration_min'] or 0)
+
+            months = [{'month': m, 'work_min': by_month.get(m, 0)} for m in range(1, 13)]
+            total_min = sum(by_month.values())
+            self.json({
+                'months': months,
+                'total_min': total_min,
+                'year': year,
+                'mode': 'year'
+            })
+
+        else:  # week mode (default)
+            week = self.get_argument('week', None)
+            year = self.get_argument('year', None)
+
+            if not week or not year:
+                w, y = get_week_number()
+                week, year = str(w), str(y)
+
+            params = [user['id'], int(week), int(year)]
+            q = """
+                SELECT te.*, p.name as project_name, p.code as project_code,
+                       u.first_name, u.last_name
+                FROM time_entries te
+                LEFT JOIN projects p ON te.project_id = p.id
+                LEFT JOIN users u ON te.user_id = u.id
+                WHERE te.user_id=? AND te.week_number=? AND te.week_year=?
+            """
+            if status:
+                q += " AND te.status=?"
+                params.append(status)
+            q += " ORDER BY te.started_at DESC"
+            entries = db.fetchall(q, params)
+
+            # Add alerts
+            alerts = check_alerts(user['id'], int(week), int(year))
+            total_min = sum(e['duration_min'] or 0 for e in entries
+                            if e['ended_at'] and e['activity_type'] != 'BREAK')
+            self.json({
+                'entries': entries,
+                'total_min': total_min,
+                'alerts': alerts,
+                'week': int(week),
+                'year': int(year),
+                'mode': 'week'
+            })
 
     def post(self):
         user = self.require_auth()
@@ -242,7 +352,7 @@ class ValidateWeekHandler(BaseHandler):
         user = self.require_auth(['MANAGER', 'ADMIN', 'SUPERADMIN'])
         if not user: return
         data = self.body()
-        emp_id = data.get('user_id')   # optional – omit to validate ALL employees
+        emp_id = data.get('user_id')  # optional – if omitted, validates ALL employees
         week = data.get('week')
         year = data.get('year')
         if not week or not year:
@@ -257,7 +367,7 @@ class ValidateWeekHandler(BaseHandler):
             """, (user['id'], now, now, emp_id, int(week), int(year)))
             self.audit('WEEK_VALIDATED', 'time_entries', f"{emp_id}_{week}_{year}")
         else:
-            # Validate entire week for all employees at once
+            # Validate entire week for all employees
             db.execute("""
                 UPDATE time_entries
                 SET status='APPROVED', validated_by=?, validated_at=?, updated_at=?
