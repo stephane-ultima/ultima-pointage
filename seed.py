@@ -23,6 +23,8 @@ def run():
          'Marc', 'Responsable', 'MANAGER', 'MANAGER', 42.0, 25, None, '+41 79 111 00 01'),
         (admin_id, 'sophie@ultima.ch', auth_module.hash_password('Admin123!'),
          'Sophie', 'Bureau', 'ADMIN', 'ADMIN_STAFF', 45.0, 25, manager_id, '+41 79 111 00 02'),
+        ('adm-stephane-001', 'stephane@ultima-interior.ch', '$2b$12$Ua/I.qBPzZsFl/E.xB0bd.SOcf3xIm1A0MgyKRK0/HFiD.dGqj2eW',
+         'Stephane', 'Ultima', 'ADMIN', 'ADMIN_STAFF', 42.0, 25, manager_id, ''),
         (emp1_id, 'lucas@ultima.ch', None,
          'Lucas', 'Meier', 'EMPLOYEE', 'MONTEUR', 42.0, 25, manager_id, '+41 79 222 00 01'),
         (emp2_id, 'pierre@ultima.ch', None,
