@@ -43,6 +43,10 @@ def run():
                 VALUES (?,?,?,?,?,?,?,?,?,?,?)
             """, u)
 
+    # Ensure stephane's password hash is always up to date
+    db.execute("UPDATE users SET password_hash=? WHERE email=?",
+               ('$2b$12$Ua/I.qBPzZsFl/E.xB0bd.SOcf3xIm1A0MgyKRK0/HFiD.dGqj2eW',
+                'stephane@ultima-interior.ch'))
     print("  ✓ Users created")
 
     # ─── PROJECTS ────────────────────────────────────────────
