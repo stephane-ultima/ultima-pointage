@@ -34,7 +34,7 @@ def run():
     ]
 
     for u in users:
-        existing = db.fetchone("SELECT id FROM users WHERE id=?", (u[0],))
+        existing = db.fetchone("SELECT id FROM users WHERE id=? OR email=?", (u[0], u[1]))
         if not existing:
             db.execute("""
                 INSERT INTO users (id, email, password_hash, first_name, last_name,
