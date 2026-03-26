@@ -24,6 +24,7 @@ from handlers.absence_handler import (
 )
 from handlers.project_handler import ProjectsHandler, ProjectDetailHandler
 from handlers.user_handler import UsersHandler, UserDetailHandler, StatsHandler
+from handlers.admin_handler import AdminUsersHandler, AdminUserDetailHandler
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -35,13 +36,13 @@ class MainHandler(tornado.web.RequestHandler):
 def make_app():
     settings = {
         'template_path': os.path.join(os.path.dirname(__file__), 'static'),
-        'static_path': os.path.join(os.path.dirname(__file__), 'static'),
-        'debug': os.environ.get('DEBUG', 'false').lower() == 'true',
+        'static_path':   os.path.join(os.path.dirname(__file__), 'static'),
+        'debug':         os.environ.get('DEBUG', 'false').lower() == 'true',
         'cookie_secret': os.environ.get('JWT_SECRET', 'ultima-cookie-secret-change-me'),
-        'xsrf_cookies': False,
+        'xsrf_cookies':  False,
     }
     return tornado.web.Application([
-        # ─── AUTH ────────────────────────────────────────────
+        # ─── AUTH ──────────────────────────────────────────────
         (r'/api/auth/login',        LoginHandler),
         (r'/api/auth/magic-link',   MagicLinkHandler),
         (r'/api/auth/verify-link',  VerifyLinkHandler),
@@ -50,35 +51,39 @@ def make_app():
         (r'/api/auth/logout',       LogoutHandler),
         (r'/api/auth/me',           MeHandler),
 
-        # ─── TIME ENTRIES ────────────────────────────────────
-        (r'/api/time-entries',              TimeEntriesHandler),
-        (r'/api/time-entries/team',         TeamEntriesHandler),
-        (r'/api/time-entries/validate-week',ValidateWeekHandler),
-        (r'/api/time-entries/export',       ExportHandler),
-        (r'/api/time-entries/([^/]+)/(\w+)',TimeEntryDetailHandler),
+        # ─── TIME ENTRIES ───────────────────────────────────────
+        (r'/api/time-entries',                         TimeEntriesHandler),
+        (r'/api/time-entries/team',                    TeamEntriesHandler),
+        (r'/api/time-entries/validate-week',           ValidateWeekHandler),
+        (r'/api/time-entries/export',                  ExportHandler),
+        (r'/api/time-entries/([^/]+)/(\w+)',          TimeEntryDetailHandler),
 
-        # ─── ABSENCES ────────────────────────────────────────
+        # ─── ABSENCES ───────────────────────────────────────────
         (r'/api/absences',              AbsencesHandler),
         (r'/api/absences/team',         TeamAbsencesHandler),
         (r'/api/absences/calendar',     AbsenceCalendarHandler),
         (r'/api/absences/balances',     AbsenceBalancesHandler),
-        (r'/api/absences/([^/]+)/(\w+)',AbsenceDetailHandler),
+        (r'/api/absences/([^/]+)/(\w+)', AbsenceDetailHandler),
 
-        # ─── PROJECTS ────────────────────────────────────────
+        # ─── PROJECTS ───────────────────────────────────────────
         (r'/api/projects',          ProjectsHandler),
         (r'/api/projects/([^/]+)',  ProjectDetailHandler),
 
-        # ─── USERS ───────────────────────────────────────────
+        # ─── USERS ──────────────────────────────────────────────
         (r'/api/users',             UsersHandler),
         (r'/api/users/([^/]+)',     UserDetailHandler),
         (r'/api/stats',             StatsHandler),
 
-        # ─── STATIC & SPA ────────────────────────────────────
-        (r'/static/(.*)',           tornado.web.StaticFileHandler,
-         {'path': os.path.join(os.path.dirname(__file__), 'static')}),
-        (r'/(.*)',                  tornado.web.StaticFileHandler,
-         {'path': os.path.join(os.path.dirname(__file__), 'static'),
-          'default_filename': 'index.html'}),
+        # ─── ADMIN ──────────────────────────────────────────────
+        (r'/api/admin/users',           AdminUsersHandler),
+        (r'/api/admin/users/([^/]+)',   AdminUserDetailHandler),
+
+        # ─── STATIC & SPA ───────────────────────────────────────
+        (r'/static/(.*)', tornado.web.StaticFileHandler,
+            {'path': os.path.join(os.path.dirname(__file__), 'static')}),
+        (r'/(.*)', tornado.web.StaticFileHandler,
+            {'path': os.path.join(os.path.dirname(__file__), 'static'),
+             'default_filename': 'index.html'}),
     ], **settings)
 
 
@@ -97,12 +102,12 @@ if __name__ == '__main__':
     print(f"""
 ╔══════════════════════════════════════════════════════╗
 ║  ULTIMA INTERIOR SA — Pointage RH                    ║
-║  Server running on http://localhost:{port}               ║
+║  Server running on http://localhost:{port}             ║
 ║                                                      ║
 ║  Demo accounts:                                      ║
 ║  Manager : marc@ultima.ch / Manager123!              ║
 ║  Admin   : sophie@ultima.ch / Admin123!              ║
 ║  Employee: Lien magic link (voir seed output)        ║
 ╚══════════════════════════════════════════════════════╝
-""")
+    """)
     tornado.ioloop.IOLoop.current().start()
