@@ -285,41 +285,275 @@ function ProgressBar({ value, max, color = 'bg-ultima-500' }) {
   );
 }
 
-function BottomNav({ current, role, onNav }) {
+// ─── NAVIGATION ICONS (SVG inline) ─────────────────────────────────────────
+function Icon({ path, className = "w-5 h-5" }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+      <path strokeLinecap="round" strokeLinejoin="round" d={path} />
+    </svg>
+  );
+}
+const PATHS = {
+  team:       "M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z",
+  validation: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+  calendar:   "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5",
+  absences:   "M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z",
+  account:    "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z",
+  home:       "M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z",
+  hours:      "M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z",
+  admin:      "M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z M15 12a3 3 0 11-6 0 3 3 0 016 0z",
+  projects:   "M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z",
+  clock:      "M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z",
+  logout:     "M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75",
+};
+
+// ─── SIDE NAVIGATION ────────────────────────────────────────────────────────
+function SideNav({ current, role, onNav }) {
   const isManager = role === 'MANAGER' || role === 'ADMIN' || role === 'SUPERADMIN';
+  const isAdmin = role === 'ADMIN' || role === 'SUPERADMIN';
   const tabs = isManager
     ? [
-        { id: 'team',       icon: '👥', label: 'Équipe' },
-        { id: 'validation', icon: '✅', label: 'Validation' },
-        { id: 'calendar',   icon: '📆', label: 'Calendrier' },
-        { id: 'absences',   icon: '📅', label: 'Absences' },
-        { id: 'account',    icon: '👤', label: 'Compte' },
+        { id: 'team',       iconKey: 'team',       label: 'Équipe' },
+        { id: 'validation', iconKey: 'validation',  label: 'Validation' },
+        { id: 'calendar',   iconKey: 'calendar',    label: 'Calendrier' },
+        { id: 'absences',   iconKey: 'absences',    label: 'Absences' },
+        ...(isAdmin ? [{ id: 'admin', iconKey: 'admin', label: 'Administration' }] : []),
+        { id: 'account',    iconKey: 'account',     label: 'Compte' },
       ]
     : [
-        { id: 'home',     icon: '⏱️', label: 'Pointage' },
-        { id: 'hours',    icon: '📊', label: 'Mes heures' },
-        { id: 'absences', icon: '📅', label: 'Absences' },
-        { id: 'account',  icon: '👤', label: 'Compte' },
+        { id: 'home',     iconKey: 'clock',    label: 'Pointage' },
+        { id: 'hours',    iconKey: 'hours',    label: 'Mes heures' },
+        { id: 'absences', iconKey: 'absences', label: 'Absences' },
+        { id: 'account',  iconKey: 'account',  label: 'Compte' },
       ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 safe-bottom z-40">
-      <div className="flex justify-around">
+    <aside className="fixed left-0 top-0 bottom-0 w-56 bg-white border-r border-slate-200 flex flex-col z-40">
+      {/* Logo */}
+      <div className="h-16 px-5 border-b border-slate-100 flex items-center gap-3 flex-shrink-0">
+        <div className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center text-white">
+          <Icon path={PATHS.clock} className="w-4 h-4" />
+        </div>
+        <div>
+          <div className="text-sm font-bold text-slate-800 leading-none">Ultima</div>
+          <div className="text-xs text-slate-400 mt-0.5">Pointage</div>
+        </div>
+      </div>
+      {/* Nav items */}
+      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
         {tabs.map(t => (
           <button
             key={t.id}
             onClick={() => onNav(t.id)}
-            className={`flex-1 flex flex-col items-center py-2 pt-3 gap-0.5 transition-colors
-              ${current === t.id ? 'text-ultima-600' : 'text-slate-400'}`}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left group
+              ${current === t.id
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}
           >
-            <span className="text-xl">{t.icon}</span>
-            <span className="text-[10px] font-medium">{t.label}</span>
+            <Icon path={PATHS[t.iconKey]} className="w-4 h-4 flex-shrink-0" />
+            <span className="text-sm font-medium">{t.label}</span>
           </button>
         ))}
+      </nav>
+      {/* Footer */}
+      <div className="px-2 py-3 border-t border-slate-100 flex-shrink-0">
+        <div className="px-3 py-2 text-xs text-slate-400">Ultima Interior SA</div>
       </div>
-    </nav>
+    </aside>
   );
 }
+
+
+// ─── ADMIN SCREEN ───────────────────────────────────────────────────────────
+function AdminScreen() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(null);
+  const [editUser, setEditUser] = useState(null);
+  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', role: 'EMPLOYEE', employee_type: 'MONTEUR', weekly_target_h: 42, annual_leave_d: 25, phone: '', password: '' });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      const d = await api.get('/admin/users');
+      setUsers(d.users || []);
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { loadUsers(); }, []);
+
+  const openCreate = () => {
+    setForm({ first_name: '', last_name: '', email: '', role: 'EMPLOYEE', employee_type: 'MONTEUR', weekly_target_h: 42, annual_leave_d: 25, phone: '', password: '' });
+    setEditUser(null);
+    setError('');
+    setModal('form');
+  };
+
+  const openEdit = (u) => {
+    setForm({ first_name: u.first_name || '', last_name: u.last_name || '', email: u.email || '', role: u.role || 'EMPLOYEE', employee_type: u.employee_type || 'MONTEUR', weekly_target_h: u.weekly_target_h || 42, annual_leave_d: u.annual_leave_d || 25, phone: u.phone || '', password: '' });
+    setEditUser(u);
+    setError('');
+    setModal('form');
+  };
+
+  const saveUser = async () => {
+    if (!form.email || !form.first_name || !form.last_name) return setError('Prénom, nom et email sont requis');
+    if (!editUser && !form.password) return setError('Un mot de passe est requis pour le nouvel utilisateur');
+    setSaving(true); setError('');
+    try {
+      const payload = { ...form };
+      if (!payload.password) delete payload.password;
+      if (editUser) {
+        await api.patch('/admin/users/' + editUser.id, payload);
+      } else {
+        await api.post('/admin/users', payload);
+      }
+      setModal(null);
+      await loadUsers();
+    } catch (err) { setError(err.message); }
+    finally { setSaving(false); }
+  };
+
+  const deleteUser = async (userId, name) => {
+    if (!window.confirm('Supprimer ' + name + ' ? Cette action est irréversible.')) return;
+    try {
+      await api.delete('/admin/users/' + userId);
+      await loadUsers();
+    } catch (err) { alert(err.message); }
+  };
+
+  const filtered = users.filter(u =>
+    (u.first_name + ' ' + u.last_name + ' ' + u.email).toLowerCase().includes(search.toLowerCase())
+  );
+
+  const ROLE_LABELS = { EMPLOYEE: 'Employé', MANAGER: 'Manager', ADMIN: 'Admin', SUPERADMIN: 'Super Admin' };
+  const ROLE_COLORS = { EMPLOYEE: 'bg-slate-100 text-slate-600', MANAGER: 'bg-blue-100 text-blue-700', ADMIN: 'bg-purple-100 text-purple-700', SUPERADMIN: 'bg-red-100 text-red-700' };
+
+  return (
+    <div className="space-y-4 pb-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-slate-800">Gestion des accès</h2>
+          <p className="text-sm text-slate-500">{users.length} collaborateur(s)</p>
+        </div>
+        <Button onClick={openCreate} variant="primary" className="flex items-center gap-2">
+          <span>+</span> Ajouter
+        </Button>
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="Rechercher un collaborateur..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-slate-400"
+        />
+        <Icon path={PATHS.team} className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      </div>
+
+      {/* Table */}
+      {loading ? (
+        <div className="flex justify-center py-12"><Spinner size="lg" /></div>
+      ) : (
+        <Card>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-slate-100">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Collaborateur</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Rôle</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Type</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {filtered.length === 0 ? (
+                  <tr><td colSpan={5} className="text-center py-12 text-slate-400">Aucun collaborateur trouvé</td></tr>
+                ) : filtered.map(u => (
+                  <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-sm font-bold text-slate-600 flex-shrink-0">
+                          {(u.first_name || '?')[0]}{(u.last_name || '')[0]}
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-slate-800">{u.first_name} {u.last_name}</div>
+                          {u.phone && <div className="text-xs text-slate-400">{u.phone}</div>}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-600">{u.email}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ROLE_COLORS[u.role] || 'bg-slate-100 text-slate-600'}`}>
+                        {ROLE_LABELS[u.role] || u.role}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-500">{u.employee_type}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => openEdit(u)} className="text-xs text-slate-500 hover:text-slate-800 px-2 py-1 rounded hover:bg-slate-100 transition-colors">
+                          Modifier
+                        </button>
+                        <button onClick={() => deleteUser(u.id, u.first_name + ' ' + u.last_name)} className="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors">
+                          Supprimer
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
+      {/* Create/Edit Modal */}
+      {modal === 'form' && (
+        <Modal title={editUser ? 'Modifier ' + editUser.first_name : 'Nouveau collaborateur'} onClose={() => setModal(null)}>
+          <div className="space-y-3">
+            {error && <Alert type="error">{error}</Alert>}
+            <div className="grid grid-cols-2 gap-3">
+              <Input label="Prénom *" value={form.first_name} onChange={v => setForm(f => ({ ...f, first_name: v }))} />
+              <Input label="Nom *" value={form.last_name} onChange={v => setForm(f => ({ ...f, last_name: v }))} />
+            </div>
+            <Input label="Email *" type="email" value={form.email} onChange={v => setForm(f => ({ ...f, email: v }))} />
+            <Input label={editUser ? 'Nouveau mot de passe (laisser vide = inchangé)' : 'Mot de passe *'} type="password" value={form.password} onChange={v => setForm(f => ({ ...f, password: v }))} />
+            <Select label="Rôle" value={form.role} onChange={v => setForm(f => ({ ...f, role: v }))} options={[
+              { value: 'EMPLOYEE', label: 'Employé' },
+              { value: 'MANAGER', label: 'Manager' },
+              { value: 'ADMIN', label: 'Admin' },
+            ]} />
+            <Select label="Type" value={form.employee_type} onChange={v => setForm(f => ({ ...f, employee_type: v }))} options={[
+              { value: 'MONTEUR', label: 'Monteur' },
+              { value: 'ADMIN_STAFF', label: 'Admin Staff' },
+              { value: 'MANAGER', label: 'Manager' },
+            ]} />
+            <div className="grid grid-cols-2 gap-3">
+              <Input label="Heures / semaine" type="number" value={form.weekly_target_h} onChange={v => setForm(f => ({ ...f, weekly_target_h: parseFloat(v) || 42 }))} />
+              <Input label="Congés / an (j)" type="number" value={form.annual_leave_d} onChange={v => setForm(f => ({ ...f, annual_leave_d: parseInt(v) || 25 }))} />
+            </div>
+            <Input label="Téléphone" value={form.phone} onChange={v => setForm(f => ({ ...f, phone: v }))} />
+            <div className="flex gap-2 pt-2">
+              <Button onClick={saveUser} loading={saving} variant="primary" className="flex-1">
+                {editUser ? 'Enregistrer' : 'Créer'}
+              </Button>
+              <Button onClick={() => setModal(null)} variant="secondary">Annuler</Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
 
 function TopBar({ title, subtitle, onBack, actions }) {
   return (
@@ -700,7 +934,7 @@ function HomeScreen({ user, meData, onRefresh }) {
     <div className="space-y-4 pb-4">
       {/* Alerts */}
       {alerts.map((a, i) => (
-        <Alert key={i} type="warning" title={a.code}>
+        <Alert key={i} type="warning" title={a.message || a.code}>
           {a.message}
         </Alert>
       ))}
@@ -1676,7 +1910,7 @@ function TeamScreen() {
                 <div className="mt-2 flex gap-1 flex-wrap">
                   {emp.alerts.map((a, i) => (
                     <span key={i} className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
-                      ⚠ {a.code}
+                      {a.message || a.code}
                     </span>
                   ))}
                 </div>
@@ -1797,7 +2031,7 @@ function ValidationScreen() {
               <div className="mt-3 space-y-1">
                 {emp.alerts.map((a, i) => (
                   <div key={i} className="text-xs bg-yellow-50 text-yellow-700 px-3 py-1.5 rounded-lg">
-                    ⚠ {a.code}: {a.message}
+                    {a.code}: {a.message}
                   </div>
                 ))}
               </div>
@@ -2225,12 +2459,15 @@ function App() {
       case 'validation': return <ValidationScreen />;
       case 'projects':   return <ProjectsScreen user={auth} />;
       case 'calendar':   return <CalendarScreen />;
+      case 'admin':     return <AdminScreen />;
       default:           return <HomeScreen user={auth} meData={meData} onRefresh={refreshMe} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-50 flex">
+      <SideNav current={view} role={auth.role} onNav={setView} />
+      <div className="flex-1 ml-56 min-h-screen flex flex-col">
       <TopBar
         title={titleInfo.title}
         subtitle={titleInfo.subtitle}
@@ -2245,10 +2482,10 @@ function App() {
           </div>
         }
       />
-      <main className="px-4 pt-4 pb-24">
+      <main className="px-4 pt-4 pb-6">
         {renderView()}
       </main>
-      <BottomNav current={view} role={auth.role} onNav={setView} />
+      
     </div>
   );
 }
