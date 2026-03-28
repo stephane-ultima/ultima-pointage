@@ -60,9 +60,13 @@ def check_alerts(user_id, week, year):
     total_min = sum(e['duration_min'] or 0 for e in entries if e['ended_at'])
     total_h = total_min / 60
 
-    # ALT001: Minimum rest between sessions
+    # ALT001: Minimum rest between sessions (only between different calendar days)
     work_entries = [e for e in entries if e['ended_at']]
     for i in range(1, len(work_entries)):
+        prev_day = datetime.date.fromtimestamp(work_entries[i-1]['ended_at'])
+        curr_day = datetime.date.fromtimestamp(work_entries[i]['started_at'])
+        if prev_day == curr_day:
+            continue  # same-day sessions: no overnight rest required
         gap_h = (work_entries[i]['started_at'] - work_entries[i-1]['ended_at']) / 3600
         if gap_h < 11:
             alerts.append({
