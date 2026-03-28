@@ -8,6 +8,7 @@ import sys
 import tornado.ioloop
 import tornado.web
 import db
+import auth as auth_module
 
 from handlers.auth_handler import (
     LoginHandler, MagicLinkHandler, VerifyLinkHandler,
@@ -26,9 +27,40 @@ from handlers.user_handler import UsersHandler, UserDetailHandler, StatsHandler
 
 
 class MainHandler(tornado.web.RequestHandler):
-    """Serve the React SPA for any non-API route."""
     def get(self, *args):
         self.render('index.html')
+
+
+class SetupHandler(tornado.web.RequestHandler):
+    """One-time setup: create superadmin if no users exist."""
+    def post(self):
+        self.set_header('Content-Type', 'application/json')
+        import json
+        try:
+            data = json.loads(self.request.body)
+        except Exception:
+            data = {}
+        email = data.get('email', 'stephane@ultima-interior.ch')
+        password = data.get('password', 'Ultima2026!')
+        first_name = data.get('first_name', 'St\u00e9phane')
+        last_name = data.get('last_name', 'Ultima')
+
+        # Check if user already exists
+        existing = db.fetchone("SELECT id FROM users WHERE email=?", (email,))
+        if existing:
+            self.finish(json.dumps({'status': 'exists', 'email': email}))
+            return
+
+        uid = 'adm-stephane-001'
+        ph = auth_module.hash_password(password)
+        db.execute("""
+            INSERT OR IGNORE INTO users
+                (id, email, password_hash, first_name, last_name,
+                 role, employee_type, weekly_target_h, annual_leave_d, phone)
+            VALUES (?,?,?,?,?,?,?,?,?,?)
+        """, (uid, email, ph, first_name, last_name,
+              'SUPERADMIN', 'ADMIN_STAFF', 45.0, 25, ''))
+        self.finish(json.dumps({'status': 'created', 'email': email, 'role': 'SUPERADMIN'}))
 
 
 def make_app():
@@ -40,6 +72,7 @@ def make_app():
         'xsrf_cookies': False,
     }
     return tornado.web.Application([
+        (r'/api/setup',             SetupHandler),
         (r'/api/auth/login',        LoginHandler),
         (r'/api/auth/magic-link',   MagicLinkHandler),
         (r'/api/auth/verify-link',  VerifyLinkHandler),
@@ -80,13 +113,12 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
     app = make_app()
     app.listen(port)
-    print(f"Ultima Pointage RH started on port {port}", flush=True)
+    print(f"Ultima Pointage started on port {port}", flush=True)
 
-    # Always seed on startup — idempotent (checks for existing records)
+    # Seed on startup (idempotent)
     def do_seed():
         import seed
         seed.run()
-        print("Seed done", flush=True)
-
     tornado.ioloop.IOLoop.current().call_later(1.0, do_seed)
+
     tornado.ioloop.IOLoop.current().start()
