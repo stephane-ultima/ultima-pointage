@@ -1,6 +1,7 @@
 // ═══════════════════════════════════════════════════════════════
-//  ULTIMA POINTAGE — React SPA
-//  Mobile-first HR time-tracking for Ultima Interior SA
+//  ULTIMA POINTAGE — React SPA v3.0
+//  Design premium — Apple-inspired HR time-tracking
+//  Ultima Interior SA
 // ═══════════════════════════════════════════════════════════════
 
 const { useState, useEffect, useCallback, useRef, useMemo } = React;
@@ -40,7 +41,6 @@ const api = {
 
     let res = await fetch('/api' + path, opts);
 
-    // Try token refresh on 401
     if (res.status === 401 && retry && this.refreshToken) {
       const r = await fetch('/api/auth/refresh', {
         method: 'POST',
@@ -75,49 +75,80 @@ const api = {
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
 const ACTIVITY_TYPES = {
-  TRAVEL_PRO: { label: 'Trajet pro',  icon: '🚗', color: 'bg-blue-100 text-blue-800' },
-  WORK_SITE:  { label: 'Chantier',    icon: '🔨', color: 'bg-amber-100 text-amber-800' },
-  WORK_OFFICE:{ label: 'Bureau',      icon: '💼', color: 'bg-purple-100 text-purple-800' },
-  BREAK:      { label: 'Pause',       icon: '☕', color: 'bg-slate-100 text-slate-600' },
-  TRAINING:   { label: 'Formation',   icon: '📚', color: 'bg-green-100 text-green-800' },
-  OTHER:      { label: 'Autre',       icon: '📋', color: 'bg-gray-100 text-gray-700' },
+  WORK_SITE:   { label: 'Sur chantier',  color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  WORK_OFFICE: { label: 'Au bureau',     color: 'bg-violet-50 text-violet-700 border-violet-200' },
+  WORK_DEPOT:  { label: 'Au depot',      color: 'bg-orange-50 text-orange-700 border-orange-200' },
+  TRAVEL_PRO:  { label: 'Trajet pro',    color: 'bg-sky-50 text-sky-700 border-sky-200' },
+  BREAK:       { label: 'Pause',         color: 'bg-slate-50 text-slate-500 border-slate-200' },
+  OTHER:       { label: 'Autre',         color: 'bg-gray-50 text-gray-600 border-gray-200' },
 };
 
 const ABSENCE_TYPES = {
-  HOLIDAY:           { label: 'Vacances',            icon: '🏖️', color: 'bg-sky-100 text-sky-800',      bar: '#38bdf8' },
-  SICK:              { label: 'Maladie',             icon: '🤒', color: 'bg-red-100 text-red-800',      bar: '#f87171' },
-  ACCIDENT:          { label: 'Accident',            icon: '🏥', color: 'bg-orange-100 text-orange-800', bar: '#fb923c' },
-  TRAINING:          { label: 'Formation',           icon: '📚', color: 'bg-green-100 text-green-800',  bar: '#4ade80' },
-  UNPAID:            { label: 'Non payé',            icon: '📄', color: 'bg-gray-100 text-gray-700',    bar: '#9ca3af' },
-  SERVICE_MILITAIRE: { label: 'Service militaire',   icon: '🪖', color: 'bg-teal-100 text-teal-800',    bar: '#2dd4bf' },
-  MATERNITE:         { label: 'Maternité',           icon: '🤱', color: 'bg-pink-100 text-pink-800',    bar: '#f472b6' },
-  PATERNITE:         { label: 'Paternité',           icon: '👨‍👶', color: 'bg-indigo-100 text-indigo-800', bar: '#818cf8' },
-  DECES:             { label: 'Décès / deuil',       icon: '🕊️', color: 'bg-slate-100 text-slate-600',  bar: '#94a3b8' },
-  MARIAGE:           { label: 'Mariage',             icon: '💍', color: 'bg-violet-100 text-violet-800', bar: '#a78bfa' },
-  DEMENAGEMENT:      { label: 'Déménagement',        icon: '📦', color: 'bg-amber-100 text-amber-800',  bar: '#fbbf24' },
-  OTHER:             { label: 'Autre',               icon: '📋', color: 'bg-purple-100 text-purple-800', bar: '#c084fc' },
-};
-
-const EMPLOYEE_TYPES = {
-  MONTEUR:     'Monteur',
-  ADMIN_STAFF: 'Admin / Staff',
-  MANAGER:     'Manager',
+  HOLIDAY:  { label: 'Vacances',    color: 'bg-sky-50 text-sky-700' },
+  SICK:     { label: 'Maladie',     color: 'bg-red-50 text-red-700' },
+  ACCIDENT: { label: 'Accident',    color: 'bg-orange-50 text-orange-700' },
+  TRAINING: { label: 'Formation',   color: 'bg-emerald-50 text-emerald-700' },
+  UNPAID:   { label: 'Non paye',    color: 'bg-gray-50 text-gray-600' },
+  OTHER:    { label: 'Autre',       color: 'bg-purple-50 text-purple-700' },
 };
 
 const STATUS_COLORS = {
-  PENDING:   'bg-yellow-100 text-yellow-800',
-  APPROVED:  'bg-green-100 text-green-800',
-  REJECTED:  'bg-red-100 text-red-800',
-  RETURNED:  'bg-orange-100 text-orange-800',
-  DRAFT:     'bg-slate-100 text-slate-600',
+  PENDING:   'bg-amber-50 text-amber-700',
+  APPROVED:  'bg-emerald-50 text-emerald-700',
+  REJECTED:  'bg-red-50 text-red-700',
+  RETURNED:  'bg-orange-50 text-orange-700',
+  DRAFT:     'bg-slate-100 text-slate-500',
 };
 
 const STATUS_LABELS = {
   PENDING:  'En attente',
-  APPROVED: 'Approuvé',
-  REJECTED: 'Refusé',
-  RETURNED: 'Retourné',
+  APPROVED: 'Approuve',
+  REJECTED: 'Refuse',
+  RETURNED: 'Retourne',
   DRAFT:    'Brouillon',
+};
+
+const EMPLOYEE_TYPES = {
+  MONTEUR:    'Monteur / Poseur',
+  ADMIN_STAFF:'Administratif',
+  MANAGER:    "Chef d'equipe",
+};
+
+// SVG icon paths (Heroicons outline)
+const IC = {
+  clock:      'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z',
+  check:      'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+  checkPlain: 'M4.5 12.75l6 6 9-13.5',
+  team:       'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z',
+  calendar:   'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z',
+  absences:   'M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z',
+  account:    'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z',
+  admin:      'M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
+  home:       'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25',
+  bars:       'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5',
+  x:          'M6 18L18 6M6 6l12 12',
+  chevLeft:   'M15.75 19.5L8.25 12l7.5-7.5',
+  chevRight:  'M8.25 4.5l7.5 7.5-7.5 7.5',
+  chevDown:   'M19.5 8.25l-7.5 7.5-7.5-7.5',
+  plus:       'M12 4.5v15m7.5-7.5h-15',
+  pencil:     'M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125',
+  trash:      'M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0',
+  eye:        'M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
+  logout:     'M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9',
+  shield:     'M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z',
+  bell:       'M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0',
+  star:       'M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z',
+  camera:     'M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z',
+  search:     'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z',
+  lock:       'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z',
+  warning:    'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z',
+  info:       'M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z',
+  edit:       'M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10',
+  download:   'M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3',
+  play:       'M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z',
+  stop:       'M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z',
+  briefcase:  'M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z',
+  truck:      'M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12',
 };
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -130,8 +161,13 @@ const fmt = {
   },
   date: (str) => {
     if (!str) return '';
-    const d = new Date(str);
+    const d = new Date(str + 'T12:00:00');
     return d.toLocaleDateString('fr-CH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  },
+  dateShort: (str) => {
+    if (!str) return '';
+    const d = new Date(str + 'T12:00:00');
+    return d.toLocaleDateString('fr-CH', { day: 'numeric', month: 'short' });
   },
   duration: (min) => {
     if (!min && min !== 0) return '--';
@@ -148,30 +184,27 @@ const fmt = {
     const s = secs % 60;
     return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   },
+  elapsedMins: (startTs) => {
+    if (!startTs) return 0;
+    return Math.floor((Date.now() / 1000 - startTs) / 60);
+  },
   weekday: (dayStr) => {
     if (!dayStr) return '';
     const d = new Date(dayStr + 'T12:00:00');
     return d.toLocaleDateString('fr-CH', { weekday: 'short', day: 'numeric', month: 'short' });
   },
-  pct: (val, max) => Math.min(100, Math.round((val / max) * 100)),
+  pct: (val, max) => max > 0 ? Math.min(100, Math.round((val / max) * 100)) : 0,
+  initials: (first, last) => `${(first || '?')[0]}${(last || '')[0]}`.toUpperCase(),
 };
 
-function weekLabel(week, year) {
-  if (!week || !year) return `Semaine ${week} / ${year}`;
-  const jan4 = new Date(year, 0, 4);
-  const weekStart = new Date(jan4);
-  weekStart.setDate(jan4.getDate() - jan4.getDay() + 1 + (week - 1) * 7);
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6);
-  const fmtD = d => d.toLocaleDateString('fr-CH', { day: 'numeric', month: 'long' });
-  const fmtDY = d => d.toLocaleDateString('fr-CH', { day: 'numeric', month: 'long', year: 'numeric' });
-  return weekStart.getMonth() === weekEnd.getMonth()
-    ? `${weekStart.getDate()} – ${fmtDY(weekEnd)}`
-    : `${fmtD(weekStart)} – ${fmtDY(weekEnd)}`;
-}
-
-function monthLabel(month, year) {
-  return new Date(year, month - 1, 1).toLocaleDateString('fr-CH', { month: 'long', year: 'numeric' });
+function getISOWeek() {
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const dow = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dow);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const wk = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return { week: wk, year: d.getUTCFullYear() };
 }
 
 function useInterval(callback, delay) {
@@ -185,88 +218,138 @@ function useInterval(callback, delay) {
   }, [delay]);
 }
 
-// ─── UI COMPONENTS ────────────────────────────────────────────────────────────
+// ─── BASE COMPONENTS ─────────────────────────────────────────────────────────
+
+// SVG icon component
+function Ic({ name, size = 20, className = '' }) {
+  const path = IC[name];
+  if (!path) return null;
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      width={size}
+      height={size}
+      className={className}
+      style={{ flexShrink: 0 }}
+    >
+      {path.includes('M') && path.split(' M').length > 2
+        ? path.split(' M').map((p, i) => i === 0
+            ? <path key={i} strokeLinecap="round" strokeLinejoin="round" d={p} />
+            : <path key={i} strokeLinecap="round" strokeLinejoin="round" d={'M' + p} />)
+        : <path strokeLinecap="round" strokeLinejoin="round" d={path} />
+      }
+    </svg>
+  );
+}
 
 function Spinner({ size = 'md' }) {
-  const s = size === 'sm' ? 'w-4 h-4' : size === 'lg' ? 'w-10 h-10' : 'w-6 h-6';
+  const s = { sm: 16, md: 24, lg: 40 }[size];
   return (
-    <div className={`${s} border-2 border-slate-200 border-t-ultima-500 rounded-full spin`} />
+    <svg width={s} height={s} viewBox="0 0 24 24" className="spin text-blue-600">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none"
+        strokeDasharray="31.4" strokeDashoffset="10" strokeLinecap="round" />
+    </svg>
   );
 }
 
 function Badge({ status }) {
+  const cls = STATUS_COLORS[status] || 'bg-slate-100 text-slate-500';
+  const label = STATUS_LABELS[status] || status;
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[status] || 'bg-gray-100 text-gray-700'}`}>
-      {STATUS_LABELS[status] || status}
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>
+      {label}
     </span>
   );
 }
 
-function Alert({ type = 'info', title, children, onClose }) {
-  const styles = {
-    info:    'bg-blue-50 border-blue-200 text-blue-800',
-    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-    error:   'bg-red-50 border-red-200 text-red-800',
-    success: 'bg-green-50 border-green-200 text-green-800',
-  };
-  return (
-    <div className={`border rounded-xl p-3 ${styles[type]}`}>
-      <div className="flex items-start gap-2">
-        <div className="flex-1">
-          {title && <p className="font-semibold text-sm">{title}</p>}
-          <p className="text-sm">{children}</p>
-        </div>
-        {onClose && (
-          <button onClick={onClose} className="text-current opacity-60 hover:opacity-100 text-lg leading-none">×</button>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function Card({ children, className = '', onClick }) {
-  return (
-    <div
-      className={`bg-white rounded-2xl shadow-sm border border-slate-100 ${onClick ? 'cursor-pointer active:scale-[0.98] transition-transform' : ''} ${className}`}
-      onClick={onClick}
-    >
-      {children}
-    </div>
-  );
+  const base = 'bg-white rounded-2xl shadow-card border border-slate-100/80';
+  if (onClick) {
+    return (
+      <div
+        className={`${base} cursor-pointer transition-all duration-150 hover:shadow-card-hover active:scale-[0.99] ${className}`}
+        onClick={onClick}
+      >
+        {children}
+      </div>
+    );
+  }
+  return <div className={`${base} ${className}`}>{children}</div>;
 }
 
 function Button({ children, onClick, variant = 'primary', size = 'md', disabled, loading, className = '', type = 'button' }) {
-  const base = 'font-semibold rounded-xl transition-all active:scale-[0.97] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed';
-  const sizes = { sm: 'px-3 py-2 text-sm', md: 'px-5 py-3 text-base', lg: 'px-6 py-4 text-lg' };
   const variants = {
-    primary:   'bg-ultima-500 hover:bg-ultima-600 text-white shadow-sm',
-    secondary: 'bg-slate-100 hover:bg-slate-200 text-slate-700',
-    danger:    'bg-red-500 hover:bg-red-600 text-white',
-    ghost:     'hover:bg-slate-100 text-slate-600',
-    success:   'bg-green-500 hover:bg-green-600 text-white',
+    primary:   'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white shadow-sm',
+    secondary: 'bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700',
+    success:   'bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-sm',
+    danger:    'bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-600 border border-red-200',
+    ghost:     'hover:bg-slate-100 active:bg-slate-200 text-slate-600',
+    outline:   'border border-slate-200 bg-white hover:bg-slate-50 text-slate-700',
+  };
+  const sizes = {
+    xs: 'px-3 py-1.5 text-xs rounded-lg gap-1.5',
+    sm: 'px-3.5 py-2 text-sm rounded-xl gap-2',
+    md: 'px-4 py-2.5 text-sm rounded-xl gap-2',
+    lg: 'px-5 py-3 text-base rounded-xl gap-2.5',
+    xl: 'px-6 py-4 text-base rounded-2xl gap-3',
   };
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
-      className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}
+      className={`inline-flex items-center justify-center font-semibold transition-all duration-150 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
     >
-      {loading && <Spinner size="sm" />}
-      {children}
+      {loading ? <Spinner size="sm" /> : children}
     </button>
   );
 }
 
+function Alert({ type = 'info', title, children, onClose }) {
+  const styles = {
+    info:    { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', icon: 'info' },
+    success: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-800', icon: 'checkPlain' },
+    warning: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-800', icon: 'warning' },
+    error:   { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', icon: 'x' },
+  };
+  const s = styles[type] || styles.info;
+  return (
+    <div className={`flex gap-3 px-4 py-3 rounded-xl border ${s.bg} ${s.border} slide-up`}>
+      <Ic name={s.icon} size={16} className={`${s.text} mt-0.5 flex-shrink-0`} />
+      <div className="flex-1 min-w-0">
+        {title && <p className={`text-sm font-semibold ${s.text}`}>{title}</p>}
+        {children && <p className={`text-sm ${s.text} ${title ? 'mt-0.5' : ''}`}>{children}</p>}
+      </div>
+      {onClose && (
+        <button onClick={onClose} className={`${s.text} opacity-60 hover:opacity-100 flex-shrink-0`}>
+          <Ic name="x" size={14} />
+        </button>
+      )}
+    </div>
+  );
+}
+
 function Modal({ open, onClose, title, children }) {
+  useEffect(() => {
+    if (open) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto slide-up" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 fade-in" style={{ background: 'rgba(15,23,42,0.5)' }}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] overflow-y-auto scale-in">
         {title && (
-          <div className="flex items-center justify-between p-5 border-b border-slate-100">
-            <h2 className="text-lg font-bold text-slate-800">{title}</h2>
-            <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-2xl leading-none">×</button>
+          <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-100">
+            <h3 className="font-bold text-slate-800 text-lg">{title}</h3>
+            <button onClick={onClose} className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
+              <Ic name="x" size={16} className="text-slate-500" />
+            </button>
           </div>
         )}
         <div className="p-5">{children}</div>
@@ -275,315 +358,19 @@ function Modal({ open, onClose, title, children }) {
   );
 }
 
-function ProgressBar({ value, max, color = 'bg-ultima-500' }) {
-  const pct = fmt.pct(value, max);
-  const barColor = pct >= 100 ? 'bg-green-500' : pct > 90 ? 'bg-amber-500' : color;
-  return (
-    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-      <div className={`h-2 rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
-    </div>
-  );
-}
-
-// ─── NAVIGATION ICONS (SVG inline) ─────────────────────────────────────────
-function Icon({ path, className = "w-5 h-5" }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-      <path strokeLinecap="round" strokeLinejoin="round" d={path} />
-    </svg>
-  );
-}
-const PATHS = {
-  team:       "M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z",
-  validation: "M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
-  calendar:   "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5",
-  absences:   "M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z",
-  account:    "M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z",
-  home:       "M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z",
-  hours:      "M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z",
-  admin:      "M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z M15 12a3 3 0 11-6 0 3 3 0 016 0z",
-  projects:   "M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z",
-  clock:      "M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z",
-  logout:     "M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75",
-};
-
-// ─── SIDE NAVIGATION ────────────────────────────────────────────────────────
-function SideNav({ current, role, onNav }) {
-  const isManager = role === 'MANAGER' || role === 'ADMIN' || role === 'SUPERADMIN';
-  const isAdmin = role === 'ADMIN' || role === 'SUPERADMIN';
-  const tabs = isManager
-    ? [
-        { id: 'team',       iconKey: 'team',       label: 'Équipe' },
-        { id: 'validation', iconKey: 'validation',  label: 'Validation' },
-        { id: 'calendar',   iconKey: 'calendar',    label: 'Calendrier' },
-        { id: 'absences',   iconKey: 'absences',    label: 'Absences' },
-        ...(isAdmin ? [{ id: 'admin', iconKey: 'admin', label: 'Administration' }] : []),
-        { id: 'account',    iconKey: 'account',     label: 'Compte' },
-      ]
-    : [
-        { id: 'home',     iconKey: 'clock',    label: 'Pointage' },
-        { id: 'hours',    iconKey: 'hours',    label: 'Mes heures' },
-        { id: 'absences', iconKey: 'absences', label: 'Absences' },
-        { id: 'account',  iconKey: 'account',  label: 'Compte' },
-      ];
-
-  return (
-    <aside className="fixed left-0 top-0 bottom-0 w-56 bg-white border-r border-slate-200 flex flex-col z-40">
-      {/* Logo */}
-      <div className="h-16 px-5 border-b border-slate-100 flex items-center gap-3 flex-shrink-0">
-        <div className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center text-white">
-          <Icon path={PATHS.clock} className="w-4 h-4" />
-        </div>
-        <div>
-          <div className="text-sm font-bold text-slate-800 leading-none">Ultima</div>
-          <div className="text-xs text-slate-400 mt-0.5">Pointage</div>
-        </div>
-      </div>
-      {/* Nav items */}
-      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
-        {tabs.map(t => (
-          <button
-            key={t.id}
-            onClick={() => onNav(t.id)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left group
-              ${current === t.id
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}`}
-          >
-            <Icon path={PATHS[t.iconKey]} className="w-4 h-4 flex-shrink-0" />
-            <span className="text-sm font-medium">{t.label}</span>
-          </button>
-        ))}
-      </nav>
-      {/* Footer */}
-      <div className="px-2 py-3 border-t border-slate-100 flex-shrink-0">
-        <div className="px-3 py-2 text-xs text-slate-400">Ultima Interior SA</div>
-      </div>
-    </aside>
-  );
-}
-
-
-// ─── ADMIN SCREEN ───────────────────────────────────────────────────────────
-function AdminScreen() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState(null);
-  const [editUser, setEditUser] = useState(null);
-  const [form, setForm] = useState({ first_name: '', last_name: '', email: '', role: 'EMPLOYEE', employee_type: 'MONTEUR', weekly_target_h: 42, annual_leave_d: 25, phone: '', password: '' });
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [search, setSearch] = useState('');
-
-  const loadUsers = async () => {
-    setLoading(true);
-    try {
-      const d = await api.get('/admin/users');
-      setUsers(d.users || []);
-    } catch (err) { console.error(err); }
-    finally { setLoading(false); }
-  };
-
-  useEffect(() => { loadUsers(); }, []);
-
-  const openCreate = () => {
-    setForm({ first_name: '', last_name: '', email: '', role: 'EMPLOYEE', employee_type: 'MONTEUR', weekly_target_h: 42, annual_leave_d: 25, phone: '', password: '' });
-    setEditUser(null);
-    setError('');
-    setModal('form');
-  };
-
-  const openEdit = (u) => {
-    setForm({ first_name: u.first_name || '', last_name: u.last_name || '', email: u.email || '', role: u.role || 'EMPLOYEE', employee_type: u.employee_type || 'MONTEUR', weekly_target_h: u.weekly_target_h || 42, annual_leave_d: u.annual_leave_d || 25, phone: u.phone || '', password: '' });
-    setEditUser(u);
-    setError('');
-    setModal('form');
-  };
-
-  const saveUser = async () => {
-    if (!form.email || !form.first_name || !form.last_name) return setError('Prénom, nom et email sont requis');
-    if (!editUser && !form.password) return setError('Un mot de passe est requis pour le nouvel utilisateur');
-    setSaving(true); setError('');
-    try {
-      const payload = { ...form };
-      if (!payload.password) delete payload.password;
-      if (editUser) {
-        await api.patch('/admin/users/' + editUser.id, payload);
-      } else {
-        await api.post('/admin/users', payload);
-      }
-      setModal(null);
-      await loadUsers();
-    } catch (err) { setError(err.message); }
-    finally { setSaving(false); }
-  };
-
-  const deleteUser = async (userId, name) => {
-    if (!window.confirm('Supprimer ' + name + ' ? Cette action est irréversible.')) return;
-    try {
-      await api.delete('/admin/users/' + userId);
-      await loadUsers();
-    } catch (err) { alert(err.message); }
-  };
-
-  const filtered = users.filter(u =>
-    (u.first_name + ' ' + u.last_name + ' ' + u.email).toLowerCase().includes(search.toLowerCase())
-  );
-
-  const ROLE_LABELS = { EMPLOYEE: 'Employé', MANAGER: 'Manager', ADMIN: 'Admin', SUPERADMIN: 'Super Admin' };
-  const ROLE_COLORS = { EMPLOYEE: 'bg-slate-100 text-slate-600', MANAGER: 'bg-blue-100 text-blue-700', ADMIN: 'bg-purple-100 text-purple-700', SUPERADMIN: 'bg-red-100 text-red-700' };
-
-  return (
-    <div className="space-y-4 pb-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-bold text-slate-800">Gestion des accès</h2>
-          <p className="text-sm text-slate-500">{users.length} collaborateur(s)</p>
-        </div>
-        <Button onClick={openCreate} variant="primary" className="flex items-center gap-2">
-          <span>+</span> Ajouter
-        </Button>
-      </div>
-
-      {/* Search */}
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="Rechercher un collaborateur..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-slate-400"
-        />
-        <Icon path={PATHS.team} className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-      </div>
-
-      {/* Table */}
-      {loading ? (
-        <div className="flex justify-center py-12"><Spinner size="lg" /></div>
-      ) : (
-        <Card>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Collaborateur</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Email</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Rôle</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Type</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {filtered.length === 0 ? (
-                  <tr><td colSpan={5} className="text-center py-12 text-slate-400">Aucun collaborateur trouvé</td></tr>
-                ) : filtered.map(u => (
-                  <tr key={u.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-sm font-bold text-slate-600 flex-shrink-0">
-                          {(u.first_name || '?')[0]}{(u.last_name || '')[0]}
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-slate-800">{u.first_name} {u.last_name}</div>
-                          {u.phone && <div className="text-xs text-slate-400">{u.phone}</div>}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-600">{u.email}</td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ROLE_COLORS[u.role] || 'bg-slate-100 text-slate-600'}`}>
-                        {ROLE_LABELS[u.role] || u.role}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-slate-500">{u.employee_type}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => openEdit(u)} className="text-xs text-slate-500 hover:text-slate-800 px-2 py-1 rounded hover:bg-slate-100 transition-colors">
-                          Modifier
-                        </button>
-                        <button onClick={() => deleteUser(u.id, u.first_name + ' ' + u.last_name)} className="text-xs text-red-400 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition-colors">
-                          Supprimer
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      )}
-
-      {/* Create/Edit Modal */}
-      {modal === 'form' && (
-        <Modal title={editUser ? 'Modifier ' + editUser.first_name : 'Nouveau collaborateur'} onClose={() => setModal(null)}>
-          <div className="space-y-3">
-            {error && <Alert type="error">{error}</Alert>}
-            <div className="grid grid-cols-2 gap-3">
-              <Input label="Prénom *" value={form.first_name} onChange={v => setForm(f => ({ ...f, first_name: v }))} />
-              <Input label="Nom *" value={form.last_name} onChange={v => setForm(f => ({ ...f, last_name: v }))} />
-            </div>
-            <Input label="Email *" type="email" value={form.email} onChange={v => setForm(f => ({ ...f, email: v }))} />
-            <Input label={editUser ? 'Nouveau mot de passe (laisser vide = inchangé)' : 'Mot de passe *'} type="password" value={form.password} onChange={v => setForm(f => ({ ...f, password: v }))} />
-            <Select label="Rôle" value={form.role} onChange={v => setForm(f => ({ ...f, role: v }))} options={[
-              { value: 'EMPLOYEE', label: 'Employé' },
-              { value: 'MANAGER', label: 'Manager' },
-              { value: 'ADMIN', label: 'Admin' },
-            ]} />
-            <Select label="Type" value={form.employee_type} onChange={v => setForm(f => ({ ...f, employee_type: v }))} options={[
-              { value: 'MONTEUR', label: 'Monteur' },
-              { value: 'ADMIN_STAFF', label: 'Admin Staff' },
-              { value: 'MANAGER', label: 'Manager' },
-            ]} />
-            <div className="grid grid-cols-2 gap-3">
-              <Input label="Heures / semaine" type="number" value={form.weekly_target_h} onChange={v => setForm(f => ({ ...f, weekly_target_h: parseFloat(v) || 42 }))} />
-              <Input label="Congés / an (j)" type="number" value={form.annual_leave_d} onChange={v => setForm(f => ({ ...f, annual_leave_d: parseInt(v) || 25 }))} />
-            </div>
-            <Input label="Téléphone" value={form.phone} onChange={v => setForm(f => ({ ...f, phone: v }))} />
-            <div className="flex gap-2 pt-2">
-              <Button onClick={saveUser} loading={saving} variant="primary" className="flex-1">
-                {editUser ? 'Enregistrer' : 'Créer'}
-              </Button>
-              <Button onClick={() => setModal(null)} variant="secondary">Annuler</Button>
-            </div>
-          </div>
-        </Modal>
-      )}
-    </div>
-  );
-}
-
-
-function TopBar({ title, subtitle, onBack, actions }) {
-  return (
-    <header className="bg-white border-b border-slate-100 px-4 py-3 safe-top sticky top-0 z-30">
-      <div className="flex items-center gap-3">
-        {onBack && (
-          <button onClick={onBack} className="text-slate-500 hover:text-slate-700 text-xl font-light">←</button>
-        )}
-        <div className="flex-1 min-w-0">
-          <h1 className="font-bold text-slate-800 text-lg leading-tight truncate">{title}</h1>
-          {subtitle && <p className="text-xs text-slate-500 truncate">{subtitle}</p>}
-        </div>
-        {actions && <div className="flex items-center gap-2">{actions}</div>}
-      </div>
-    </header>
-  );
-}
-
-function Input({ label, type = 'text', value, onChange, placeholder, required, autoFocus, className = '' }) {
+function Input({ label, type = 'text', value, onChange, placeholder, required, autoFocus, className = '', readOnly }) {
   return (
     <div className={className}>
-      {label && <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>}
+      {label && <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{label}{required && ' *'}</label>}
       <input
         type={type}
-        value={value}
-        onChange={e => onChange(e.target.value)}
+        value={value || ''}
+        onChange={e => onChange && onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
         autoFocus={autoFocus}
-        className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-ultima-400 focus:border-transparent bg-white"
+        readOnly={readOnly}
+        className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:bg-slate-50 read-only:bg-slate-50 read-only:text-slate-500"
       />
     </div>
   );
@@ -592,11 +379,11 @@ function Input({ label, type = 'text', value, onChange, placeholder, required, a
 function Select({ label, value, onChange, options, className = '' }) {
   return (
     <div className={className}>
-      {label && <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>}
+      {label && <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">{label}</label>}
       <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-ultima-400 bg-white"
+        value={value || ''}
+        onChange={e => onChange && onChange(e.target.value)}
+        className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none"
       >
         {options.map(o => (
           <option key={o.value} value={o.value}>{o.label}</option>
@@ -606,138 +393,289 @@ function Select({ label, value, onChange, options, className = '' }) {
   );
 }
 
-// ─── AUTH SCREENS ─────────────────────────────────────────────────────────────
+// User avatar with initials or photo
+function UserAvatar({ user, size = 'md' }) {
+  const sizes = { xs: 'w-7 h-7 text-xs', sm: 'w-9 h-9 text-sm', md: 'w-11 h-11 text-base', lg: 'w-16 h-16 text-xl', xl: 'w-24 h-24 text-3xl' };
+  const s = sizes[size] || sizes.md;
+  const initials = fmt.initials(user.first_name, user.last_name);
+  if (user.avatar_url) {
+    return <img src={user.avatar_url} className={`${s} rounded-2xl object-cover flex-shrink-0`} alt={initials} />;
+  }
+  // Color based on initials
+  const colors = ['bg-blue-100 text-blue-700', 'bg-violet-100 text-violet-700', 'bg-emerald-100 text-emerald-700',
+    'bg-amber-100 text-amber-700', 'bg-pink-100 text-pink-700', 'bg-cyan-100 text-cyan-700'];
+  const idx = ((user.first_name || '').charCodeAt(0) || 0) % colors.length;
+  return (
+    <div className={`${s} ${colors[idx]} rounded-2xl flex items-center justify-center font-bold flex-shrink-0`}>
+      {initials}
+    </div>
+  );
+}
+
+function ProgressRing({ value, max, size = 140, strokeWidth = 10, className = '' }) {
+  const radius = (size - strokeWidth * 2) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const pct = max > 0 ? Math.min(1, value / max) : 0;
+  const offset = circumference * (1 - pct);
+  const color = pct >= 1 ? '#10b981' : pct >= 0.7 ? '#3b82f6' : pct >= 0.4 ? '#f59e0b' : '#94a3b8';
+
+  return (
+    <svg width={size} height={size} className={className} style={{ transform: 'rotate(-90deg)' }}>
+      <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="#f1f5f9" strokeWidth={strokeWidth} />
+      <circle
+        cx={size/2} cy={size/2} r={radius} fill="none"
+        stroke={color} strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        style={{ transition: 'stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease' }}
+      />
+    </svg>
+  );
+}
+
+function ProgressBar({ value, max, color }) {
+  const pct = fmt.pct(value, max);
+  const barColor = color || (pct >= 100 ? 'bg-emerald-500' : pct >= 70 ? 'bg-blue-500' : pct >= 40 ? 'bg-amber-400' : 'bg-slate-300');
+  return (
+    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+      <div
+        className={`h-full ${barColor} rounded-full transition-all duration-700`}
+        style={{ width: `${pct}%` }}
+      />
+    </div>
+  );
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+
+function SideNav({ current, role, onNav, isOpen, onClose, user }) {
+  const isManager = ['MANAGER', 'ADMIN', 'SUPERADMIN'].includes(role);
+  const isAdmin = ['ADMIN', 'SUPERADMIN'].includes(role);
+
+  const tabs = isManager
+    ? [
+        { id: 'team',       icon: 'team',       label: 'Equipe' },
+        { id: 'validation', icon: 'check',       label: 'Validation' },
+        { id: 'calendar',   icon: 'calendar',    label: 'Calendrier' },
+        { id: 'absences',   icon: 'absences',    label: 'Absences' },
+        ...(isAdmin ? [{ id: 'admin', icon: 'admin', label: 'Administration' }] : []),
+        { id: 'account',    icon: 'account',     label: 'Compte' },
+      ]
+    : [
+        { id: 'home',     icon: 'clock',    label: 'Pointage' },
+        { id: 'hours',    icon: 'absences', label: 'Mes heures' },
+        { id: 'absences', icon: 'calendar', label: 'Absences' },
+        { id: 'account',  icon: 'account',  label: 'Compte' },
+      ];
+
+  const NavContent = () => (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div className="px-5 h-16 flex items-center gap-3 border-b border-slate-100 flex-shrink-0">
+        <div className="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
+          <Ic name="clock" size={18} className="text-white" />
+        </div>
+        <div>
+          <div className="text-sm font-bold text-slate-900 leading-none">Ultima</div>
+          <div className="text-xs text-slate-400 mt-0.5 leading-none">Pointage</div>
+        </div>
+      </div>
+
+      {/* Nav items */}
+      <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto">
+        {tabs.map(t => {
+          const active = current === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => { onNav(t.id); onClose && onClose(); }}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left group ${
+                active
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+              }`}
+            >
+              <Ic name={t.icon} size={18} className="flex-shrink-0" />
+              <span className="text-sm font-medium">{t.label}</span>
+              {active && <div className="ml-auto w-1.5 h-1.5 bg-white/70 rounded-full" />}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* User footer */}
+      {user && (
+        <div className="p-3 border-t border-slate-100 flex-shrink-0">
+          <button
+            onClick={() => { onNav('account'); onClose && onClose(); }}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all hover:bg-slate-100 ${current === 'account' ? 'bg-blue-600 text-white' : ''}`}
+          >
+            <UserAvatar user={user} size="xs" />
+            <div className="flex-1 min-w-0 text-left">
+              <div className={`text-sm font-semibold truncate ${current === 'account' ? 'text-white' : 'text-slate-800'}`}>
+                {user.first_name} {user.last_name}
+              </div>
+              <div className={`text-xs truncate ${current === 'account' ? 'text-white/70' : 'text-slate-400'}`}>
+                {role}
+              </div>
+            </div>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-slate-200 z-40">
+        <NavContent />
+      </aside>
+
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div className="md:hidden fixed inset-0 z-50 flex fade-in">
+          <div className="absolute inset-0" style={{ background: 'rgba(15,23,42,0.5)' }} onClick={onClose} />
+          <aside className="relative w-72 bg-white h-full shadow-2xl slide-up">
+            <NavContent />
+          </aside>
+        </div>
+      )}
+    </>
+  );
+}
+
+function MobileHeader({ title, subtitle, onMenu, actions }) {
+  return (
+    <div className="md:hidden flex items-center gap-3 px-4 h-14 bg-white border-b border-slate-100 flex-shrink-0 glass sticky top-0 z-30">
+      <button
+        onClick={onMenu}
+        className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors flex-shrink-0"
+      >
+        <Ic name="bars" size={20} />
+      </button>
+      <div className="flex-1 min-w-0">
+        <h1 className="font-bold text-slate-900 text-base truncate leading-none">{title}</h1>
+        {subtitle && <p className="text-xs text-slate-500 mt-0.5 truncate">{subtitle}</p>}
+      </div>
+      {actions && <div className="flex-shrink-0">{actions}</div>}
+    </div>
+  );
+}
+
+// ─── LOGIN SCREEN ─────────────────────────────────────────────────────────────
 
 function LoginScreen({ onLogin }) {
-  const [mode, setMode] = useState('password'); // 'password' | 'magic'
+  const [mode, setMode] = useState('password');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [magicSent, setMagicSent] = useState(false);
-  const [magicToken, setMagicToken] = useState('');
-
-  // Check URL for magic token
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const t = params.get('token');
-    if (t) {
-      window.history.replaceState({}, '', '/');
-      onLogin({ needPin: true, token: t, email: '' });
-    }
-  }, []);
+  const [sent, setSent] = useState(false);
 
   const handlePassword = async (e) => {
     e.preventDefault();
     setLoading(true); setError('');
     try {
       const d = await api.post('/auth/login', { email, password });
-      api.setTokens(d.token, null);
-      onLogin({ user: d.user });
-    } catch (err) {
-      setError(err.message);
-    } finally { setLoading(false); }
+      if (d.need_pin) {
+        onLogin({ needPin: true, token: d.pin_token, email });
+      } else {
+        api.setTokens(d.token, d.refresh_token);
+        onLogin({ user: d.user });
+      }
+    } catch (err) { setError(err.message); }
+    finally { setLoading(false); }
   };
 
-  const handleMagic = async (e) => {
+  const handleMagicLink = async (e) => {
     e.preventDefault();
     setLoading(true); setError('');
     try {
-      const d = await api.post('/auth/magic-link', { contact: email });
-      setMagicSent(true);
-      if (d._demo_token) setMagicToken(d._demo_token);
-    } catch (err) {
-      setError(err.message);
-    } finally { setLoading(false); }
-  };
-
-  const useDemoToken = () => {
-    onLogin({ needPin: true, token: magicToken, email });
+      await api.post('/auth/magic-link', { email });
+      setSent(true);
+    } catch (err) { setError(err.message); }
+    finally { setLoading(false); }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-800 to-slate-900 flex flex-col items-center justify-center px-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center px-6 py-12">
       {/* Logo */}
       <div className="mb-8 text-center">
-        <div className="w-20 h-20 bg-ultima-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-          <span className="text-4xl">⏱</span>
+        <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/40">
+          <Ic name="clock" size={32} className="text-white" />
         </div>
         <h1 className="text-2xl font-bold text-white">Ultima Pointage</h1>
-        <p className="text-slate-400 text-sm mt-1">Ultima Interior SA — Bulle</p>
+        <p className="text-slate-400 text-sm mt-1">Ultima Interior SA</p>
       </div>
 
-      <div className="w-full max-w-sm">
-        {/* Mode switcher */}
-        <div className="flex bg-slate-700 rounded-xl p-1 mb-6">
-          <button
-            onClick={() => { setMode('password'); setError(''); }}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${mode === 'password' ? 'bg-white text-slate-800' : 'text-slate-300'}`}
-          >Mot de passe</button>
-          <button
-            onClick={() => { setMode('magic'); setError(''); }}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${mode === 'magic' ? 'bg-white text-slate-800' : 'text-slate-300'}`}
-          >Lien magique</button>
+      {/* Card */}
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden">
+        {/* Mode tabs */}
+        <div className="flex border-b border-slate-100">
+          {[
+            { id: 'password', label: 'Mot de passe' },
+            { id: 'magic',    label: 'Lien magique' },
+          ].map(t => (
+            <button
+              key={t.id}
+              onClick={() => { setMode(t.id); setError(''); setSent(false); }}
+              className={`flex-1 py-3.5 text-sm font-semibold transition-colors ${mode === t.id ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
-        {mode === 'password' ? (
-          <form onSubmit={handlePassword} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-                placeholder="manager@ultima.ch"
-                className="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-ultima-400" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Mot de passe</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
-                className="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-ultima-400" />
-            </div>
-            {error && <Alert type="error">{error}</Alert>}
-            <Button type="submit" loading={loading} className="w-full" size="lg">Se connecter</Button>
-          </form>
-        ) : magicSent ? (
-          <div className="text-center space-y-4">
-            <div className="text-5xl">📧</div>
-            <p className="text-white font-semibold">Lien envoyé !</p>
-            <p className="text-slate-400 text-sm">Vérifiez votre email <strong className="text-slate-200">{email}</strong></p>
-            {magicToken && (
-              <div className="bg-slate-700 rounded-xl p-4 text-left">
-                <p className="text-xs text-ultima-400 font-semibold mb-2">🔧 Mode démo — Token direct :</p>
-                <p className="text-xs text-slate-300 font-mono break-all">{magicToken}</p>
-                <Button onClick={useDemoToken} className="w-full mt-3" size="sm" variant="secondary">
-                  Utiliser ce token →
-                </Button>
+        <div className="p-6">
+          {mode === 'password' ? (
+            <form onSubmit={handlePassword} className="space-y-4">
+              <Input label="Adresse email" type="email" value={email} onChange={setEmail} placeholder="vous@ultima-interior.ch" required autoFocus />
+              <Input label="Mot de passe" type="password" value={password} onChange={setPassword} placeholder="••••••••" required />
+              {error && <Alert type="error">{error}</Alert>}
+              <Button type="submit" loading={loading} className="w-full" size="lg">
+                Se connecter
+              </Button>
+            </form>
+          ) : sent ? (
+            <div className="py-4 text-center">
+              <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <Ic name="checkPlain" size={20} className="text-emerald-600" />
               </div>
-            )}
-            <Button onClick={() => setMagicSent(false)} variant="ghost" className="w-full text-slate-300">← Retour</Button>
-          </div>
-        ) : (
-          <form onSubmit={handleMagic} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Votre email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-                placeholder="prenom@ultima.ch"
-                className="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-ultima-400" />
+              <h3 className="font-bold text-slate-800 mb-1">Email envoye</h3>
+              <p className="text-sm text-slate-500">Verifiez votre boite mail et cliquez sur le lien pour vous connecter.</p>
+              <button onClick={() => setSent(false)} className="mt-4 text-sm text-blue-600 font-medium hover:underline">
+                Renvoyer un lien
+              </button>
             </div>
-            {error && <Alert type="error">{error}</Alert>}
-            <Button type="submit" loading={loading} className="w-full" size="lg">Envoyer le lien</Button>
-            <p className="text-center text-slate-400 text-xs">Recevez un lien de connexion sécurisé sans mot de passe</p>
-          </form>
-        )}
+          ) : (
+            <form onSubmit={handleMagicLink} className="space-y-4">
+              <p className="text-sm text-slate-500">Recevez un lien de connexion par email, sans mot de passe.</p>
+              <Input label="Adresse email" type="email" value={email} onChange={setEmail} placeholder="vous@ultima-interior.ch" required autoFocus />
+              {error && <Alert type="error">{error}</Alert>}
+              <Button type="submit" loading={loading} className="w-full" size="lg">
+                Envoyer le lien
+              </Button>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
+// ─── PIN SCREEN ───────────────────────────────────────────────────────────────
+
 function PinScreen({ token, onSuccess }) {
-  const [pin, setPin] = useState('');
-  const [isNew, setIsNew] = useState(false);
-  const [confirm, setConfirm] = useState('');
-  const [step, setStep] = useState('checking'); // checking | set_pin | enter_pin
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [step, setStep] = useState('checking');
   const [userId, setUserId] = useState('');
   const [firstName, setFirstName] = useState('');
+  const [isNew, setIsNew] = useState(false);
+  const [pin, setPin] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     api.post('/auth/verify-link', { token })
@@ -751,13 +689,11 @@ function PinScreen({ token, onSuccess }) {
   }, [token]);
 
   const handlePin = async () => {
-    if (pin.length !== 4) return setError('Le PIN doit être à 4 chiffres');
+    if (pin.length !== 4) return setError('Le PIN doit etre a 4 chiffres');
     if (isNew && pin !== confirm) return setError('Les PINs ne correspondent pas');
     setLoading(true); setError('');
     try {
-      const body = isNew
-        ? { user_id: userId, pin, new_pin: pin }
-        : { user_id: userId, pin };
+      const body = isNew ? { user_id: userId, pin, new_pin: pin } : { user_id: userId, pin };
       const d = await api.post('/auth/verify-pin', body);
       api.setTokens(d.token, null);
       onSuccess(d.user);
@@ -768,76 +704,78 @@ function PinScreen({ token, onSuccess }) {
   };
 
   const addDigit = (d) => {
-    if (step === 'set_pin') {
-      if (!isNew || pin.length < 4) {
-        setPin(p => p.length < 4 ? p + d : p);
-      } else {
-        setConfirm(p => p.length < 4 ? p + d : p);
-      }
+    if (step === 'set_pin' && isNew && pin.length === 4) {
+      setConfirm(p => p.length < 4 ? p + d : p);
     } else {
       setPin(p => p.length < 4 ? p + d : p);
     }
   };
 
   const delDigit = () => {
-    if (step === 'set_pin' && isNew && confirm.length > 0) setConfirm(p => p.slice(0,-1));
+    if (step === 'set_pin' && isNew && pin.length === 4 && confirm.length > 0) setConfirm(p => p.slice(0,-1));
     else setPin(p => p.slice(0,-1));
   };
 
   const currentPin = step === 'set_pin' && isNew && pin.length === 4 ? confirm : pin;
+  const showConfirm = (currentPin.length === 4) && !loading;
 
   if (step === 'checking') return (
-    <div className="min-h-screen bg-slate-800 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
       {error ? <Alert type="error">{error}</Alert> : <Spinner size="lg" />}
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-800 to-slate-900 flex flex-col items-center justify-center px-6">
-      <div className="w-24 h-24 bg-ultima-500 rounded-2xl flex items-center justify-center mb-6">
-        <span className="text-5xl">🔐</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex flex-col items-center justify-center px-6 py-12">
+      <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-600/40">
+        <Ic name="lock" size={26} className="text-white" />
       </div>
-      {firstName && <p className="text-ultima-400 text-base font-semibold mb-2">Bonjour, {firstName} 👋</p>}
+
+      {firstName && (
+        <p className="text-blue-400 text-sm font-semibold mb-2">Bonjour, {firstName}</p>
+      )}
       <h2 className="text-xl font-bold text-white mb-2">
         {step === 'set_pin' && isNew
-          ? pin.length < 4 ? 'Créez votre PIN' : 'Confirmez votre PIN'
+          ? pin.length < 4 ? 'Creez votre PIN' : 'Confirmez votre PIN'
           : 'Entrez votre PIN'}
       </h2>
       <p className="text-slate-400 text-sm mb-8 text-center">
         {step === 'set_pin' && isNew
-          ? 'Choisissez un code à 4 chiffres pour sécuriser votre accès'
-          : 'Saisissez votre code PIN à 4 chiffres'}
+          ? 'Choisissez un code a 4 chiffres'
+          : 'Saisissez votre code PIN'}
       </p>
 
       {/* Dots */}
       <div className="flex gap-4 mb-8">
         {[0,1,2,3].map(i => (
-          <div key={i} className={`w-4 h-4 rounded-full transition-colors ${i < currentPin.length ? 'bg-ultima-400' : 'bg-slate-600'}`} />
+          <div key={i} className={`w-4 h-4 rounded-full transition-all duration-200 ${
+            i < currentPin.length ? 'bg-blue-400 scale-110' : 'bg-slate-600'
+          }`} />
         ))}
       </div>
 
-      {error && <div className="mb-4"><Alert type="error">{error}</Alert></div>}
+      {error && <div className="mb-4 max-w-xs w-full"><Alert type="error">{error}</Alert></div>}
 
       {/* Keypad */}
       <div className="grid grid-cols-3 gap-3 w-64">
         {[1,2,3,4,5,6,7,8,9].map(n => (
           <button key={n} onClick={() => addDigit(String(n))}
-            className="h-16 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-2xl text-white text-2xl font-medium transition-colors">
+            className="h-16 bg-slate-700/80 hover:bg-slate-600 active:bg-slate-500 active:scale-95 rounded-2xl text-white text-2xl font-medium transition-all duration-100">
             {n}
           </button>
         ))}
         <div />
         <button onClick={() => addDigit('0')}
-          className="h-16 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-2xl text-white text-2xl font-medium transition-colors">
+          className="h-16 bg-slate-700/80 hover:bg-slate-600 active:bg-slate-500 active:scale-95 rounded-2xl text-white text-2xl font-medium transition-all duration-100">
           0
         </button>
         <button onClick={delDigit}
-          className="h-16 bg-slate-700 hover:bg-slate-600 active:bg-slate-500 rounded-2xl text-white text-2xl transition-colors">
-          ⌫
+          className="h-16 bg-slate-700/80 hover:bg-slate-600 active:bg-slate-500 active:scale-95 rounded-2xl text-slate-300 transition-all duration-100 flex items-center justify-center">
+          <Ic name="chevLeft" size={20} />
         </button>
       </div>
 
-      {(currentPin.length === 4) && (
+      {showConfirm && (
         <Button onClick={handlePin} loading={loading} className="w-64 mt-6" size="lg">
           Confirmer
         </Button>
@@ -846,37 +784,28 @@ function PinScreen({ token, onSuccess }) {
   );
 }
 
-// ─── EMPLOYEE SCREENS ─────────────────────────────────────────────────────────
+// ─── HOME SCREEN (Pointage) ───────────────────────────────────────────────────
 
 function HomeScreen({ user, meData, onRefresh }) {
   const [entries, setEntries] = useState([]);
-  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState(null);
   const [elapsed, setElapsed] = useState('00:00:00');
   const [showStart, setShowStart] = useState(false);
-  const [startForm, setStartForm] = useState({ project_id: '', activity_type: 'WORK_SITE' });
+  const [actType, setActType] = useState('WORK_SITE');
   const [actError, setActError] = useState('');
   const [actLoading, setActLoading] = useState(false);
   const [alerts, setAlerts] = useState([]);
 
   const loadData = useCallback(async () => {
     try {
-      const [te, pr] = await Promise.all([
-        api.get('/time-entries'),
-        api.get('/projects'),
-      ]);
+      const te = await api.get('/time-entries');
       setEntries(te.entries || []);
       setAlerts(te.alerts || []);
       const act = (te.entries || []).find(e => e.status === 'DRAFT' && !e.ended_at);
       setActive(act || null);
-      setProjects(pr.projects || []);
-      if (pr.projects?.length && !startForm.project_id) {
-        setStartForm(f => ({ ...f, project_id: pr.projects[0].id }));
-      }
-    } catch (err) {
-      console.error(err);
-    } finally { setLoading(false); }
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
   }, []);
 
   useEffect(() => { loadData(); }, []);
@@ -890,13 +819,9 @@ function HomeScreen({ user, meData, onRefresh }) {
   }, [active]);
 
   const startEntry = async () => {
-    if (!startForm.project_id) return setActError('Sélectionnez un chantier');
     setActLoading(true); setActError('');
     try {
-      await api.post('/time-entries', {
-        project_id: startForm.project_id,
-        activity_type: startForm.activity_type,
-      });
+      await api.post('/time-entries', { activity_type: actType });
       setShowStart(false);
       await loadData();
     } catch (err) { setActError(err.message); }
@@ -913,7 +838,6 @@ function HomeScreen({ user, meData, onRefresh }) {
     finally { setActLoading(false); }
   };
 
-  // Today's entries
   const today = new Date().toISOString().split('T')[0];
   const todayEntries = entries.filter(e => {
     const d = new Date(e.started_at * 1000).toISOString().split('T')[0];
@@ -922,134 +846,171 @@ function HomeScreen({ user, meData, onRefresh }) {
 
   const todayWork = todayEntries.filter(e => e.activity_type !== 'BREAK' && e.ended_at)
     .reduce((s, e) => s + (e.duration_min || 0), 0);
+  const activeMins = active ? fmt.elapsedMins(active.started_at) : 0;
+  const totalWithActive = todayWork + (active && active.activity_type !== 'BREAK' ? activeMins : 0);
   const dailyTarget = (user.weekly_target_h || 42) / 5 * 60;
+  const pct = fmt.pct(totalWithActive, dailyTarget);
+  const greetHour = new Date().getHours();
+  const greet = greetHour < 12 ? 'Bonjour' : greetHour < 18 ? 'Bon apres-midi' : 'Bonsoir';
 
   if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <Spinner size="lg" />
-    </div>
+    <div className="flex items-center justify-center h-64"><Spinner size="lg" /></div>
   );
 
   return (
-    <div className="space-y-4 pb-4">
+    <div className="space-y-4 pb-6 max-w-lg">
+      {/* Greeting */}
+      <div className="pt-2">
+        <p className="text-sm text-slate-500">{greet},</p>
+        <h2 className="text-2xl font-bold text-slate-900">{user.first_name}</h2>
+      </div>
+
       {/* Alerts */}
       {alerts.map((a, i) => (
-        <Alert key={i} type="warning" title={a.message || a.code}>
-          {a.message}
-        </Alert>
+        <Alert key={i} type="warning" title="Anomalie">{a.message || a.code}</Alert>
       ))}
 
-      {/* Active session card */}
-      {active ? (
-        <Card className="p-5 border-2 border-ultima-300">
-          <div className="text-center">
-            <div className="text-sm font-medium text-ultima-600 mb-1">Session active</div>
-            <div className="text-5xl font-mono font-bold text-slate-800 mb-2 tracking-tight">{elapsed}</div>
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <span className={`px-3 py-1 rounded-full text-sm ${ACTIVITY_TYPES[active.activity_type]?.color}`}>
-                {ACTIVITY_TYPES[active.activity_type]?.icon} {ACTIVITY_TYPES[active.activity_type]?.label}
-              </span>
+      {/* Main pointage card */}
+      <Card className="p-6">
+        <div className="flex flex-col items-center">
+          {/* Circular progress */}
+          <div className="relative mb-6">
+            <ProgressRing value={totalWithActive} max={dailyTarget} size={180} strokeWidth={12} />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              {active ? (
+                <>
+                  <span className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-1">En cours</span>
+                  <span className="text-3xl font-mono font-bold text-slate-900 tabular-nums leading-none">{elapsed}</span>
+                  <span className="text-xs text-slate-400 mt-1">{ACTIVITY_TYPES[active.activity_type]?.label}</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-3xl font-bold text-slate-900">{fmt.duration(todayWork)}</span>
+                  <span className="text-xs text-slate-400 mt-1">aujourd'hui</span>
+                  <span className="text-xs font-medium text-slate-500 mt-0.5">{pct}% de l'objectif</span>
+                </>
+              )}
             </div>
-            <p className="text-xs text-slate-500 mb-4">Démarré à {fmt.time(active.started_at)}</p>
-            <div className="w-20 h-20 mx-auto relative mb-4">
-              <div className="w-20 h-20 bg-red-100 rounded-full pulse-ring flex items-center justify-center cursor-pointer"
-                onClick={stopEntry}>
-                <div className="text-center">
-                  <div className="text-2xl">⏹</div>
-                  <div className="text-xs font-semibold text-red-700">Stop</div>
-                </div>
+          </div>
+
+          {/* Action button */}
+          {active ? (
+            <div className="w-full space-y-3">
+              <button
+                onClick={stopEntry}
+                disabled={actLoading}
+                className={`w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-3 transition-all active:scale-[0.97] disabled:opacity-60 pulse-ring ${
+                  actLoading ? 'bg-slate-200 text-slate-500' : 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-200'
+                }`}
+              >
+                <Ic name="stop" size={22} />
+                {actLoading ? 'Arret en cours...' : 'Pointer la fin'}
+              </button>
+              <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
+                <Ic name="clock" size={12} />
+                <span>Demarre a {fmt.time(active.started_at)}</span>
               </div>
             </div>
-          </div>
-        </Card>
-      ) : (
-        <Card className="p-5">
-          <div className="text-center">
-            <div className="text-slate-400 text-sm mb-3">Aucune session active</div>
-            <Button onClick={() => setShowStart(true)} className="w-full" size="lg">
-              <span className="text-lg">▶</span> Démarrer le pointage
-            </Button>
-          </div>
-        </Card>
-      )}
-
-      {/* Today progress */}
-      <Card className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-semibold text-slate-700">Aujourd'hui</span>
-          <span className="text-sm text-slate-500">{fmt.duration(todayWork)} / {fmt.duration(dailyTarget)}</span>
+          ) : (
+            <button
+              onClick={() => setShowStart(true)}
+              className="w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 active:scale-[0.97] text-white shadow-lg shadow-blue-200 transition-all"
+            >
+              <Ic name="play" size={22} />
+              Pointer l'arrivee
+            </button>
+          )}
         </div>
-        <ProgressBar value={todayWork} max={dailyTarget} />
-        {meData?.week_summary && (
-          <div className="mt-3 flex justify-between text-xs text-slate-500">
-            <span>Semaine S{meData.week_summary.week}</span>
-            <span>{fmt.duration(meData.week_summary.total_work_min)} / {(user.weekly_target_h || 42)}h</span>
-          </div>
-        )}
       </Card>
 
-      {/* Today's entries */}
+      {/* Daily summary */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: 'Travaille', value: fmt.duration(todayWork), color: 'text-slate-800' },
+          { label: 'Objectif', value: `${fmt.duration(dailyTarget)}`, color: 'text-slate-500' },
+          { label: 'Reste', value: totalWithActive >= dailyTarget ? 'Atteint' : fmt.duration(Math.max(0, dailyTarget - totalWithActive)), color: totalWithActive >= dailyTarget ? 'text-emerald-600' : 'text-amber-600' },
+        ].map(item => (
+          <Card key={item.label} className="p-3 text-center">
+            <div className={`text-xl font-bold ${item.color}`}>{item.value}</div>
+            <div className="text-xs text-slate-400 mt-0.5">{item.label}</div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Week summary */}
+      {meData?.week && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-semibold text-slate-700">Semaine S{meData.week.number}</span>
+            <span className="text-sm text-slate-500">{fmt.duration(meData.week.total_min)} / {user.weekly_target_h || 42}h</span>
+          </div>
+          <ProgressBar value={meData.week.total_min} max={(user.weekly_target_h || 42) * 60} />
+        </Card>
+      )}
+
+      {/* Today entries */}
       {todayEntries.length > 0 && (
         <Card>
-          <div className="p-4 border-b border-slate-50">
-            <h3 className="font-semibold text-slate-700 text-sm">Activités du jour</h3>
+          <div className="px-4 py-3 border-b border-slate-50">
+            <h3 className="text-sm font-semibold text-slate-600">Activites du jour</h3>
           </div>
           <div className="divide-y divide-slate-50">
-            {todayEntries.map(e => (
-              <div key={e.id} className="px-4 py-3 flex items-center gap-3">
-                <span className="text-xl">{ACTIVITY_TYPES[e.activity_type]?.icon || '📋'}</span>
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-slate-700">
-                    {ACTIVITY_TYPES[e.activity_type]?.label}
+            {todayEntries.map(e => {
+              const at = ACTIVITY_TYPES[e.activity_type] || ACTIVITY_TYPES.OTHER;
+              return (
+                <div key={e.id} className="px-4 py-3 flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-bold border ${at.color}`}>
+                    {e.activity_type === 'WORK_SITE' ? <Ic name="briefcase" size={16} /> :
+                     e.activity_type === 'WORK_OFFICE' ? <Ic name="home" size={16} /> :
+                     e.activity_type === 'TRAVEL_PRO' ? <Ic name="truck" size={16} /> :
+                     e.activity_type === 'BREAK' ? <Ic name="star" size={16} /> :
+                     <Ic name="clock" size={16} />}
                   </div>
-                  <div className="text-xs text-slate-400">
-                    {fmt.time(e.started_at)} — {e.ended_at ? fmt.time(e.ended_at) : 'en cours'}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-slate-700">{at.label}</div>
+                    <div className="text-xs text-slate-400">
+                      {fmt.time(e.started_at)} — {e.ended_at ? fmt.time(e.ended_at) : 'en cours'}
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    {e.ended_at
+                      ? <span className="text-sm font-semibold text-slate-600">{fmt.duration(e.duration_min)}</span>
+                      : <span className="text-xs bg-blue-50 text-blue-600 font-medium px-2 py-0.5 rounded-full">En cours</span>}
+                    <div className="mt-0.5"><Badge status={e.status} /></div>
                   </div>
                 </div>
-                <div className="text-right">
-                  {e.ended_at
-                    ? <span className="text-sm font-semibold text-slate-600">{fmt.duration(e.duration_min)}</span>
-                    : <span className="text-xs text-ultima-500 font-medium">En cours</span>}
-                  <Badge status={e.status} />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
       )}
 
-      {/* Start session modal */}
-      <Modal open={showStart} onClose={() => setShowStart(false)} title="Démarrer une activité">
+      {/* Start modal */}
+      <Modal open={showStart} onClose={() => setShowStart(false)} title="Demarrer une activite">
         <div className="space-y-4">
-          <Select
-            label="Chantier"
-            value={startForm.project_id}
-            onChange={v => setStartForm(f => ({ ...f, project_id: v }))}
-            options={projects.map(p => ({ value: p.id, label: `${p.code} — ${p.name}` }))}
-          />
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Type d'activité</label>
-            <div className="grid grid-cols-2 gap-2">
-              {Object.entries(ACTIVITY_TYPES).map(([k, v]) => (
-                <button
-                  key={k}
-                  onClick={() => setStartForm(f => ({ ...f, activity_type: k }))}
-                  className={`p-3 rounded-xl border-2 text-left transition-all ${
-                    startForm.activity_type === k
-                      ? 'border-ultima-400 bg-ultima-50'
-                      : 'border-slate-100 bg-white hover:border-slate-200'
-                  }`}
-                >
-                  <div className="text-lg">{v.icon}</div>
-                  <div className="text-xs font-medium text-slate-700 mt-1">{v.label}</div>
-                </button>
-              ))}
-            </div>
+          <p className="text-sm text-slate-500">Choisissez le type d'activite</p>
+          <div className="grid grid-cols-2 gap-2">
+            {Object.entries(ACTIVITY_TYPES).map(([k, v]) => (
+              <button
+                key={k}
+                onClick={() => setActType(k)}
+                className={`p-3.5 rounded-xl border-2 text-left transition-all ${
+                  actType === k
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <div className={`text-xs font-semibold mt-1 ${actType === k ? 'text-blue-700' : 'text-slate-700'}`}>{v.label}</div>
+              </button>
+            ))}
           </div>
           {actError && <Alert type="error">{actError}</Alert>}
-          <div className="flex gap-3">
+          <div className="flex gap-3 pt-1">
             <Button onClick={() => setShowStart(false)} variant="secondary" className="flex-1">Annuler</Button>
-            <Button onClick={startEntry} loading={actLoading} className="flex-1">▶ Démarrer</Button>
+            <Button onClick={startEntry} loading={actLoading} className="flex-1">
+              <Ic name="play" size={16} />
+              Demarrer
+            </Button>
           </div>
         </div>
       </Modal>
@@ -1057,311 +1018,172 @@ function HomeScreen({ user, meData, onRefresh }) {
   );
 }
 
+// ─── HOURS SCREEN ────────────────────────────────────────────────────────────
+
 function HoursScreen({ user }) {
-  const [mode, setMode] = useState('week'); // day | week | month | year
+  const [entries, setEntries] = useState([]);
+  const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState(null);
+  const [{ week, year }, setWeekYear] = useState(() => getISOWeek());
 
-  // Navigation state
-  const now = new Date();
-  const [selDate, setSelDate] = useState(now.toISOString().split('T')[0]);
-  const [selWeek, setSelWeek] = useState(() => {
-    const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-    const dow = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dow);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-  });
-  const [selWeekYear, setSelWeekYear] = useState(() => {
-    const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-    const dow = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dow);
-    return d.getUTCFullYear();
-  });
-  const [selMonth, setSelMonth] = useState(now.getMonth() + 1);
-  const [selYear, setSelYear] = useState(now.getFullYear());
-
-  const load = useCallback(async () => {
+  useEffect(() => {
     setLoading(true);
-    try {
-      let url;
-      if (mode === 'day')   url = `/time-entries?mode=day&date=${selDate}`;
-      else if (mode === 'month') url = `/time-entries?mode=month&month=${selMonth}&year=${selYear}`;
-      else if (mode === 'year')  url = `/time-entries?mode=year&year=${selYear}`;
-      else url = `/time-entries?mode=week&week=${selWeek}&year=${selWeekYear}`;
-      const d = await api.get(url);
-      setData(d);
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); }
-  }, [mode, selDate, selWeek, selWeekYear, selMonth, selYear]);
-
-  useEffect(() => { load(); }, [load]);
+    Promise.all([
+      api.get(`/time-entries?week=${week}&year=${year}`),
+      api.get(`/stats?week=${week}&year=${year}`),
+    ]).then(([te, st]) => {
+      setEntries(te.entries || []);
+      setStats(st.days || []);
+    }).catch(console.error)
+      .finally(() => setLoading(false));
+  }, [week, year]);
 
   const changeWeek = (delta) => {
-    let w = selWeek + delta, y = selWeekYear;
-    if (w < 1) { w = 52; y--; } if (w > 52) { w = 1; y++; }
-    setSelWeek(w); setSelWeekYear(y);
-  };
-  const changeMonth = (delta) => {
-    let m = selMonth + delta, y = selYear;
-    if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; }
-    setSelMonth(m); setSelYear(y);
-  };
-  const changeDay = (delta) => {
-    const d = new Date(selDate + 'T12:00:00');
-    d.setDate(d.getDate() + delta);
-    setSelDate(d.toISOString().split('T')[0]);
+    setWeekYear(({ week: w, year: y }) => {
+      let nw = w + delta;
+      let ny = y;
+      if (nw < 1) { nw = 52; ny -= 1; }
+      if (nw > 52) { nw = 1; ny += 1; }
+      return { week: nw, year: ny };
+    });
   };
 
-  const target = (user.weekly_target_h || 42) * 60;
-  const dailyTarget = target / 5;
-
-  const computeByDay = (entries) => {
+  const byDay = useMemo(() => {
     const map = {};
-    (entries || []).forEach(e => {
+    entries.forEach(e => {
       const d = new Date(e.started_at * 1000).toISOString().split('T')[0];
       if (!map[d]) map[d] = [];
       map[d].push(e);
     });
-    return Object.entries(map).sort(([a], [b]) => a < b ? 1 : -1);
-  };
+    return Object.entries(map).sort(([a], [b]) => b.localeCompare(a));
+  }, [entries]);
 
-  // ─── Week view
-  const WeekView = () => {
-    const entries = data?.entries || [];
-    const totalWork = entries.filter(e => e.activity_type !== 'BREAK' && e.ended_at)
-      .reduce((s, e) => s + (e.duration_min || 0), 0);
-    const byDay = computeByDay(entries);
-    return (
-      <>
+  const totalWork = entries.filter(e => e.activity_type !== 'BREAK' && e.ended_at)
+    .reduce((s, e) => s + (e.duration_min || 0), 0);
+  const target = (user.weekly_target_h || 42) * 60;
+
+  // DAY names for chart
+  const dayNames = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'];
+
+  return (
+    <div className="space-y-4 pb-6 max-w-lg">
+      {/* Week nav */}
+      <Card className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={() => changeWeek(-1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
+            <Ic name="chevLeft" size={18} className="text-slate-600" />
+          </button>
+          <div className="text-center">
+            <div className="text-sm font-bold text-slate-800">Semaine {week} — {year}</div>
+          </div>
+          <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
+            <Ic name="chevRight" size={18} className="text-slate-600" />
+          </button>
+        </div>
+
+        {/* Weekly total */}
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm text-slate-500">Total semaine</span>
+          <span className={`text-sm font-bold ${totalWork >= target ? 'text-emerald-600' : 'text-slate-700'}`}>
+            {fmt.duration(totalWork)} / {user.weekly_target_h || 42}h
+          </span>
+        </div>
+        <ProgressBar value={totalWork} max={target} />
+      </Card>
+
+      {/* Bar chart */}
+      {stats.length > 0 && (
         <Card className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <button onClick={() => changeWeek(-1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600">‹</button>
-            <div className="text-center">
-              <div className="font-bold text-slate-800 text-sm">{weekLabel(selWeek, selWeekYear)}</div>
-              <div className="text-xs text-slate-400">Semaine {selWeek} · {selWeekYear}</div>
-            </div>
-            <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600">›</button>
-          </div>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm text-slate-500">Total semaine</span>
-            <span className={`text-sm font-bold ${totalWork >= target ? 'text-green-600' : 'text-slate-700'}`}>
-              {fmt.duration(totalWork)} / {user.weekly_target_h || 42}h
-            </span>
-          </div>
-          <ProgressBar value={totalWork} max={target} />
-        </Card>
-        {byDay.length === 0
-          ? <div className="text-center py-12 text-slate-400"><div className="text-4xl mb-3">📭</div><p>Aucune entrée cette semaine</p></div>
-          : byDay.map(([day, dayEntries]) => {
-              const dayWork = dayEntries.filter(e => e.activity_type !== 'BREAK' && e.ended_at).reduce((s, e) => s + (e.duration_min || 0), 0);
-              const hasMeal = dayEntries.some(e => e.meal_allowance);
+          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-4">Repartition par jour</h3>
+          <div className="flex items-end gap-2 h-28">
+            {stats.map((d, i) => {
+              const dailyTarget = (user.weekly_target_h || 42) / 5 * 60;
+              const pct = Math.min(100, d.work_min > 0 ? (d.work_min / dailyTarget) * 100 : 0);
+              const dayName = new Date(d.day + 'T12:00:00').toLocaleDateString('fr-CH', { weekday: 'narrow' });
+              const isToday = d.day === new Date().toISOString().split('T')[0];
+              const color = pct >= 95 ? 'bg-emerald-500' : pct >= 60 ? 'bg-blue-500' : pct > 0 ? 'bg-amber-400' : 'bg-slate-100';
               return (
-                <Card key={day}>
-                  <div className="px-4 py-3 border-b border-slate-50 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-slate-700 capitalize">{fmt.weekday(day)}</span>
-                    <div className="flex items-center gap-2">
-                      {hasMeal && <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">🍽 Repas</span>}
-                      <span className="text-sm font-bold text-slate-600">{fmt.duration(dayWork)}</span>
-                    </div>
+                <div key={d.day} className="flex-1 flex flex-col items-center gap-1.5">
+                  {d.work_min > 0 && (
+                    <span className="text-[9px] font-medium text-slate-400">{fmt.duration(d.work_min)}</span>
+                  )}
+                  <div className="w-full bg-slate-100 rounded-lg relative overflow-hidden" style={{ height: '80px' }}>
+                    <div
+                      className={`absolute bottom-0 left-0 right-0 rounded-lg ${color} transition-all duration-700`}
+                      style={{ height: `${Math.max(pct, pct > 0 ? 5 : 0)}%` }}
+                    />
+                    {d.meal && <div className="absolute top-1 right-1 w-1.5 h-1.5 bg-orange-400 rounded-full" />}
                   </div>
-                  <div className="divide-y divide-slate-50">
-                    {dayEntries.map(e => (
-                      <div key={e.id} className="px-4 py-2.5 flex items-center gap-3">
-                        <span>{ACTIVITY_TYPES[e.activity_type]?.icon || '📋'}</span>
-                        <div className="flex-1">
-                          <div className="text-sm text-slate-700">{ACTIVITY_TYPES[e.activity_type]?.label}</div>
-                          <div className="text-xs text-slate-400">{fmt.time(e.started_at)} – {e.ended_at ? fmt.time(e.ended_at) : '…'}</div>
-                        </div>
-                        <div className="text-right space-y-1">
-                          {e.ended_at && <div className="text-sm font-medium text-slate-600">{fmt.duration(e.duration_min)}</div>}
-                          <Badge status={e.status} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              );
-            })}
-      </>
-    );
-  };
-
-  // ─── Day view
-  const DayView = () => {
-    const entries = data?.entries || [];
-    const totalWork = entries.filter(e => e.activity_type !== 'BREAK' && e.ended_at).reduce((s, e) => s + (e.duration_min || 0), 0);
-    const hasMeal = entries.some(e => e.meal_allowance);
-    return (
-      <>
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <button onClick={() => changeDay(-1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">‹</button>
-            <div className="text-center">
-              <div className="font-bold text-slate-800 capitalize">{fmt.weekday(selDate)}</div>
-              <div className="text-xs text-slate-400">{fmt.date(selDate)}</div>
-            </div>
-            <button onClick={() => changeDay(1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">›</button>
-          </div>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm text-slate-500">Total jour</span>
-            <div className="flex items-center gap-2">
-              {hasMeal && <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">🍽 Repas</span>}
-              <span className={`text-sm font-bold ${totalWork >= dailyTarget ? 'text-green-600' : 'text-slate-700'}`}>{fmt.duration(totalWork)}</span>
-            </div>
-          </div>
-          <ProgressBar value={totalWork} max={dailyTarget} />
-        </Card>
-        {entries.length === 0
-          ? <div className="text-center py-12 text-slate-400"><div className="text-4xl mb-3">📭</div><p>Aucune entrée ce jour</p></div>
-          : <Card><div className="divide-y divide-slate-50">
-              {entries.map(e => (
-                <div key={e.id} className="px-4 py-3 flex items-center gap-3">
-                  <span>{ACTIVITY_TYPES[e.activity_type]?.icon || '📋'}</span>
-                  <div className="flex-1">
-                    <div className="text-sm text-slate-700">{ACTIVITY_TYPES[e.activity_type]?.label}</div>
-                    <div className="text-xs text-slate-400">{fmt.time(e.started_at)} – {e.ended_at ? fmt.time(e.ended_at) : '…'}</div>
-                  </div>
-                  <div className="text-right space-y-1">
-                    {e.ended_at && <div className="text-sm font-medium">{fmt.duration(e.duration_min)}</div>}
-                    <Badge status={e.status} />
-                  </div>
-                </div>
-              ))}
-            </div></Card>}
-      </>
-    );
-  };
-
-  // ─── Month view
-  const MonthView = () => {
-    const days = data?.days || [];
-    const totalWork = data?.total_min || 0;
-    const daysWorked = days.filter(d => d.work_min > 0).length;
-    return (
-      <>
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <button onClick={() => changeMonth(-1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">‹</button>
-            <div className="text-center">
-              <div className="font-bold text-slate-800 capitalize">{monthLabel(selMonth, selYear)}</div>
-              <div className="text-xs text-slate-400">{daysWorked} jour(s) travaillé(s)</div>
-            </div>
-            <button onClick={() => changeMonth(1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">›</button>
-          </div>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm text-slate-500">Total mois</span>
-            <span className="text-sm font-bold text-slate-700">{fmt.duration(totalWork)}</span>
-          </div>
-          <ProgressBar value={totalWork} max={(user.weekly_target_h || 42) * 4.33 * 60} />
-        </Card>
-        {/* Mini bar chart */}
-        {days.length > 0 && (
-          <Card className="p-4">
-            <h3 className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wide">Détail par jour</h3>
-            <div className="flex items-end gap-0.5" style={{ height: '60px' }}>
-              {days.map(d => {
-                const pct = Math.min(100, (d.work_min / dailyTarget) * 100);
-                return (
-                  <div key={d.date} className="flex-1 flex flex-col items-center">
-                    <div className="w-full bg-slate-100 rounded-sm relative" style={{ height: '48px' }}>
-                      <div className={`absolute bottom-0 left-0 right-0 rounded-sm ${pct >= 100 ? 'bg-green-400' : 'bg-ultima-400'}`} style={{ height: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="mt-3 space-y-2">
-              {days.slice().reverse().map(d => (
-                <div key={d.date} className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500 capitalize">{fmt.weekday(d.date)}</span>
-                  <span className="font-medium text-slate-700">{fmt.duration(d.work_min)}</span>
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
-        {days.length === 0 && <div className="text-center py-12 text-slate-400"><div className="text-4xl mb-3">📭</div><p>Aucune entrée ce mois</p></div>}
-      </>
-    );
-  };
-
-  // ─── Year view
-  const YearView = () => {
-    const months = data?.months || [];
-    const totalWork = data?.total_min || 0;
-    const monthNames = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
-    const maxMin = Math.max(...months.map(m => m.work_min), 1);
-    return (
-      <>
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <button onClick={() => setSelYear(y => y - 1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">‹</button>
-            <div className="text-center">
-              <div className="font-bold text-slate-800">{selYear}</div>
-              <div className="text-xs text-slate-400">Vue annuelle</div>
-            </div>
-            <button onClick={() => setSelYear(y => y + 1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">›</button>
-          </div>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-sm text-slate-500">Total {selYear}</span>
-            <span className="text-sm font-bold text-slate-700">{fmt.duration(totalWork)}</span>
-          </div>
-        </Card>
-        <Card className="p-4">
-          <div className="flex items-end gap-1" style={{ height: '80px' }}>
-            {months.map(m => {
-              const pct = (m.work_min / maxMin) * 100;
-              const isCurrentMonth = m.month === (new Date().getMonth() + 1) && selYear === new Date().getFullYear();
-              return (
-                <div key={m.month} className="flex-1 flex flex-col items-center gap-1">
-                  <div className="w-full bg-slate-100 rounded-sm relative" style={{ height: '56px' }}>
-                    <div className={`absolute bottom-0 left-0 right-0 rounded-sm transition-all ${isCurrentMonth ? 'bg-ultima-500' : 'bg-ultima-300'}`}
-                      style={{ height: `${pct}%` }} />
-                  </div>
-                  <span className={`text-[9px] ${isCurrentMonth ? 'text-ultima-600 font-bold' : 'text-slate-400'}`}>
-                    {monthNames[m.month - 1]}
+                  <span className={`text-[10px] font-semibold ${isToday ? 'text-blue-600' : 'text-slate-400'}`}>
+                    {dayName}
                   </span>
                 </div>
               );
             })}
           </div>
-          <div className="mt-4 space-y-2">
-            {months.filter(m => m.work_min > 0).slice().reverse().map(m => (
-              <div key={m.month} className="flex items-center justify-between text-sm">
-                <span className="text-slate-500">{monthNames[m.month - 1]} {selYear}</span>
-                <span className="font-medium text-slate-700">{fmt.duration(m.work_min)}</span>
-              </div>
-            ))}
+          <div className="mt-3 flex items-center gap-3 text-xs text-slate-400">
+            <span className="flex items-center gap-1"><span className="w-2 h-2 bg-emerald-500 rounded-sm inline-block" /> Complet</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 bg-blue-500 rounded-sm inline-block" /> En cours</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 bg-amber-400 rounded-sm inline-block" /> Partiel</span>
           </div>
         </Card>
-      </>
-    );
-  };
+      )}
 
-  return (
-    <div className="space-y-4 pb-4">
-      {/* Mode selector */}
-      <div className="flex bg-white rounded-2xl border border-slate-100 shadow-sm p-1 gap-1">
-        {[['day','Jour'],['week','Semaine'],['month','Mois'],['year','Année']].map(([m, lbl]) => (
-          <button key={m} onClick={() => setMode(m)}
-            className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${mode === m ? 'bg-ultima-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
-            {lbl}
-          </button>
-        ))}
-      </div>
-
+      {/* Day-by-day */}
       {loading ? (
         <div className="flex justify-center py-8"><Spinner size="lg" /></div>
+      ) : byDay.length === 0 ? (
+        <Card className="p-8 text-center">
+          <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <Ic name="clock" size={24} className="text-slate-400" />
+          </div>
+          <p className="text-slate-500 font-medium">Aucune entree cette semaine</p>
+        </Card>
       ) : (
-        mode === 'day'   ? <DayView /> :
-        mode === 'month' ? <MonthView /> :
-        mode === 'year'  ? <YearView /> :
-                           <WeekView />
+        byDay.map(([day, dayEntries]) => {
+          const dayWork = dayEntries.filter(e => e.activity_type !== 'BREAK' && e.ended_at)
+            .reduce((s, e) => s + (e.duration_min || 0), 0);
+          const hasMeal = dayEntries.some(e => e.meal_allowance);
+          return (
+            <Card key={day}>
+              <div className="px-4 py-3 border-b border-slate-50 flex items-center justify-between">
+                <span className="text-sm font-semibold text-slate-700 capitalize">{fmt.weekday(day)}</span>
+                <div className="flex items-center gap-2">
+                  {hasMeal && <span className="text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2 py-0.5 rounded-full font-medium">Repas</span>}
+                  <span className="text-sm font-bold text-slate-700">{fmt.duration(dayWork)}</span>
+                </div>
+              </div>
+              <div className="divide-y divide-slate-50">
+                {dayEntries.map(e => {
+                  const at = ACTIVITY_TYPES[e.activity_type] || ACTIVITY_TYPES.OTHER;
+                  return (
+                    <div key={e.id} className="px-4 py-2.5 flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 border ${at.color}`}>
+                        <Ic name="clock" size={14} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm text-slate-700 font-medium">{at.label}</div>
+                        <div className="text-xs text-slate-400">
+                          {fmt.time(e.started_at)} — {e.ended_at ? fmt.time(e.ended_at) : '...'}
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        {e.ended_at && <div className="text-sm font-semibold text-slate-600">{fmt.duration(e.duration_min)}</div>}
+                        <Badge status={e.status} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          );
+        })
       )}
     </div>
   );
 }
+
+// ─── ABSENCES SCREEN ─────────────────────────────────────────────────────────
 
 function AbsencesScreen({ user }) {
   const [data, setData] = useState(null);
@@ -1372,10 +1194,8 @@ function AbsencesScreen({ user }) {
   const [error, setError] = useState('');
 
   const load = async () => {
-    try {
-      const d = await api.get('/absences');
-      setData(d);
-    } catch (err) { console.error(err); }
+    try { const d = await api.get('/absences'); setData(d); }
+    catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
 
@@ -1393,104 +1213,97 @@ function AbsencesScreen({ user }) {
     finally { setSaving(false); }
   };
 
-  const balance = data?.balance;
+  if (loading) return <div className="flex justify-center py-8"><Spinner size="lg" /></div>;
+
   const absences = data?.absences || [];
-  const remaining = balance ? balance.holiday_total - balance.holiday_taken - balance.holiday_pending : 0;
+  const balances = data?.balances || {};
 
   return (
-    <div className="space-y-4 pb-4">
-      {/* Balance card */}
-      {balance && (
-        <Card className="p-4">
-          <h3 className="text-sm font-semibold text-slate-600 mb-3">Solde vacances {new Date().getFullYear()}</h3>
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="bg-slate-50 rounded-xl p-3">
-              <div className="text-2xl font-bold text-slate-800">{balance.holiday_total}</div>
-              <div className="text-xs text-slate-500">Total</div>
-            </div>
-            <div className="bg-red-50 rounded-xl p-3">
-              <div className="text-2xl font-bold text-red-600">{balance.holiday_taken}</div>
-              <div className="text-xs text-slate-500">Pris</div>
-            </div>
-            <div className={`rounded-xl p-3 ${remaining < 5 ? 'bg-orange-50' : 'bg-green-50'}`}>
-              <div className={`text-2xl font-bold ${remaining < 5 ? 'text-orange-600' : 'text-green-600'}`}>{remaining.toFixed(1)}</div>
-              <div className="text-xs text-slate-500">Restant</div>
-            </div>
-          </div>
-          {balance.holiday_pending > 0 && (
-            <div className="mt-3 text-xs text-yellow-700 bg-yellow-50 rounded-lg px-3 py-2">
-              ⏳ {balance.holiday_pending} jour(s) en attente d'approbation
-            </div>
-          )}
-          {balance.comp_balance > 0 && (
-            <div className="mt-2 text-xs text-blue-700 bg-blue-50 rounded-lg px-3 py-2">
-              ⊕ {balance.comp_balance}h de compensation disponibles
-            </div>
-          )}
-        </Card>
+    <div className="space-y-4 pb-6 max-w-lg">
+      {/* Balance cards */}
+      {balances && (
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="p-4 text-center">
+            <div className="text-2xl font-bold text-blue-600">{balances.available_leave ?? (user.annual_leave_d || 25)}</div>
+            <div className="text-xs text-slate-500 mt-1">Jours disponibles</div>
+          </Card>
+          <Card className="p-4 text-center">
+            <div className="text-2xl font-bold text-amber-600">{balances.pending_days ?? 0}</div>
+            <div className="text-xs text-slate-500 mt-1">En attente</div>
+          </Card>
+        </div>
       )}
 
-      {/* New absence button */}
       <Button onClick={() => setShowNew(true)} className="w-full">
-        + Nouvelle demande d'absence
+        <Ic name="plus" size={18} />
+        Nouvelle demande
       </Button>
 
-      {/* Absence list */}
-      {loading ? (
-        <div className="flex justify-center py-8"><Spinner size="lg" /></div>
-      ) : absences.length === 0 ? (
-        <div className="text-center py-12 text-slate-400">
-          <div className="text-4xl mb-3">📅</div>
-          <p>Aucune demande d'absence</p>
-        </div>
-      ) : (
-        <Card>
-          <div className="divide-y divide-slate-50">
-            {absences.map(a => {
-              const t = ABSENCE_TYPES[a.type] || ABSENCE_TYPES.OTHER;
-              return (
-                <div key={a.id} className="px-4 py-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{t.icon}</span>
-                      <div>
-                        <div className="text-sm font-semibold text-slate-700">{t.label}</div>
-                        <div className="text-xs text-slate-500">
-                          {fmt.date(a.start_date)} → {fmt.date(a.end_date)} ({a.duration_days}j)
-                        </div>
-                      </div>
-                    </div>
-                    <Badge status={a.status} />
-                  </div>
-                  {a.comment && <p className="text-xs text-slate-400 mt-1 ml-8">💬 {a.comment}</p>}
-                  {a.review_note && (
-                    <p className="text-xs text-red-500 mt-1 ml-8">📝 {a.review_note}</p>
-                  )}
-                </div>
-              );
-            })}
+      {absences.length === 0 ? (
+        <Card className="p-8 text-center">
+          <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <Ic name="calendar" size={22} className="text-slate-400" />
           </div>
+          <p className="text-slate-500 font-medium">Aucune absence enregistree</p>
         </Card>
+      ) : (
+        absences.map(a => {
+          const t = ABSENCE_TYPES[a.type] || ABSENCE_TYPES.OTHER;
+          return (
+            <Card key={a.id} className="p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${t.color}`}>
+                    <Ic name="calendar" size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-semibold text-slate-800">{t.label}</div>
+                    <div className="text-sm text-slate-500">
+                      {fmt.dateShort(a.start_date)} — {fmt.dateShort(a.end_date)}
+                      <span className="ml-2 text-xs text-slate-400">{a.duration_days}j</span>
+                    </div>
+                    {a.comment && <p className="text-xs text-slate-400 mt-0.5 truncate">{a.comment}</p>}
+                  </div>
+                </div>
+                <Badge status={a.status} />
+              </div>
+            </Card>
+          );
+        })
       )}
 
-      {/* New absence modal */}
-      <Modal open={showNew} onClose={() => setShowNew(false)} title="Demande d'absence">
+      <Modal open={showNew} onClose={() => { setShowNew(false); setError(''); }} title="Nouvelle demande">
         <div className="space-y-4">
-          <Select
-            label="Type"
-            value={form.type}
-            onChange={v => setForm(f => ({ ...f, type: v }))}
-            options={Object.entries(ABSENCE_TYPES).map(([k, v]) => ({ value: k, label: `${v.icon} ${v.label}` }))}
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <Input label="Du" type="date" value={form.start_date} onChange={v => setForm(f => ({ ...f, start_date: v }))} />
-            <Input label="Au" type="date" value={form.end_date} onChange={v => setForm(f => ({ ...f, end_date: v }))} />
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Type</label>
+            <div className="grid grid-cols-2 gap-2">
+              {Object.entries(ABSENCE_TYPES).map(([k, v]) => (
+                <button key={k} onClick={() => setForm(f => ({ ...f, type: k }))}
+                  className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-all border-2 ${
+                    form.type === k ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-100 text-slate-600 hover:border-slate-200'
+                  }`}>
+                  {v.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <Input label="Commentaire (optionnel)" value={form.comment} onChange={v => setForm(f => ({ ...f, comment: v }))}
-            placeholder="Ex: vacances estivales" />
+          <div className="grid grid-cols-2 gap-3">
+            <Input label="Du" type="date" value={form.start_date} onChange={v => setForm(f => ({ ...f, start_date: v }))} required />
+            <Input label="Au" type="date" value={form.end_date} onChange={v => setForm(f => ({ ...f, end_date: v }))} required />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Commentaire (optionnel)</label>
+            <textarea
+              value={form.comment}
+              onChange={e => setForm(f => ({ ...f, comment: e.target.value }))}
+              rows={2}
+              placeholder="Precisions eventuelles..."
+              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            />
+          </div>
           {error && <Alert type="error">{error}</Alert>}
-          <div className="flex gap-3">
-            <Button onClick={() => setShowNew(false)} variant="secondary" className="flex-1">Annuler</Button>
+          <div className="flex gap-3 pt-1">
+            <Button onClick={() => { setShowNew(false); setError(''); }} variant="secondary" className="flex-1">Annuler</Button>
             <Button onClick={submit} loading={saving} className="flex-1">Envoyer</Button>
           </div>
         </div>
@@ -1499,311 +1312,280 @@ function AbsencesScreen({ user }) {
   );
 }
 
+// ─── CALENDAR SCREEN ─────────────────────────────────────────────────────────
+
 function CalendarScreen() {
-  const now = new Date();
-  const [month, setMonth] = useState(now.getMonth() + 1);
-  const [year, setYear] = useState(now.getFullYear());
-  const [data, setData] = useState(null);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterType, setFilterType] = useState('ALL');
+  const [month, setMonth] = useState(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() + 1 };
+  });
 
-  const load = useCallback(async () => {
+  useEffect(() => {
     setLoading(true);
-    try {
-      const d = await api.get(`/absences/calendar?month=${month}&year=${year}`);
-      setData(d);
-    } catch (e) { console.error(e); }
-    finally { setLoading(false); }
-  }, [month, year]);
-
-  useEffect(() => { load(); }, [load]);
+    api.get(`/absences/calendar?year=${month.year}&month=${month.month}`)
+      .then(d => setData(d.entries || []))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [month.year, month.month]);
 
   const changeMonth = (delta) => {
-    let m = month + delta, y = year;
-    if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; }
-    setMonth(m); setYear(y);
-  };
-
-  const MONTH_NAMES = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  const DAY_NAMES = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
-
-  const getDaysInMonth = (m, y) => new Date(y, m, 0).getDate();
-  const getFirstWeekday = (m, y) => {
-    const d = new Date(y, m - 1, 1).getDay();
-    return d === 0 ? 6 : d - 1; // Mon=0
-  };
-
-  const buildCalendar = () => {
-    const daysInMonth = getDaysInMonth(month, year);
-    const firstWd = getFirstWeekday(month, year);
-    const cells = [];
-    for (let i = 0; i < firstWd; i++) cells.push(null);
-    for (let d = 1; d <= daysInMonth; d++) cells.push(d);
-    return cells;
-  };
-
-  const getAbsencesForDay = (day) => {
-    if (!data || !day) return [];
-    const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    const all = [
-      ...(data.absences || []).map(a => ({ ...a, _pending: false })),
-      ...(data.pending || []).map(a => ({ ...a, _pending: true })),
-    ];
-    return all.filter(a => {
-      if (filterType !== 'ALL' && a.type !== filterType) return false;
-      return a.start_date <= dateStr && a.end_date >= dateStr;
+    setMonth(({ year, month: m }) => {
+      let nm = m + delta;
+      let ny = year;
+      if (nm < 1) { nm = 12; ny -= 1; }
+      if (nm > 12) { nm = 1; ny += 1; }
+      return { year: ny, month: nm };
     });
   };
 
-  const getHolidayForDay = (day) => {
-    if (!data || !day) return null;
-    const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    return (data.holidays || []).find(h => h.date === dateStr) || null;
-  };
-
-  const isToday = (day) => {
-    if (!day) return false;
-    const d = new Date();
-    return d.getDate() === day && d.getMonth() + 1 === month && d.getFullYear() === year;
-  };
-
-  const isWeekend = (cellIndex) => {
-    const dayOfWeek = cellIndex % 7;
-    return dayOfWeek === 5 || dayOfWeek === 6; // Sat / Sun
-  };
-
-  const cells = buildCalendar();
-
-  // Unique types in current data for filter
-  const availableTypes = ['ALL', ...new Set([
-    ...(data?.absences || []).map(a => a.type),
-    ...(data?.pending || []).map(a => a.type),
-  ])];
+  const monthName = new Date(month.year, month.month - 1, 1)
+    .toLocaleDateString('fr-CH', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="space-y-4 pb-4">
-      {/* Header nav */}
+    <div className="space-y-4 pb-6 max-w-2xl">
       <Card className="p-4">
         <div className="flex items-center justify-between">
-          <button onClick={() => changeMonth(-1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">‹</button>
-          <div className="text-center">
-            <div className="font-bold text-slate-800">{MONTH_NAMES[month - 1]} {year}</div>
-            <div className="text-xs text-slate-400">{data ? `${(data.absences || []).length} absence(s) approuvée(s)` : '…'}</div>
-          </div>
-          <button onClick={() => changeMonth(1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">›</button>
+          <button onClick={() => changeMonth(-1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
+            <Ic name="chevLeft" size={18} className="text-slate-600" />
+          </button>
+          <span className="font-bold text-slate-800 capitalize">{monthName}</span>
+          <button onClick={() => changeMonth(1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
+            <Ic name="chevRight" size={18} className="text-slate-600" />
+          </button>
         </div>
       </Card>
 
-      {/* Type filter chips */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {availableTypes.map(t => {
-          const info = ABSENCE_TYPES[t];
-          return (
-            <button key={t} onClick={() => setFilterType(t)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${filterType === t ? 'bg-ultima-500 text-white' : 'bg-white text-slate-600 border border-slate-200'}`}>
-              {t === 'ALL' ? '📅 Tous' : `${info?.icon || ''} ${info?.label || t}`}
-            </button>
-          );
-        })}
-      </div>
-
       {loading ? (
         <div className="flex justify-center py-8"><Spinner size="lg" /></div>
+      ) : data.length === 0 ? (
+        <Card className="p-8 text-center">
+          <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <Ic name="calendar" size={22} className="text-slate-400" />
+          </div>
+          <p className="text-slate-500 font-medium">Aucune absence ce mois</p>
+        </Card>
       ) : (
-        <>
-          {/* Calendar grid */}
-          <Card className="p-3">
-            {/* Day headers */}
-            <div className="grid grid-cols-7 mb-1">
-              {DAY_NAMES.map(d => (
-                <div key={d} className={`text-center text-[10px] font-semibold py-1 ${d === 'Sam' || d === 'Dim' ? 'text-slate-300' : 'text-slate-400'}`}>{d}</div>
-              ))}
-            </div>
-            {/* Days */}
-            <div className="grid grid-cols-7 gap-0.5">
-              {cells.map((day, idx) => {
-                const dayAbsences = getAbsencesForDay(day);
-                const holiday = getHolidayForDay(day);
-                const weekend = isWeekend(idx);
-                return (
-                  <div key={idx} className={`min-h-[52px] rounded-lg p-1 ${!day ? '' : holiday ? 'bg-amber-50' : weekend ? 'bg-slate-50/60' : 'bg-white'} ${isToday(day) ? 'ring-2 ring-ultima-400' : ''}`}>
-                    {day && (
-                      <>
-                        <div className={`text-[11px] font-semibold mb-0.5 ${isToday(day) ? 'text-ultima-600' : weekend ? 'text-slate-300' : 'text-slate-600'}`}>{day}</div>
-                        {holiday && <div className="text-[9px] text-amber-600 font-medium leading-tight truncate">🎌 {holiday.name.split(' ')[0]}</div>}
-                        {dayAbsences.slice(0, 2).map((a, i) => {
-                          const t = ABSENCE_TYPES[a.type] || ABSENCE_TYPES.OTHER;
-                          return (
-                            <div key={i} className={`text-[9px] px-1 rounded leading-tight mb-0.5 truncate ${a._pending ? 'opacity-50' : ''}`}
-                              style={{ backgroundColor: t.bar + '33', color: t.bar }}>
-                              {a.first_name?.[0]}{a.last_name?.[0]}
-                            </div>
-                          );
-                        })}
-                        {dayAbsences.length > 2 && <div className="text-[9px] text-slate-400">+{dayAbsences.length - 2}</div>}
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
-
-          {/* Legend */}
-          <Card className="p-4">
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Absences ce mois</h3>
-            {(data?.absences?.length === 0 && data?.pending?.length === 0) ? (
-              <p className="text-sm text-slate-400 text-center py-2">Aucune absence ce mois</p>
-            ) : (
-              <div className="space-y-2">
-                {[...(data?.absences || []).map(a => ({ ...a, _pending: false })),
-                   ...(data?.pending || []).map(a => ({ ...a, _pending: true }))
-                ].filter(a => filterType === 'ALL' || a.type === filterType)
-                 .sort((a, b) => a.start_date.localeCompare(b.start_date))
-                 .map(a => {
-                  const t = ABSENCE_TYPES[a.type] || ABSENCE_TYPES.OTHER;
-                  return (
-                    <div key={a.id} className="flex items-center gap-3">
-                      <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: t.bar }} />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-slate-700">{a.first_name} {a.last_name}</div>
-                        <div className="text-xs text-slate-400">{t.icon} {t.label} · {fmt.date(a.start_date)} → {fmt.date(a.end_date)} ({a.duration_days}j)</div>
-                      </div>
-                      {a._pending && <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full flex-shrink-0">En attente</span>}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </Card>
-
-          {/* Swiss holidays */}
-          {data?.holidays?.length > 0 && (
-            <Card className="p-4">
-              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Jours fériés (Fribourg)</h3>
-              <div className="space-y-2">
-                {data.holidays.map(h => (
-                  <div key={h.date} className="flex justify-between items-center text-sm">
-                    <span className="text-slate-600">🎌 {h.name}</span>
-                    <span className="text-slate-400">{fmt.date(h.date)}</span>
-                  </div>
-                ))}
+        data.map(entry => {
+          const t = ABSENCE_TYPES[entry.type] || ABSENCE_TYPES.OTHER;
+          return (
+            <Card key={entry.id} className="p-4">
+              <div className="flex items-center gap-3">
+                <UserAvatar user={entry} size="sm" />
+                <div className="flex-1">
+                  <div className="font-semibold text-slate-800">{entry.first_name} {entry.last_name}</div>
+                  <div className="text-sm text-slate-500">{t.label} · {fmt.dateShort(entry.start_date)} — {fmt.dateShort(entry.end_date)}</div>
+                </div>
+                <Badge status={entry.status} />
               </div>
             </Card>
-          )}
-        </>
+          );
+        })
       )}
     </div>
   );
 }
 
-function AccountScreen({ user, onLogout }) {
-  const [loading, setLoading] = useState(false);
+// ─── ACCOUNT SCREEN ──────────────────────────────────────────────────────────
+
+function AccountScreen({ user, onLogout, onUserUpdate }) {
+  const [info, setInfo] = useState({ first_name: user.first_name || '', last_name: user.last_name || '', phone: user.phone || '' });
+  const [infoMsg, setInfoMsg] = useState(null);
+  const [savingInfo, setSavingInfo] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(user.avatar_url || null);
+  const [pwForm, setPwForm] = useState({ current_password: '', new_password: '', confirm_password: '' });
+  const [pwMsg, setPwMsg] = useState(null);
+  const [savingPw, setSavingPw] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const fileRef = useRef();
+
+  const isManagerOrAdmin = ['MANAGER', 'ADMIN', 'SUPERADMIN'].includes(user.role);
+  const roleLabel = { SUPERADMIN: 'Super Admin', ADMIN: 'Administrateur', MANAGER: 'Responsable', EMPLOYEE: 'Employe' }[user.role] || user.role;
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = 160;
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const min = Math.min(img.width, img.height);
+        ctx.drawImage(img, (img.width - min) / 2, (img.height - min) / 2, min, min, 0, 0, size, size);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        setAvatarPreview(dataUrl);
+        api.patch(`/users/${user.id}`, { avatar_url: dataUrl })
+          .then(() => onUserUpdate && onUserUpdate())
+          .catch(err => alert('Erreur: ' + err.message));
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const saveInfo = async () => {
+    setSavingInfo(true); setInfoMsg(null);
+    try {
+      await api.patch(`/users/${user.id}`, info);
+      setInfoMsg({ type: 'success', text: 'Informations mises a jour' });
+      onUserUpdate && onUserUpdate();
+    } catch (err) { setInfoMsg({ type: 'error', text: err.message }); }
+    finally { setSavingInfo(false); }
+  };
+
+  const changePassword = async () => {
+    if (!pwForm.new_password) return setPwMsg({ type: 'error', text: 'Nouveau mot de passe requis' });
+    if (pwForm.new_password !== pwForm.confirm_password)
+      return setPwMsg({ type: 'error', text: 'Les mots de passe ne correspondent pas' });
+    if (pwForm.new_password.length < 8)
+      return setPwMsg({ type: 'error', text: 'Minimum 8 caracteres' });
+    setSavingPw(true); setPwMsg(null);
+    try {
+      await api.post('/auth/change-password', { current_password: pwForm.current_password, new_password: pwForm.new_password });
+      setPwMsg({ type: 'success', text: 'Mot de passe modifie' });
+      setPwForm({ current_password: '', new_password: '', confirm_password: '' });
+    } catch (err) { setPwMsg({ type: 'error', text: err.message }); }
+    finally { setSavingPw(false); }
+  };
 
   const handleLogout = async () => {
-    setLoading(true);
-    try {
-      await api.post('/auth/logout');
-    } catch {}
+    setLoggingOut(true);
+    try { await api.post('/auth/logout'); } catch {}
     api.clearTokens();
     onLogout();
   };
 
   return (
-    <div className="space-y-4 pb-4">
-      {/* Profile card */}
+    <div className="space-y-4 pb-8 max-w-lg">
+      {/* Profile header */}
       <Card className="p-5">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-ultima-100 rounded-2xl flex items-center justify-center">
-            <span className="text-3xl font-bold text-ultima-700">
-              {(user.first_name || '?')[0]}{(user.last_name || '')[0]}
-            </span>
+          <div className="relative flex-shrink-0" onClick={() => fileRef.current?.click()}>
+            <div className="cursor-pointer hover:opacity-90 transition-opacity">
+              {avatarPreview
+                ? <img src={avatarPreview} className="w-20 h-20 rounded-2xl object-cover" alt="avatar" />
+                : <UserAvatar user={user} size="lg" />
+              }
+            </div>
+            <button className="absolute -bottom-1 -right-1 w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center shadow-md">
+              <Ic name="camera" size={13} className="text-white" />
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
           </div>
-          <div>
-            <h2 className="font-bold text-slate-800 text-lg">{user.first_name} {user.last_name}</h2>
-            <p className="text-sm text-slate-500">{user.email}</p>
-            <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">
-              {user.role === 'MANAGER' ? '👔 Responsable' : user.role === 'ADMIN' ? '🛠 Admin' : '👷 Monteur'}
-            </span>
+          <div className="flex-1 min-w-0">
+            <h2 className="font-bold text-slate-800 text-xl">{user.first_name} {user.last_name}</h2>
+            <p className="text-sm text-slate-500 truncate">{user.email}</p>
+            <div className="flex gap-2 mt-2 flex-wrap">
+              <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${isManagerOrAdmin ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
+                {roleLabel}
+              </span>
+              <span className="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-500">
+                {EMPLOYEE_TYPES[user.employee_type] || user.employee_type}
+              </span>
+            </div>
           </div>
         </div>
+        <p className="text-xs text-slate-400 mt-3">Cliquez sur la photo pour la modifier</p>
       </Card>
 
-      {/* Info grid */}
-      <Card className="p-4">
-        <h3 className="text-sm font-semibold text-slate-600 mb-3">Mes paramètres</h3>
+      {/* Info */}
+      <Card className="p-5">
+        <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <Ic name="edit" size={16} className="text-slate-400" />
+          Informations personnelles
+        </h3>
         <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Input label="Prenom" value={info.first_name} onChange={v => setInfo(f => ({ ...f, first_name: v }))} />
+            <Input label="Nom" value={info.last_name} onChange={v => setInfo(f => ({ ...f, last_name: v }))} />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Email</label>
+            <div className="w-full border border-slate-100 rounded-xl px-4 py-2.5 text-slate-400 bg-slate-50 text-sm">{user.email || '—'}</div>
+            <p className="text-xs text-slate-400 mt-1">L'email est gere par l'administrateur</p>
+          </div>
+          <Input label="Telephone" value={info.phone} onChange={v => setInfo(f => ({ ...f, phone: v }))} placeholder="+41 79 000 00 00" />
+        </div>
+        {infoMsg && <div className="mt-3"><Alert type={infoMsg.type}>{infoMsg.text}</Alert></div>}
+        <Button onClick={saveInfo} loading={savingInfo} className="w-full mt-4">Enregistrer</Button>
+      </Card>
+
+      {/* Contract info */}
+      <Card className="p-5">
+        <h3 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
+          <Ic name="briefcase" size={16} className="text-slate-400" />
+          Contrat
+        </h3>
+        <div className="space-y-1">
           {[
-            { label: 'Cible hebdo', value: `${user.weekly_target_h || 42}h / semaine` },
-            { label: 'Congés annuels', value: `${user.annual_leave_d || 25} jours` },
-            { label: 'Téléphone', value: user.phone || '—' },
+            { label: 'Cible hebdomadaire', value: `${user.weekly_target_h || 42}h / semaine` },
+            { label: 'Conges annuels', value: `${user.annual_leave_d || 25} jours` },
           ].map(item => (
-            <div key={item.label} className="flex justify-between text-sm">
+            <div key={item.label} className="flex justify-between py-2.5 text-sm border-b border-slate-50 last:border-0">
               <span className="text-slate-500">{item.label}</span>
-              <span className="font-medium text-slate-700">{item.value}</span>
+              <span className="font-semibold text-slate-700">{item.value}</span>
             </div>
           ))}
         </div>
       </Card>
 
-      {/* Legal */}
-      <Card className="p-4">
-        <h3 className="text-sm font-semibold text-slate-600 mb-2">Information légale</h3>
-        <p className="text-xs text-slate-400">
-          Vos données sont hébergées en Suisse conformément à la nLPD.
-          Ultima Interior SA, Bulle (FR). Responsable: direction@ultima-interior.ch
-        </p>
-      </Card>
+      {/* Password (managers/admins) */}
+      {isManagerOrAdmin && (
+        <Card className="p-5">
+          <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <Ic name="lock" size={16} className="text-slate-400" />
+            Changer le mot de passe
+          </h3>
+          <div className="space-y-3">
+            <Input label="Mot de passe actuel" type="password" value={pwForm.current_password} onChange={v => setPwForm(f => ({ ...f, current_password: v }))} placeholder="Mot de passe actuel" />
+            <Input label="Nouveau mot de passe" type="password" value={pwForm.new_password} onChange={v => setPwForm(f => ({ ...f, new_password: v }))} placeholder="8 caracteres minimum" />
+            <Input label="Confirmation" type="password" value={pwForm.confirm_password} onChange={v => setPwForm(f => ({ ...f, confirm_password: v }))} placeholder="Repetez le nouveau mot de passe" />
+          </div>
+          {pwMsg && <div className="mt-3"><Alert type={pwMsg.type}>{pwMsg.text}</Alert></div>}
+          <Button onClick={changePassword} loading={savingPw} variant="outline" className="w-full mt-4">Modifier le mot de passe</Button>
+        </Card>
+      )}
 
-      <Button onClick={handleLogout} loading={loading} variant="danger" className="w-full">
-        Déconnexion
+      {/* Logout */}
+      <Button onClick={handleLogout} loading={loggingOut} variant="danger" className="w-full">
+        <Ic name="logout" size={18} />
+        Se deconnecter
       </Button>
     </div>
   );
 }
 
-// ─── MANAGER SCREENS ──────────────────────────────────────────────────────────
+// ─── TEAM SCREEN ──────────────────────────────────────────────────────────────
 
 function TeamScreen() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [week, setWeek] = useState(null);
-  const [year, setYear] = useState(null);
+  const [{ week, year }, setWeekYear] = useState(() => getISOWeek());
   const [selected, setSelected] = useState(null);
   const [userEntries, setUserEntries] = useState(null);
   const [userLoading, setUserLoading] = useState(false);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
-    const now = new Date();
-    const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-    const dow = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dow);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    const wk = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-    setWeek(wk);
-    setYear(d.getUTCFullYear());
-  }, []);
-
-  useEffect(() => {
-    if (!week || !year) return;
     setLoading(true);
     api.get(`/time-entries/team?week=${week}&year=${year}`)
-      .then(d => setData((d.team || []).map(m => ({
-        ...m, ...(m.employee || {}),
-        user_id: m.employee ? m.employee.id : m.user_id,
-        total_work_min: m.total_min || 0,
-        has_pending: (m.pending_count || 0) > 0,
-      }))))
+      .then(d => setData(d.team || []))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [week, year]);
 
   const changeWeek = (delta) => {
-    let w = week + delta;
-    let y = year;
-    if (w < 1) { w = 52; y -= 1; }
-    if (w > 52) { w = 1; y += 1; }
-    setWeek(w); setYear(y);
+    setWeekYear(({ week: w, year: y }) => {
+      let nw = w + delta;
+      let ny = y;
+      if (nw < 1) { nw = 52; ny -= 1; }
+      if (nw > 52) { nw = 1; ny += 1; }
+      return { week: nw, year: ny };
+    });
   };
 
   const viewUser = async (emp) => {
@@ -1816,45 +1598,64 @@ function TeamScreen() {
     finally { setUserLoading(false); }
   };
 
+  // User detail view
   if (selected) {
     const entries = userEntries || [];
     const totalWork = entries.filter(e => e.activity_type !== 'BREAK' && e.ended_at)
       .reduce((s, e) => s + (e.duration_min || 0), 0);
 
     return (
-      <div className="space-y-4 pb-4">
-        <button onClick={() => setSelected(null)} className="flex items-center gap-2 text-slate-600 font-medium">
-          ← {selected.first_name} {selected.last_name}
+      <div className="space-y-4 pb-6 max-w-lg">
+        <button onClick={() => setSelected(null)} className="flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 transition-colors">
+          <Ic name="chevLeft" size={18} />
+          {selected.first_name} {selected.last_name}
         </button>
+
         <Card className="p-4">
+          <div className="flex items-center gap-3 mb-4">
+            <UserAvatar user={selected} size="md" />
+            <div>
+              <div className="font-bold text-slate-800">{selected.first_name} {selected.last_name}</div>
+              <div className="text-sm text-slate-500">{EMPLOYEE_TYPES[selected.employee_type] || selected.employee_type}</div>
+            </div>
+          </div>
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-slate-500">Total semaine {week}</span>
-            <span className="font-bold text-slate-800">{fmt.duration(totalWork)}</span>
+            <span className="text-sm text-slate-500">Semaine {week}</span>
+            <span className="font-bold text-slate-800">{fmt.duration(totalWork)} / {selected.weekly_target_h || 42}h</span>
           </div>
           <ProgressBar value={totalWork} max={(selected.weekly_target_h || 42) * 60} />
         </Card>
+
         {userLoading ? (
           <div className="flex justify-center py-8"><Spinner size="lg" /></div>
+        ) : entries.length === 0 ? (
+          <Card className="p-8 text-center">
+            <p className="text-slate-400">Aucune entree cette semaine</p>
+          </Card>
         ) : (
           <Card>
             <div className="divide-y divide-slate-50">
-              {entries.length === 0
-                ? <div className="p-6 text-center text-slate-400">Aucune entrée</div>
-                : entries.map(e => (
+              {entries.map(e => {
+                const at = ACTIVITY_TYPES[e.activity_type] || ACTIVITY_TYPES.OTHER;
+                return (
                   <div key={e.id} className="px-4 py-3 flex items-center gap-3">
-                    <span>{ACTIVITY_TYPES[e.activity_type]?.icon || '📋'}</span>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium">{ACTIVITY_TYPES[e.activity_type]?.label}</div>
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 border text-xs ${at.color}`}>
+                      <Ic name="clock" size={14} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-slate-700">{at.label}</div>
                       <div className="text-xs text-slate-400">
-                        {new Date(e.started_at * 1000).toLocaleDateString('fr-CH', { weekday: 'short', day: 'numeric' })} · {fmt.time(e.started_at)} – {e.ended_at ? fmt.time(e.ended_at) : '…'}
+                        {new Date(e.started_at * 1000).toLocaleDateString('fr-CH', { weekday: 'short', day: 'numeric' })}
+                        {' · '}{fmt.time(e.started_at)} — {e.ended_at ? fmt.time(e.ended_at) : '...'}
                       </div>
                     </div>
-                    <div className="text-right">
-                      {e.ended_at && <div className="text-sm font-medium">{fmt.duration(e.duration_min)}</div>}
+                    <div className="text-right flex-shrink-0">
+                      {e.ended_at && <div className="text-sm font-semibold">{fmt.duration(e.duration_min)}</div>}
                       <Badge status={e.status} />
                     </div>
                   </div>
-                ))}
+                );
+              })}
             </div>
           </Card>
         )}
@@ -1862,118 +1663,148 @@ function TeamScreen() {
     );
   }
 
+  // Calculate team stats
+  const present = data.filter(e => (e.entries_today || 0) > 0).length;
+  const alerts = data.reduce((sum, e) => sum + (e.alerts?.length || 0), 0);
+  const pending = data.filter(e => e.has_pending).length;
+
+  const filtered = search
+    ? data.filter(e => `${e.first_name} ${e.last_name}`.toLowerCase().includes(search.toLowerCase()))
+    : data;
+
   return (
-    <div className="space-y-4 pb-4">
+    <div className="space-y-4 pb-6 max-w-2xl">
       {/* Week nav */}
       <Card className="p-4">
         <div className="flex items-center justify-between">
-          <button onClick={() => changeWeek(-1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">‹</button>
+          <button onClick={() => changeWeek(-1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
+            <Ic name="chevLeft" size={18} className="text-slate-600" />
+          </button>
           <div className="text-center">
-            <div className="font-bold text-slate-800 text-sm">{weekLabel(week, year)}</div>
-            <div className="text-xs text-slate-400">S{week} / {year}</div>
+            <div className="text-sm font-bold text-slate-800">Semaine {week} — {year}</div>
           </div>
-          <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">›</button>
+          <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
+            <Ic name="chevRight" size={18} className="text-slate-600" />
+          </button>
         </div>
       </Card>
 
+      {/* KPI summary */}
+      {data.length > 0 && (
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: 'Employes', value: data.length, color: 'text-slate-800' },
+            { label: 'En attente', value: pending, color: pending > 0 ? 'text-amber-600' : 'text-slate-800' },
+            { label: 'Alertes', value: alerts, color: alerts > 0 ? 'text-red-600' : 'text-slate-800' },
+          ].map(s => (
+            <Card key={s.label} className="p-3 text-center">
+              <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
+              <div className="text-xs text-slate-400 mt-0.5">{s.label}</div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Search */}
+      {data.length > 4 && (
+        <div className="relative">
+          <Ic name="search" size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Rechercher un employe..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+      )}
+
+      {/* Employee cards */}
       {loading ? (
         <div className="flex justify-center py-8"><Spinner size="lg" /></div>
-      ) : data.length === 0 ? (
-        <div className="text-center py-12 text-slate-400">
-          <div className="text-4xl mb-3">👥</div>
-          <p>Aucune donnée pour cette semaine</p>
-        </div>
+      ) : filtered.length === 0 ? (
+        <Card className="p-8 text-center">
+          <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <Ic name="team" size={22} className="text-slate-400" />
+          </div>
+          <p className="text-slate-500 font-medium">Aucun employe</p>
+        </Card>
       ) : (
-        data.map(emp => {
-          const totalWork = (emp.total_work_min || 0);
-          const target = (emp.weekly_target_h || 42) * 60;
-          const pct = fmt.pct(totalWork, target);
-          const hasAlerts = emp.alerts?.length > 0;
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {filtered.map(emp => {
+            const totalWork = emp.total_work_min || 0;
+            const target = (emp.weekly_target_h || 42) * 60;
+            const pct = fmt.pct(totalWork, target);
+            const hasAlerts = emp.alerts && emp.alerts.length > 0;
+            const isActive = emp.is_active_now;
 
-          return (
-            <Card key={emp.user_id} className="p-4" onClick={() => viewUser(emp)}>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center font-bold text-slate-600">
-                  {(emp.first_name || '?')[0]}{(emp.last_name || '')[0]}
+            return (
+              <Card key={emp.user_id} className="p-4" onClick={() => viewUser(emp)}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="relative flex-shrink-0">
+                    <UserAvatar user={emp} size="sm" />
+                    {isActive && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-slate-800 truncate">{emp.first_name} {emp.last_name}</div>
+                    <div className="text-xs text-slate-500 truncate">{EMPLOYEE_TYPES[emp.employee_type] || emp.employee_type}</div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="font-bold text-slate-700 text-sm">{fmt.duration(totalWork)}</div>
+                    <div className="text-xs text-slate-400">/ {emp.weekly_target_h || 42}h</div>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-slate-800">{emp.first_name} {emp.last_name}</div>
-                  <div className="text-xs text-slate-500">{emp.employee_type}</div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-slate-700">{fmt.duration(totalWork)}</div>
-                  <div className="text-xs text-slate-400">/ {emp.weekly_target_h || 42}h</div>
-                </div>
-              </div>
-              <ProgressBar value={totalWork} max={target} />
-              {hasAlerts && (
-                <div className="mt-2 flex gap-1 flex-wrap">
-                  {emp.alerts.map((a, i) => (
-                    <span key={i} className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
-                      {a.message || a.code}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {emp.status && (
-                <div className="mt-2"><Badge status={emp.status} /></div>
-              )}
-            </Card>
-          );
-        })
+                <ProgressBar value={totalWork} max={target} />
+                {hasAlerts && (
+                  <div className="mt-2 flex gap-1 flex-wrap">
+                    {emp.alerts.map((a, i) => (
+                      <span key={i} className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-medium">
+                        {a.message || a.code}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            );
+          })}
+        </div>
       )}
     </div>
   );
 }
 
+// ─── VALIDATION SCREEN ────────────────────────────────────────────────────────
+
 function ValidationScreen() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [week, setWeek] = useState(null);
-  const [year, setYear] = useState(null);
+  const [{ week, year }, setWeekYear] = useState(() => getISOWeek());
   const [validating, setValidating] = useState(false);
   const [success, setSuccess] = useState('');
-  const [returnModal, setReturnModal] = useState(null);
-  const [returnNote, setReturnNote] = useState('');
 
   useEffect(() => {
-    const now = new Date();
-    const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-    const dow = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dow);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    const wk = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-    setWeek(wk);
-    setYear(d.getUTCFullYear());
-  }, []);
-
-  useEffect(() => {
-    if (!week || !year) return;
     setLoading(true);
     api.get(`/time-entries/team?week=${week}&year=${year}`)
-      .then(d => setData((d.team || []).map(m => ({
-        ...m, ...(m.employee || {}),
-        user_id: m.employee ? m.employee.id : m.user_id,
-        total_work_min: m.total_min || 0,
-        has_pending: (m.pending_count || 0) > 0,
-      }))))
+      .then(d => setData(d.team || []))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [week, year]);
 
   const changeWeek = (delta) => {
-    let w = week + delta;
-    let y = year;
-    if (w < 1) { w = 52; y -= 1; }
-    if (w > 52) { w = 1; y += 1; }
-    setWeek(w); setYear(y);
+    setWeekYear(({ week: w, year: y }) => {
+      let nw = w + delta;
+      let ny = y;
+      if (nw < 1) { nw = 52; ny -= 1; }
+      if (nw > 52) { nw = 1; ny += 1; }
+      return { week: nw, year: ny };
+    });
   };
 
   const validateAll = async () => {
     setValidating(true); setSuccess('');
     try {
       const d = await api.post('/time-entries/validate-week', { week, year });
-      setSuccess(`${d.validated} entrée(s) approuvée(s)`);
+      setSuccess(`${d.validated} entree(s) approuvee(s)`);
       const res = await api.get(`/time-entries/team?week=${week}&year=${year}`);
       setData(res.team || []);
     } catch (err) { alert(err.message); }
@@ -1983,55 +1814,59 @@ function ValidationScreen() {
   const pending = data.filter(e => e.has_pending);
 
   return (
-    <div className="space-y-4 pb-4">
+    <div className="space-y-4 pb-6 max-w-lg">
+      {/* Week nav */}
       <Card className="p-4">
         <div className="flex items-center justify-between">
-          <button onClick={() => changeWeek(-1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">‹</button>
-          <div className="text-center">
-            <div className="font-bold text-slate-800 text-sm">{weekLabel(week, year)}</div>
-            <div className="text-xs text-slate-400">S{week} / {year}</div>
-          </div>
-          <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">›</button>
+          <button onClick={() => changeWeek(-1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
+            <Ic name="chevLeft" size={18} className="text-slate-600" />
+          </button>
+          <span className="font-bold text-slate-800">Semaine {week} — {year}</span>
+          <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
+            <Ic name="chevRight" size={18} className="text-slate-600" />
+          </button>
         </div>
       </Card>
 
       {success && <Alert type="success">{success}</Alert>}
 
       {pending.length > 0 && (
-        <Button onClick={validateAll} loading={validating} variant="success" className="w-full">
-          ✅ Approuver toute la semaine ({pending.length} employé(s))
+        <Button onClick={validateAll} loading={validating} variant="success" className="w-full" size="lg">
+          <Ic name="checkPlain" size={20} />
+          Approuver toute la semaine ({pending.length} employe{pending.length > 1 ? 's' : ''})
         </Button>
       )}
 
       {loading ? (
         <div className="flex justify-center py-8"><Spinner size="lg" /></div>
       ) : data.length === 0 ? (
-        <div className="text-center py-12 text-slate-400">
-          <div className="text-4xl mb-3">✅</div>
-          <p>Aucune donnée pour cette semaine</p>
-        </div>
+        <Card className="p-8 text-center">
+          <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <Ic name="check" size={22} className="text-emerald-600" />
+          </div>
+          <p className="text-emerald-700 font-medium">Toutes les heures sont validees</p>
+        </Card>
       ) : (
         data.map(emp => (
           <Card key={emp.user_id} className="p-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center font-bold text-slate-600 text-sm">
-                {(emp.first_name || '?')[0]}{(emp.last_name || '')[0]}
-              </div>
+              <UserAvatar user={emp} size="sm" />
               <div className="flex-1">
                 <div className="font-semibold text-slate-800">{emp.first_name} {emp.last_name}</div>
-                <div className="text-xs text-slate-500">{fmt.duration(emp.total_work_min || 0)} travaillées</div>
+                <div className="text-xs text-slate-500">{fmt.duration(emp.total_work_min || 0)} travaillees</div>
               </div>
-              <div>
-                {emp.has_pending
-                  ? <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">En attente</span>
-                  : <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">✓ OK</span>}
-              </div>
+              {emp.has_pending
+                ? <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-full font-semibold">En attente</span>
+                : <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-semibold flex items-center gap-1">
+                    <Ic name="checkPlain" size={10} /> Valide
+                  </span>}
             </div>
-            {emp.alerts?.length > 0 && (
-              <div className="mt-3 space-y-1">
+            {emp.alerts && emp.alerts.length > 0 && (
+              <div className="mt-3 space-y-1.5">
                 {emp.alerts.map((a, i) => (
-                  <div key={i} className="text-xs bg-yellow-50 text-yellow-700 px-3 py-1.5 rounded-lg">
-                    {a.code}: {a.message}
+                  <div key={i} className="text-xs bg-amber-50 text-amber-700 border border-amber-100 px-3 py-2 rounded-xl flex items-start gap-2">
+                    <Ic name="warning" size={12} className="mt-0.5 flex-shrink-0" />
+                    <span>{a.message || a.code}</span>
                   </div>
                 ))}
               </div>
@@ -2043,37 +1878,23 @@ function ValidationScreen() {
   );
 }
 
+// ─── MANAGER ABSENCES SCREEN ──────────────────────────────────────────────────
+
 function ManagerAbsencesScreen() {
-  const [tab, setTab] = useState('requests'); // requests | balances
   const [absences, setAbsences] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('PENDING');
   const [modal, setModal] = useState(null);
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
-  const [balances, setBalances] = useState([]);
-  const [balYear, setBalYear] = useState(new Date().getFullYear());
-  const [balLoading, setBalLoading] = useState(false);
 
   const load = async () => {
-    try {
-      const d = await api.get('/absences/team');
-      setAbsences(d.absences || []);
-    } catch (err) { console.error(err); }
+    try { const d = await api.get('/absences/team'); setAbsences(d.absences || []); }
+    catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
 
-  const loadBalances = useCallback(async () => {
-    setBalLoading(true);
-    try {
-      const d = await api.get(`/absences/balances?year=${balYear}`);
-      setBalances(d.balances || []);
-    } catch (err) { console.error(err); }
-    finally { setBalLoading(false); }
-  }, [balYear]);
-
   useEffect(() => { load(); }, []);
-  useEffect(() => { if (tab === 'balances') loadBalances(); }, [tab, loadBalances]);
 
   const act = async (absId, action) => {
     if (action === 'reject' && !note) return alert('Le motif de refus est obligatoire');
@@ -2086,141 +1907,98 @@ function ManagerAbsencesScreen() {
     finally { setSaving(false); }
   };
 
+  const filters = [
+    { id: 'PENDING', label: 'En attente' },
+    { id: 'APPROVED', label: 'Approuves' },
+    { id: 'REJECTED', label: 'Refuses' },
+    { id: 'ALL', label: 'Tous' },
+  ];
+
   const filtered = filter === 'ALL' ? absences : absences.filter(a => a.status === filter);
   const pendingCount = absences.filter(a => a.status === 'PENDING').length;
 
   return (
-    <div className="space-y-4 pb-4">
-      {/* Tab switcher */}
-      <div className="flex bg-white rounded-2xl border border-slate-100 shadow-sm p-1 gap-1">
-        <button onClick={() => setTab('requests')}
-          className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${tab === 'requests' ? 'bg-ultima-500 text-white' : 'text-slate-500'}`}>
-          Demandes {pendingCount > 0 && <span className="ml-1 bg-red-500 text-white text-xs rounded-full px-1.5">{pendingCount}</span>}
-        </button>
-        <button onClick={() => setTab('balances')}
-          className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${tab === 'balances' ? 'bg-ultima-500 text-white' : 'text-slate-500'}`}>
-          Soldes
-        </button>
+    <div className="space-y-4 pb-6 max-w-lg">
+      {/* Filter chips */}
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+        {filters.map(f => (
+          <button
+            key={f.id}
+            onClick={() => setFilter(f.id)}
+            className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
+              filter === f.id
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
+            }`}
+          >
+            {f.label}
+            {f.id === 'PENDING' && pendingCount > 0 && (
+              <span className={`ml-1.5 ${filter === 'PENDING' ? 'bg-white/20' : 'bg-amber-100 text-amber-700'} text-xs px-1.5 py-0.5 rounded-full`}>
+                {pendingCount}
+              </span>
+            )}
+          </button>
+        ))}
       </div>
 
-      {tab === 'balances' ? (
-        <>
-          <div className="flex items-center justify-between">
-            <button onClick={() => setBalYear(y => y - 1)} className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center">‹</button>
-            <span className="font-bold text-slate-700">{balYear}</span>
-            <button onClick={() => setBalYear(y => y + 1)} className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center">›</button>
+      {loading ? (
+        <div className="flex justify-center py-8"><Spinner size="lg" /></div>
+      ) : filtered.length === 0 ? (
+        <Card className="p-8 text-center">
+          <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <Ic name="calendar" size={22} className="text-slate-400" />
           </div>
-          {balLoading ? (
-            <div className="flex justify-center py-8"><Spinner size="lg" /></div>
-          ) : balances.length === 0 ? (
-            <div className="text-center py-12 text-slate-400"><div className="text-4xl mb-3">📊</div><p>Aucun employé trouvé</p></div>
-          ) : (
-            balances.map(b => (
-              <Card key={b.employee.id} className="p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 bg-ultima-100 rounded-xl flex items-center justify-center font-bold text-ultima-700 text-sm">
-                    {b.employee.first_name?.[0]}{b.employee.last_name?.[0]}
-                  </div>
-                  <div className="font-semibold text-slate-800">{b.employee.first_name} {b.employee.last_name}</div>
-                </div>
-                <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                  <div className="bg-slate-50 rounded-lg p-2">
-                    <div className="font-bold text-slate-700 text-base">{b.holiday_total}</div>
-                    <div className="text-slate-400">Total</div>
-                  </div>
-                  <div className="bg-red-50 rounded-lg p-2">
-                    <div className="font-bold text-red-600 text-base">{b.holiday_taken}</div>
-                    <div className="text-slate-400">Pris</div>
-                  </div>
-                  <div className="bg-yellow-50 rounded-lg p-2">
-                    <div className="font-bold text-yellow-600 text-base">{b.holiday_pending}</div>
-                    <div className="text-slate-400">En att.</div>
-                  </div>
-                  <div className={`rounded-lg p-2 ${b.holiday_remaining < 5 ? 'bg-orange-50' : 'bg-green-50'}`}>
-                    <div className={`font-bold text-base ${b.holiday_remaining < 5 ? 'text-orange-600' : 'text-green-600'}`}>{b.holiday_remaining.toFixed(1)}</div>
-                    <div className="text-slate-400">Restant</div>
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <ProgressBar value={b.holiday_taken + b.holiday_pending} max={b.holiday_total} />
-                </div>
-              </Card>
-            ))
-          )}
-        </>
+          <p className="text-slate-500 font-medium">Aucune demande</p>
+        </Card>
       ) : (
-        <>
-          {/* Filter */}
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {['PENDING', 'APPROVED', 'REJECTED', 'ALL'].map(f => (
-              <button key={f} onClick={() => setFilter(f)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${filter === f ? 'bg-ultima-500 text-white' : 'bg-white text-slate-600 border border-slate-200'}`}>
-                {f === 'PENDING' ? 'En attente' : f === 'APPROVED' ? 'Approuvés' : f === 'REJECTED' ? 'Refusés' : 'Tous'}
-              </button>
-            ))}
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center py-8"><Spinner size="lg" /></div>
-          ) : filtered.length === 0 ? (
-            <div className="text-center py-12 text-slate-400"><div className="text-4xl mb-3">📅</div><p>Aucune demande</p></div>
-          ) : (
-            filtered.map(a => {
-              const t = ABSENCE_TYPES[a.type] || ABSENCE_TYPES.OTHER;
-              return (
-                <Card key={a.id} className="p-4">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                      <div className="font-semibold text-slate-800">{a.first_name} {a.last_name}</div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-sm">{t.icon}</span>
-                        <span className="text-sm text-slate-600">{t.label}</span>
-                      </div>
-                    </div>
-                    <Badge status={a.status} />
+        filtered.map(a => {
+          const t = ABSENCE_TYPES[a.type] || ABSENCE_TYPES.OTHER;
+          return (
+            <Card key={a.id} className="p-4">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <UserAvatar user={a} size="sm" />
+                  <div className="min-w-0">
+                    <div className="font-semibold text-slate-800">{a.first_name} {a.last_name}</div>
+                    <div className="text-xs text-slate-500">{t.label} · {fmt.dateShort(a.start_date)} — {fmt.dateShort(a.end_date)} ({a.duration_days}j)</div>
+                    {a.comment && <p className="text-xs text-slate-400 mt-0.5 truncate">{a.comment}</p>}
                   </div>
-                  <div className="text-sm text-slate-500 mb-1">
-                    {fmt.date(a.start_date)} → {fmt.date(a.end_date)} · {a.duration_days} jour(s)
-                  </div>
-                  {a.comment && <p className="text-xs text-slate-400">💬 {a.comment}</p>}
-                  {a.status === 'PENDING' && (
-                    <div className="flex gap-2 mt-3">
-                      <Button onClick={() => setModal({ absence: a, action: 'approve' })} variant="success" size="sm" className="flex-1">✓ Approuver</Button>
-                      <Button onClick={() => { setModal({ absence: a, action: 'reject' }); setNote(''); }} variant="danger" size="sm" className="flex-1">✗ Refuser</Button>
-                    </div>
-                  )}
-                </Card>
-              );
-            })
-          )}
-        </>
+                </div>
+                <Badge status={a.status} />
+              </div>
+              {a.status === 'PENDING' && (
+                <div className="flex gap-2">
+                  <Button onClick={() => setModal({ absence: a, action: 'approve' })} variant="success" size="sm" className="flex-1">
+                    <Ic name="checkPlain" size={14} /> Approuver
+                  </Button>
+                  <Button onClick={() => { setModal({ absence: a, action: 'reject' }); setNote(''); }} variant="danger" size="sm" className="flex-1">
+                    <Ic name="x" size={14} /> Refuser
+                  </Button>
+                </div>
+              )}
+            </Card>
+          );
+        })
       )}
 
-      <Modal
-        open={!!modal}
-        onClose={() => setModal(null)}
-        title={modal?.action === 'approve' ? 'Approuver la demande' : 'Refuser la demande'}
-      >
+      <Modal open={!!modal} onClose={() => setModal(null)}
+        title={modal?.action === 'approve' ? 'Confirmer l\'approbation' : 'Motif du refus'}>
         {modal && (
           <div className="space-y-4">
             <div className="bg-slate-50 rounded-xl p-3">
-              <p className="text-sm font-semibold">{modal.absence.first_name} {modal.absence.last_name}</p>
+              <p className="font-semibold text-slate-800">{modal.absence.first_name} {modal.absence.last_name}</p>
               <p className="text-sm text-slate-500">{ABSENCE_TYPES[modal.absence.type]?.label} · {modal.absence.duration_days} jour(s)</p>
             </div>
             {modal.action === 'reject' && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Motif de refus *</label>
-                <textarea
-                  value={note}
-                  onChange={e => setNote(e.target.value)}
-                  placeholder="Expliquez la raison du refus..."
-                  rows={3}
-                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ultima-400"
-                />
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Motif de refus *</label>
+                <textarea value={note} onChange={e => setNote(e.target.value)}
+                  placeholder="Expliquez la raison..." rows={3}
+                  className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
               </div>
             )}
             {modal.action === 'approve' && (
-              <Input label="Note (optionnel)" value={note} onChange={setNote} placeholder="Commentaire..." />
+              <p className="text-sm text-slate-500">Confirmez-vous l'approbation de cette demande ?</p>
             )}
             <div className="flex gap-3">
               <Button onClick={() => setModal(null)} variant="secondary" className="flex-1">Annuler</Button>
@@ -2230,7 +2008,7 @@ function ManagerAbsencesScreen() {
                 variant={modal.action === 'approve' ? 'success' : 'danger'}
                 className="flex-1"
               >
-                {modal.action === 'approve' ? '✓ Confirmer' : '✗ Refuser'}
+                {modal.action === 'approve' ? 'Confirmer' : 'Refuser'}
               </Button>
             </div>
           </div>
@@ -2240,110 +2018,194 @@ function ManagerAbsencesScreen() {
   );
 }
 
-function ProjectsScreen({ user }) {
-  const [projects, setProjects] = useState([]);
+// ─── ADMIN SCREEN ─────────────────────────────────────────────────────────────
+
+function AdminScreen() {
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showNew, setShowNew] = useState(false);
-  const [form, setForm] = useState({ code: '', name: '', client_name: '', address: '', start_date: '', end_date: '' });
+  const [modal, setModal] = useState(null);
+  const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const isManager = ['MANAGER', 'ADMIN', 'SUPERADMIN'].includes(user?.role);
+  const [search, setSearch] = useState('');
+
+  const ROLES = ['EMPLOYEE', 'MANAGER', 'ADMIN'];
+  const TYPES = [
+    { value: 'MONTEUR',     label: 'Monteur / Poseur' },
+    { value: 'ADMIN_STAFF', label: 'Administratif' },
+    { value: 'MANAGER',     label: "Chef d'equipe" },
+  ];
 
   const load = async () => {
     try {
-      const d = await api.get('/projects');
-      setProjects(d.projects || []);
-    } catch (err) { console.error(err); }
+      const d = await api.get('/admin/users');
+      setUsers(d.users || []);
+    } catch {
+      // fallback to /users
+      try { const d = await api.get('/users'); setUsers(d.users || []); } catch (err) { console.error(err); }
+    }
     finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
 
-  const create = async () => {
-    if (!form.code || !form.name) return setError('Code et nom requis');
+  const openCreate = () => {
+    setForm({ role: 'EMPLOYEE', employee_type: 'MONTEUR', weekly_target_h: 42, annual_leave_d: 25 });
+    setError('');
+    setModal({ mode: 'create' });
+  };
+
+  const openEdit = (u) => {
+    setForm({ ...u, password: '' });
+    setError('');
+    setModal({ mode: 'edit', user: u });
+  };
+
+  const save = async () => {
     setSaving(true); setError('');
     try {
-      await api.post('/projects', form);
-      setShowNew(false);
-      setForm({ code: '', name: '', client_name: '', address: '', start_date: '', end_date: '' });
+      if (modal.mode === 'create') {
+        await api.post('/admin/users', form);
+      } else {
+        const payload = { ...form };
+        delete payload.id;
+        if (!payload.password) delete payload.password;
+        await api.patch(`/admin/users/${modal.user.id}`, payload);
+      }
+      setModal(null);
       await load();
     } catch (err) { setError(err.message); }
     finally { setSaving(false); }
   };
 
-  const toggleStatus = async (p) => {
+  const toggleActive = async (u) => {
     try {
-      await api.patch(`/projects/${p.id}`, { status: p.status === 'ACTIVE' ? 'ARCHIVED' : 'ACTIVE' });
+      await api.patch(`/admin/users/${u.id}`, { active: u.active ? 0 : 1 });
       await load();
     } catch (err) { alert(err.message); }
   };
 
+  const roleColor = (role) => {
+    if (role === 'ADMIN' || role === 'SUPERADMIN') return 'bg-blue-100 text-blue-700';
+    if (role === 'MANAGER') return 'bg-violet-100 text-violet-700';
+    return 'bg-slate-100 text-slate-500';
+  };
+
+  const filtered = search
+    ? users.filter(u => `${u.first_name} ${u.last_name} ${u.email}`.toLowerCase().includes(search.toLowerCase()))
+    : users;
+
+  const activeCount = users.filter(u => u.active !== 0).length;
+
   return (
-    <div className="space-y-4 pb-4">
-      {isManager && (
-        <Button onClick={() => setShowNew(true)} className="w-full">
-          + Nouveau chantier
+    <div className="space-y-4 pb-6 max-w-2xl">
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: 'Total', value: users.length },
+          { label: 'Actifs', value: activeCount },
+          { label: 'Inactifs', value: users.length - activeCount },
+        ].map(s => (
+          <Card key={s.label} className="p-3 text-center">
+            <div className="text-2xl font-bold text-slate-800">{s.value}</div>
+            <div className="text-xs text-slate-400 mt-0.5">{s.label}</div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Actions bar */}
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Ic name="search" size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input type="text" placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)}
+            className="w-full border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        </div>
+        <Button onClick={openCreate}>
+          <Ic name="plus" size={18} />
+          Nouveau
         </Button>
-      )}
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-8"><Spinner size="lg" /></div>
-      ) : projects.length === 0 ? (
-        <div className="text-center py-12 text-slate-400">
-          <div className="text-4xl mb-3">🏗️</div>
-          <p>Aucun chantier actif</p>
-        </div>
+      ) : filtered.length === 0 ? (
+        <Card className="p-8 text-center">
+          <p className="text-slate-400">Aucun utilisateur</p>
+        </Card>
       ) : (
-        projects.map(p => (
-          <Card key={p.id} className="p-4">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1">
-                <div className="font-semibold text-slate-800">{p.name}</div>
-                <div className="text-xs text-ultima-600 font-mono mt-0.5">{p.code}</div>
-                {p.client_name && <div className="text-sm text-slate-500 mt-1">👤 {p.client_name}</div>}
-                {p.address && <div className="text-xs text-slate-400 mt-0.5">📍 {p.address}</div>}
-                <div className="text-xs text-slate-400 mt-1">
-                        {p.start_date && `Du ${fmt.date(p.start_date)}`}
-                  {p.end_date && ` au ${fmt.date(p.end_date)}`}
-                </div>
+        filtered.map(u => (
+          <Card key={u.id} className={`p-4 ${!u.active ? 'opacity-50' : ''}`}>
+            <div className="flex items-center gap-3">
+              <UserAvatar user={u} size="md" />
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-slate-800">{u.first_name} {u.last_name}</div>
+                <div className="text-xs text-slate-500 truncate">{u.email}</div>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                <span className={`text-xs px-2 py-1 rounded-full font-medium ${p.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                  {p.status === 'ACTIVE' ? 'Actif' : 'Archivé'}
-                </span>
-                {isManager && (
-                  <button onClick={() => toggleStatus(p)} className="text-xs text-slate-400 hover:text-slate-600">
-                    {p.status === 'ACTIVE' ? 'Archiver' : 'Réactiver'}
-                  </button>
-                )}
+              <span className={`text-xs px-2.5 py-1 rounded-full font-semibold flex-shrink-0 ${roleColor(u.role)}`}>
+                {u.role}
+              </span>
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <div className="flex gap-1.5 flex-wrap">
+                <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{EMPLOYEE_TYPES[u.employee_type] || u.employee_type}</span>
+                <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{u.weekly_target_h}h/sem</span>
+                <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{u.annual_leave_d}j conges</span>
+              </div>
+              <div className="flex gap-3 flex-shrink-0">
+                <button onClick={() => openEdit(u)} className="text-xs text-blue-600 font-semibold hover:text-blue-700">Modifier</button>
+                <button onClick={() => toggleActive(u)}
+                  className={`text-xs font-semibold ${u.active ? 'text-red-500 hover:text-red-600' : 'text-emerald-600 hover:text-emerald-700'}`}>
+                  {u.active ? 'Desactiver' : 'Activer'}
+                </button>
               </div>
             </div>
           </Card>
         ))
       )}
 
-      <Modal open={showNew} onClose={() => setShowNew(false)} title="Nouveau chantier">
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <Input label="Code *" value={form.code} onChange={v => setForm(f => ({ ...f, code: v }))}
-              placeholder="VIL-2026-01" />
-            <Input label="Nom *" value={form.name} onChange={v => setForm(f => ({ ...f, name: v }))}
-              placeholder="Cuisine Villars" />
+      <Modal open={!!modal} onClose={() => setModal(null)}
+        title={modal?.mode === 'create' ? 'Nouvel utilisateur' : 'Modifier l\'utilisateur'}>
+        {modal && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <Input label="Prenom *" value={form.first_name || ''} onChange={v => setForm(f => ({ ...f, first_name: v }))} />
+              <Input label="Nom *" value={form.last_name || ''} onChange={v => setForm(f => ({ ...f, last_name: v }))} />
+            </div>
+            <Input label="Email" value={form.email || ''} onChange={v => setForm(f => ({ ...f, email: v }))} placeholder="prenom@ultima-interior.ch" />
+            <Input
+              label={modal.mode === 'create' ? 'Mot de passe' : 'Nouveau mot de passe (vide = inchange)'}
+              type="password" value={form.password || ''} onChange={v => setForm(f => ({ ...f, password: v }))}
+            />
+            <Input label="Telephone" value={form.phone || ''} onChange={v => setForm(f => ({ ...f, phone: v }))} placeholder="+41 79 000 00 00" />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Role</label>
+                <select value={form.role || 'EMPLOYEE'} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Type</label>
+                <select value={form.employee_type || 'MONTEUR'} onChange={e => setForm(f => ({ ...f, employee_type: e.target.value }))}
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  {TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Input label="H / semaine" type="number" value={form.weekly_target_h ?? 42} onChange={v => setForm(f => ({ ...f, weekly_target_h: parseFloat(v) || 42 }))} />
+              <Input label="Jours conges / an" type="number" value={form.annual_leave_d ?? 25} onChange={v => setForm(f => ({ ...f, annual_leave_d: parseInt(v) || 25 }))} />
+            </div>
+            {error && <Alert type="error">{error}</Alert>}
+            <div className="flex gap-3 pt-1">
+              <Button onClick={() => setModal(null)} variant="secondary" className="flex-1">Annuler</Button>
+              <Button onClick={save} loading={saving} className="flex-1">
+                {modal.mode === 'create' ? 'Creer' : 'Enregistrer'}
+              </Button>
+            </div>
           </div>
-          <Input label="Client" value={form.client_name} onChange={v => setForm(f => ({ ...f, client_name: v }))}
-            placeholder="Famille Morel" />
-          <Input label="Adresse" value={form.address} onChange={v => setForm(f => ({ ...f, address: v }))}
-            placeholder="Route de Fribourg 45, Villars" />
-          <div className="grid grid-cols-2 gap-3">
-            <Input label="Début" type="date" value={form.start_date} onChange={v => setForm(f => ({ ...f, start_date: v }))} />
-            <Input label="Fin" type="date" value={form.end_date} onChange={v => setForm(f => ({ ...f, end_date: v }))} />
-          </div>
-          {error && <Alert type="error">{error}</Alert>}
-          <div className="flex gap-3">
-            <Button onClick={() => setShowNew(false)} variant="secondary" className="flex-1">Annuler</Button>
-            <Button onClick={create} loading={saving} className="flex-1">Créer</Button>
-          </div>
-        </div>
+        )}
       </Modal>
     </div>
   );
@@ -2352,24 +2214,28 @@ function ProjectsScreen({ user }) {
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 
 function App() {
-  const [auth, setAuth] = useState(null); // null = loading, false = unauthenticated, object = user
-  const [pinData, setPinData] = useState(null); // { token, email }
+  const [auth, setAuth] = useState(null);
+  const [pinData, setPinData] = useState(null);
   const [view, setView] = useState('home');
   const [meData, setMeData] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Load tokens on mount
   useEffect(() => {
     api.loadTokens();
     if (api.token) {
       api.get('/auth/me')
-        .then(d => { setAuth(d.user); setMeData(d); })
+        .then(d => {
+          setAuth(d.user);
+          setMeData(d);
+          const isManager = ['MANAGER', 'ADMIN', 'SUPERADMIN'].includes(d.user?.role);
+          setView(isManager ? 'team' : 'home');
+        })
         .catch(() => { api.clearTokens(); setAuth(false); });
     } else {
       setAuth(false);
     }
   }, []);
 
-  // Check URL token on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const t = params.get('token');
@@ -2384,9 +2250,9 @@ function App() {
     if (needPin) {
       setPinData({ token, email });
     } else {
+      api.setTokens(user.token, user.refresh_token);
       setAuth(user);
       setPinData(null);
-      // Set default view
       const isManager = ['MANAGER', 'ADMIN', 'SUPERADMIN'].includes(user?.role);
       setView(isManager ? 'team' : 'home');
     }
@@ -2395,12 +2261,12 @@ function App() {
   const handlePinSuccess = (user) => {
     setAuth(user);
     setPinData(null);
-    const isManager = ['MANAGER', 'ADMIN', 'SUPERADMIN'].includes(user?.role);
-    setView(isManager ? 'team' : 'home');
+    setView('home');
   };
 
   const handleLogout = () => {
     setAuth(false);
+    setMeData(null);
     setView('home');
   };
 
@@ -2412,80 +2278,93 @@ function App() {
     } catch {}
   };
 
-  // Loading state
+  // Loading
   if (auth === null) return (
-    <div className="min-h-screen bg-slate-800 flex items-center justify-center">
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center">
       <div className="text-center">
-        <div className="w-16 h-16 bg-ultima-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <span className="text-3xl">⏱</span>
+        <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/40">
+          <Ic name="clock" size={32} className="text-white" />
         </div>
         <Spinner size="lg" />
       </div>
     </div>
   );
 
-  // PIN screen
-  if (pinData) return (
-    <PinScreen token={pinData.token} onSuccess={handlePinSuccess} />
-  );
-
-  // Login screen
+  if (pinData) return <PinScreen token={pinData.token} onSuccess={handlePinSuccess} />;
   if (!auth) return <LoginScreen onLogin={handleLogin} />;
 
   const isManager = ['MANAGER', 'ADMIN', 'SUPERADMIN'].includes(auth.role);
   const isAdmin = ['ADMIN', 'SUPERADMIN'].includes(auth.role);
 
-  // Page title mapping
-  const titles = {
-    home:       { title: 'Pointage', subtitle: `Bonjour, ${auth.first_name} 👋` },
-    hours:      { title: 'Mes heures', subtitle: 'Jour · Semaine · Mois · Année' },
-    absences:   { title: isManager ? 'Gestion des absences' : 'Mes absences', subtitle: null },
-    account:    { title: 'Mon compte', subtitle: null },
-    team:       { title: 'Vue équipe', subtitle: 'Semaine en cours' },
-    validation: { title: 'Validation', subtitle: 'Approbation des heures' },
-    projects:   { title: 'Chantiers', subtitle: 'Projets actifs' },
-    calendar:   { title: 'Calendrier', subtitle: 'Absences & jours fériés' },
+  const pageInfo = {
+    home:       { title: 'Pointage',        subtitle: null },
+    hours:      { title: 'Mes heures',      subtitle: 'Recapitulatif hebdomadaire' },
+    absences:   { title: isManager ? 'Absences equipe' : 'Mes absences', subtitle: null },
+    account:    { title: 'Mon compte',      subtitle: null },
+    team:       { title: 'Equipe',          subtitle: 'Semaine en cours' },
+    validation: { title: 'Validation',      subtitle: 'Approbation des heures' },
+    calendar:   { title: 'Calendrier',      subtitle: 'Absences du mois' },
+    admin:      { title: 'Administration',  subtitle: 'Gestion des utilisateurs' },
   };
 
-  const titleInfo = titles[view] || { title: 'Ultima Pointage', subtitle: null };
+  const info = pageInfo[view] || { title: 'Ultima Pointage', subtitle: null };
+
+  const exportAction = isManager && view === 'team' ? (
+    <a href="/api/time-entries/export" target="_blank"
+      className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors font-semibold">
+      <Ic name="download" size={13} />
+      Export
+    </a>
+  ) : null;
 
   const renderView = () => {
     switch (view) {
       case 'home':       return <HomeScreen user={auth} meData={meData} onRefresh={refreshMe} />;
       case 'hours':      return <HoursScreen user={auth} />;
       case 'absences':   return isManager ? <ManagerAbsencesScreen /> : <AbsencesScreen user={auth} />;
-      case 'account':    return <AccountScreen user={auth} onLogout={handleLogout} />;
+      case 'account':    return <AccountScreen user={auth} onLogout={handleLogout} onUserUpdate={refreshMe} />;
       case 'team':       return <TeamScreen />;
       case 'validation': return <ValidationScreen />;
-      case 'projects':   return <ProjectsScreen user={auth} />;
       case 'calendar':   return <CalendarScreen />;
-      case 'admin':     return <AdminScreen />;
+      case 'admin':      return <AdminScreen />;
       default:           return <HomeScreen user={auth} meData={meData} onRefresh={refreshMe} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      <SideNav current={view} role={auth.role} onNav={setView} />
-      <div className="flex-1 ml-56 min-h-screen flex flex-col">
-      <TopBar
-        title={titleInfo.title}
-        subtitle={titleInfo.subtitle}
-        actions={
-          <div className="flex items-center gap-2">
-            {isManager && view === 'team' && (
-              <a href="/api/time-entries/export" target="_blank"
-                className="text-xs text-slate-500 hover:text-slate-700 bg-slate-100 px-2 py-1 rounded-lg">
-                ↓ CSV
-              </a>
-            )}
-          </div>
-        }
+    <div className="flex h-screen overflow-hidden bg-slate-50">
+      <SideNav
+        current={view}
+        role={auth.role}
+        onNav={v => { setView(v); setSidebarOpen(false); }}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        user={auth}
       />
-      <main className="px-4 pt-4 pb-6">
-        {renderView()}
-      </main>
-      
+
+      <div className="flex-1 flex flex-col overflow-hidden md:ml-64">
+        {/* Mobile header */}
+        <MobileHeader
+          title={info.title}
+          subtitle={info.subtitle}
+          onMenu={() => setSidebarOpen(true)}
+          actions={exportAction}
+        />
+
+        {/* Desktop page header */}
+        <div className="hidden md:flex items-center justify-between px-8 pt-8 pb-2 flex-shrink-0">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">{info.title}</h1>
+            {info.subtitle && <p className="text-sm text-slate-500 mt-0.5">{info.subtitle}</p>}
+          </div>
+          {exportAction && <div>{exportAction}</div>}
+        </div>
+
+        {/* Scrollable content */}
+        <main className="flex-1 overflow-y-auto px-4 md:px-8 py-4 md:py-6">
+          {renderView()}
+        </main>
+      </div>
     </div>
   );
 }
