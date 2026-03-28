@@ -20,7 +20,7 @@ from handlers.time_handler import (
     TeamEntriesHandler, ValidateWeekHandler, ExportHandler
 )
 from handlers.absence_handler import (
-    AbsencesHandler, AbsenceDetailHandler, TeamAbsencesHandler
+    AbsencesHandler, AbsenceDetailHandler, TeamAbsencesHandler, AbsenceCalendarHandler
 )
 from handlers.project_handler import ProjectsHandler, ProjectDetailHandler
 from handlers.user_handler import UsersHandler, UserDetailHandler, StatsHandler
