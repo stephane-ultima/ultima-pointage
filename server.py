@@ -32,7 +32,16 @@ class MainHandler(tornado.web.RequestHandler):
 
 
 class SetupHandler(tornado.web.RequestHandler):
-    """One-time setup: create superadmin if no users exist."""
+    """Setup: create or reset superadmin account."""
+    def get(self):
+        self.set_header('Content-Type', 'application/json')
+        import json
+        user = db.fetchone("SELECT id, email, role, first_name, CASE WHEN password_hash IS NOT NULL THEN 1 ELSE 0 END as has_pw FROM users WHERE email=?", ('stephane@ultima-interior.ch',))
+        if user:
+            self.finish(json.dumps({'found': True, 'id': user['id'], 'role': user['role'], 'has_pw': user['has_pw']}))
+        else:
+            self.finish(json.dumps({'found': False}))
+
     def post(self):
         self.set_header('Content-Type', 'application/json')
         import json
@@ -42,25 +51,21 @@ class SetupHandler(tornado.web.RequestHandler):
             data = {}
         email = data.get('email', 'stephane@ultima-interior.ch')
         password = data.get('password', 'Ultima2026!')
-        first_name = data.get('first_name', 'St\u00e9phane')
-        last_name = data.get('last_name', 'Ultima')
+        ph = auth_module.hash_password(password)
 
-        # Check if user already exists
         existing = db.fetchone("SELECT id FROM users WHERE email=?", (email,))
         if existing:
-            self.finish(json.dumps({'status': 'exists', 'email': email}))
-            return
-
-        uid = 'adm-stephane-001'
-        ph = auth_module.hash_password(password)
-        db.execute("""
-            INSERT OR IGNORE INTO users
-                (id, email, password_hash, first_name, last_name,
-                 role, employee_type, weekly_target_h, annual_leave_d, phone)
-            VALUES (?,?,?,?,?,?,?,?,?,?)
-        """, (uid, email, ph, first_name, last_name,
-              'SUPERADMIN', 'ADMIN_STAFF', 45.0, 25, ''))
-        self.finish(json.dumps({'status': 'created', 'email': email, 'role': 'SUPERADMIN'}))
+            db.execute("UPDATE users SET password_hash=?, role='SUPERADMIN', active=1 WHERE email=?", (ph, email))
+            self.finish(json.dumps({'status': 'updated', 'email': email}))
+        else:
+            uid = 'adm-stephane-001'
+            db.execute("""
+                INSERT OR IGNORE INTO users
+                    (id, email, password_hash, first_name, last_name,
+                     role, employee_type, weekly_target_h, annual_leave_d, phone)
+                VALUES (?,?,?,?,?,?,?,?,?,?)
+            """, (uid, email, ph, 'Stephane', 'Ultima', 'SUPERADMIN', 'ADMIN_STAFF', 45.0, 25, ''))
+            self.finish(json.dumps({'status': 'created', 'email': email}))
 
 
 def make_app():
