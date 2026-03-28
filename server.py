@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ULTIMA INTERIOR SA — Pointage RH
+ULTIMA INTERIOR SA - Pointage RH
 Main Tornado server
 """
 import os
@@ -9,7 +9,6 @@ import tornado.ioloop
 import tornado.web
 import db
 
-# Import handlers
 from handlers.auth_handler import (
     LoginHandler, MagicLinkHandler, VerifyLinkHandler,
     VerifyPinHandler, RefreshHandler, LogoutHandler, MeHandler,
@@ -75,26 +74,19 @@ if __name__ == '__main__':
 
     try:
         db.execute("ALTER TABLE users ADD COLUMN avatar_url TEXT")
-        print("\u2713 Migration: avatar_url column added")
     except Exception:
         pass
 
     port = int(os.environ.get('PORT', 8000))
     app = make_app()
     app.listen(port)
-    print(f"\u2713 Ultima Pointage RH d\u00e9marr\u00e9 sur le port {port}", flush=True)
+    print(f"Ultima Pointage RH started on port {port}", flush=True)
 
+    # Always seed on startup — idempotent (checks for existing records)
     def do_seed():
         import seed
         seed.run()
-        print("\u2713 Donn\u00e9es de d\u00e9monstration charg\u00e9es", flush=True)
+        print("Seed done", flush=True)
 
-    if '--seed' in sys.argv or os.environ.get('SEED_DB') == '1':
-        tornado.ioloop.IOLoop.current().call_later(0.5, do_seed)
-    else:
-        user_count = db.fetchone("SELECT COUNT(*) as n FROM users")
-        if user_count and user_count['n'] == 0:
-            print("\u26a1 Base vide d\u00e9tect\u00e9e \u2014 seeding automatique...", flush=True)
-            tornado.ioloop.IOLoop.current().call_later(0.5, do_seed)
-
+    tornado.ioloop.IOLoop.current().call_later(1.0, do_seed)
     tornado.ioloop.IOLoop.current().start()
