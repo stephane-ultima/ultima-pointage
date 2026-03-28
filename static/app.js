@@ -1,12 +1,12 @@
-// ═══════════════════════════════════════════════════════════════
-//  ULTIMA POINTAGE — React SPA v3.0
-//  Design premium — Apple-inspired HR time-tracking
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+//  ULTIMA POINTAGE â React SPA v3.0
+//  Design premium â Apple-inspired HR time-tracking
 //  Ultima Interior SA
-// ═══════════════════════════════════════════════════════════════
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const { useState, useEffect, useCallback, useRef, useMemo } = React;
 
-// ─── API CLIENT ──────────────────────────────────────────────────────────────
+// âââ API CLIENT ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const api = {
   token: null,
@@ -61,7 +61,7 @@ const api = {
 
     const text = await res.text();
     let json;
-    try { json = JSON.parse(text); } catch { json = { error: text }; }
+    try { json = JSON.parse(text); } catch { json = { error: text.startsWith('<') ? 'Erreur serveur inattendue' : text }; }
     if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
     return json;
   },
@@ -72,7 +72,7 @@ const api = {
   delete: (path)        => api.request('DELETE', path),
 };
 
-// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+// âââ CONSTANTS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const ACTIVITY_TYPES = {
   WORK_SITE:   { label: 'Sur chantier',  color: 'bg-amber-50 text-amber-700 border-amber-200' },
@@ -151,7 +151,7 @@ const IC = {
   truck:      'M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12',
 };
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
+// âââ HELPERS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const fmt = {
   time: (ts) => {
@@ -194,8 +194,14 @@ const fmt = {
     return d.toLocaleDateString('fr-CH', { weekday: 'short', day: 'numeric', month: 'short' });
   },
   pct: (val, max) => max > 0 ? Math.min(100, Math.round((val / max) * 100)) : 0,
-  initials: (first, last) => `${(first || '?')[0]}${(last || '')[0]}`.toUpperCase(),
+  initials: (first, last) => `${(first || '?')[0]}${(last || ' ')[0]}`.toUpperCase(),
 };
+
+function isoWeeksInYear(y) {
+  const jan1 = new Date(y, 0, 1).getDay();
+  const dec31 = new Date(y, 11, 31).getDay();
+  return jan1 === 4 || dec31 === 4 ? 53 : 52;
+}
 
 function getISOWeek() {
   const now = new Date();
@@ -218,7 +224,7 @@ function useInterval(callback, delay) {
   }, [delay]);
 }
 
-// ─── BASE COMPONENTS ─────────────────────────────────────────────────────────
+// âââ BASE COMPONENTS âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 // SVG icon component
 function Ic({ name, size = 20, className = '' }) {
@@ -447,7 +453,7 @@ function ProgressBar({ value, max, color }) {
   );
 }
 
-// ─── NAVIGATION ──────────────────────────────────────────────────────────────
+// âââ NAVIGATION ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function SideNav({ current, role, onNav, isOpen, onClose, user }) {
   const isManager = ['MANAGER', 'ADMIN', 'SUPERADMIN'].includes(role);
@@ -564,7 +570,7 @@ function MobileHeader({ title, subtitle, onMenu, actions }) {
   );
 }
 
-// ─── LOGIN SCREEN ─────────────────────────────────────────────────────────────
+// âââ LOGIN SCREEN âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function LoginScreen({ onLogin }) {
   const [mode, setMode] = useState('password');
@@ -632,7 +638,7 @@ function LoginScreen({ onLogin }) {
           {mode === 'password' ? (
             <form onSubmit={handlePassword} className="space-y-4">
               <Input label="Adresse email" type="email" value={email} onChange={setEmail} placeholder="vous@ultima-interior.ch" required autoFocus />
-              <Input label="Mot de passe" type="password" value={password} onChange={setPassword} placeholder="••••••••" required />
+              <Input label="Mot de passe" type="password" value={password} onChange={setPassword} placeholder="â¢â¢â¢â¢â¢â¢â¢â¢" required />
               {error && <Alert type="error">{error}</Alert>}
               <Button type="submit" loading={loading} className="w-full" size="lg">
                 Se connecter
@@ -665,7 +671,7 @@ function LoginScreen({ onLogin }) {
   );
 }
 
-// ─── PIN SCREEN ───────────────────────────────────────────────────────────────
+// âââ PIN SCREEN âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function PinScreen({ token, onSuccess }) {
   const [step, setStep] = useState('checking');
@@ -784,7 +790,7 @@ function PinScreen({ token, onSuccess }) {
   );
 }
 
-// ─── HOME SCREEN (Pointage) ───────────────────────────────────────────────────
+// âââ HOME SCREEN (Pointage) âââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function HomeScreen({ user, meData, onRefresh }) {
   const [entries, setEntries] = useState([]);
@@ -969,7 +975,7 @@ function HomeScreen({ user, meData, onRefresh }) {
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-slate-700">{at.label}</div>
                     <div className="text-xs text-slate-400">
-                      {fmt.time(e.started_at)} — {e.ended_at ? fmt.time(e.ended_at) : 'en cours'}
+                      {fmt.time(e.started_at)} â {e.ended_at ? fmt.time(e.ended_at) : 'en cours'}
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0">
@@ -1018,7 +1024,7 @@ function HomeScreen({ user, meData, onRefresh }) {
   );
 }
 
-// ─── HOURS SCREEN ────────────────────────────────────────────────────────────
+// âââ HOURS SCREEN ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function HoursScreen({ user }) {
   const [entries, setEntries] = useState([]);
@@ -1074,7 +1080,7 @@ function HoursScreen({ user }) {
             <Ic name="chevLeft" size={18} className="text-slate-600" />
           </button>
           <div className="text-center">
-            <div className="text-sm font-bold text-slate-800">Semaine {week} — {year}</div>
+            <div className="text-sm font-bold text-slate-800">Semaine {week} â {year}</div>
           </div>
           <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
             <Ic name="chevRight" size={18} className="text-slate-600" />
@@ -1164,7 +1170,7 @@ function HoursScreen({ user }) {
                       <div className="flex-1 min-w-0">
                         <div className="text-sm text-slate-700 font-medium">{at.label}</div>
                         <div className="text-xs text-slate-400">
-                          {fmt.time(e.started_at)} — {e.ended_at ? fmt.time(e.ended_at) : '...'}
+                          {fmt.time(e.started_at)} â {e.ended_at ? fmt.time(e.ended_at) : '...'}
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
@@ -1183,7 +1189,7 @@ function HoursScreen({ user }) {
   );
 }
 
-// ─── ABSENCES SCREEN ─────────────────────────────────────────────────────────
+// âââ ABSENCES SCREEN âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function AbsencesScreen({ user }) {
   const [data, setData] = useState(null);
@@ -1259,7 +1265,7 @@ function AbsencesScreen({ user }) {
                   <div className="min-w-0">
                     <div className="font-semibold text-slate-800">{t.label}</div>
                     <div className="text-sm text-slate-500">
-                      {fmt.dateShort(a.start_date)} — {fmt.dateShort(a.end_date)}
+                      {fmt.dateShort(a.start_date)} â {fmt.dateShort(a.end_date)}
                       <span className="ml-2 text-xs text-slate-400">{a.duration_days}j</span>
                     </div>
                     {a.comment && <p className="text-xs text-slate-400 mt-0.5 truncate">{a.comment}</p>}
@@ -1312,7 +1318,7 @@ function AbsencesScreen({ user }) {
   );
 }
 
-// ─── CALENDAR SCREEN ─────────────────────────────────────────────────────────
+// âââ CALENDAR SCREEN âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function CalendarScreen() {
   const [data, setData] = useState([]);
@@ -1375,7 +1381,7 @@ function CalendarScreen() {
                 <UserAvatar user={entry} size="sm" />
                 <div className="flex-1">
                   <div className="font-semibold text-slate-800">{entry.first_name} {entry.last_name}</div>
-                  <div className="text-sm text-slate-500">{t.label} · {fmt.dateShort(entry.start_date)} — {fmt.dateShort(entry.end_date)}</div>
+                  <div className="text-sm text-slate-500">{t.label} Â· {fmt.dateShort(entry.start_date)} â {fmt.dateShort(entry.end_date)}</div>
                 </div>
                 <Badge status={entry.status} />
               </div>
@@ -1387,7 +1393,7 @@ function CalendarScreen() {
   );
 }
 
-// ─── ACCOUNT SCREEN ──────────────────────────────────────────────────────────
+// âââ ACCOUNT SCREEN ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function AccountScreen({ user, onLogout, onUserUpdate }) {
   const [info, setInfo] = useState({ first_name: user.first_name || '', last_name: user.last_name || '', phone: user.phone || '' });
@@ -1505,10 +1511,10 @@ function AccountScreen({ user, onLogout, onUserUpdate }) {
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Email</label>
-            <div className="w-full border border-slate-100 rounded-xl px-4 py-2.5 text-slate-400 bg-slate-50 text-sm">{user.email || '—'}</div>
+            <div className="w-full border border-slate-100 rounded-xl px-4 py-2.5 text-slate-400 bg-slate-50 text-sm">{user.email || 'â'}</div>
             <p className="text-xs text-slate-400 mt-1">L'email est gere par l'administrateur</p>
           </div>
-          <Input label="Telephone" value={info.phone} onChange={v => setInfo(f => ({ ...f, phone: v }))} placeholder="+41 79 000 00 00" />
+          <Input label="Téléphone" value={info.phone} onChange={v => setInfo(f => ({ ...f, phone: v }))} placeholder="+41 79 000 00 00" />
         </div>
         {infoMsg && <div className="mt-3"><Alert type={infoMsg.type}>{infoMsg.text}</Alert></div>}
         <Button onClick={saveInfo} loading={savingInfo} className="w-full mt-4">Enregistrer</Button>
@@ -1559,7 +1565,7 @@ function AccountScreen({ user, onLogout, onUserUpdate }) {
   );
 }
 
-// ─── TEAM SCREEN ──────────────────────────────────────────────────────────────
+// âââ TEAM SCREEN ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function TeamScreen() {
   const [data, setData] = useState([]);
@@ -1592,7 +1598,7 @@ function TeamScreen() {
     setSelected(emp);
     setUserLoading(true);
     try {
-      const d = await api.get(`/time-entries/team?week=${week}&year=${year}&user_id=${emp.user_id}`);
+      const d = await api.get(`/time-entries/team?week=${week}&year=${year}&user_id=${emp.employee?.id}`);
       setUserEntries(d.entries || []);
     } catch {}
     finally { setUserLoading(false); }
@@ -1608,7 +1614,7 @@ function TeamScreen() {
       <div className="space-y-4 pb-6 max-w-lg">
         <button onClick={() => setSelected(null)} className="flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 transition-colors">
           <Ic name="chevLeft" size={18} />
-          {selected.first_name} {selected.last_name}
+          {selected.employee?.first_name} {selected.employee?.last_name}
         </button>
 
         <Card className="p-4">
@@ -1616,12 +1622,12 @@ function TeamScreen() {
             <UserAvatar user={selected} size="md" />
             <div>
               <div className="font-bold text-slate-800">{selected.first_name} {selected.last_name}</div>
-              <div className="text-sm text-slate-500">{EMPLOYEE_TYPES[selected.employee_type] || selected.employee_type}</div>
+              <div className="text-sm text-slate-500">{EMPLOYEE_TYPES[selected.employee?.employee_type] || selected.employee_type}</div>
             </div>
           </div>
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-slate-500">Semaine {week}</span>
-            <span className="font-bold text-slate-800">{fmt.duration(totalWork)} / {selected.weekly_target_h || 42}h</span>
+            <span className="font-bold text-slate-800">{fmt.duration(totalWork)} / {selected.employee?.weekly_target_h || 42}h</span>
           </div>
           <ProgressBar value={totalWork} max={(selected.weekly_target_h || 42) * 60} />
         </Card>
@@ -1646,7 +1652,7 @@ function TeamScreen() {
                       <div className="text-sm font-medium text-slate-700">{at.label}</div>
                       <div className="text-xs text-slate-400">
                         {new Date(e.started_at * 1000).toLocaleDateString('fr-CH', { weekday: 'short', day: 'numeric' })}
-                        {' · '}{fmt.time(e.started_at)} — {e.ended_at ? fmt.time(e.ended_at) : '...'}
+                        {' Â· '}{fmt.time(e.started_at)} â {e.ended_at ? fmt.time(e.ended_at) : '...'}
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
@@ -1669,7 +1675,7 @@ function TeamScreen() {
   const pending = data.filter(e => e.has_pending).length;
 
   const filtered = search
-    ? data.filter(e => `${e.first_name} ${e.last_name}`.toLowerCase().includes(search.toLowerCase()))
+    ? data.filter(e => `${e.employee?.first_name} ${e.employee?.last_name}`.toLowerCase().includes(search.toLowerCase()))
     : data;
 
   return (
@@ -1681,7 +1687,7 @@ function TeamScreen() {
             <Ic name="chevLeft" size={18} className="text-slate-600" />
           </button>
           <div className="text-center">
-            <div className="text-sm font-bold text-slate-800">Semaine {week} — {year}</div>
+            <div className="text-sm font-bold text-slate-800">Semaine {week} â {year}</div>
           </div>
           <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
             <Ic name="chevRight" size={18} className="text-slate-600" />
@@ -1732,22 +1738,22 @@ function TeamScreen() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {filtered.map(emp => {
-            const totalWork = emp.total_work_min || 0;
+            const totalWork = emp.total_min || 0;
             const target = (emp.weekly_target_h || 42) * 60;
             const pct = fmt.pct(totalWork, target);
             const hasAlerts = emp.alerts && emp.alerts.length > 0;
             const isActive = emp.is_active_now;
 
             return (
-              <Card key={emp.user_id} className="p-4" onClick={() => viewUser(emp)}>
+              <Card key={emp.employee?.id} className="p-4" onClick={() => viewUser(emp)}>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="relative flex-shrink-0">
-                    <UserAvatar user={emp} size="sm" />
+                    <UserAvatar user={emp.employee} size="sm" />
                     {isActive && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-slate-800 truncate">{emp.first_name} {emp.last_name}</div>
-                    <div className="text-xs text-slate-500 truncate">{EMPLOYEE_TYPES[emp.employee_type] || emp.employee_type}</div>
+                    <div className="font-semibold text-slate-800 truncate">{emp.employee?.first_name} {emp.employee?.last_name}</div>
+                    <div className="text-xs text-slate-500 truncate">{EMPLOYEE_TYPES[emp.employee?.employee_type] || emp.employee?.employee_type}</div>
                   </div>
                   <div className="text-right flex-shrink-0">
                     <div className="font-bold text-slate-700 text-sm">{fmt.duration(totalWork)}</div>
@@ -1773,7 +1779,7 @@ function TeamScreen() {
   );
 }
 
-// ─── VALIDATION SCREEN ────────────────────────────────────────────────────────
+// âââ VALIDATION SCREEN ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function ValidationScreen() {
   const [data, setData] = useState([]);
@@ -1804,7 +1810,7 @@ function ValidationScreen() {
     setValidating(true); setSuccess('');
     try {
       const d = await api.post('/time-entries/validate-week', { week, year });
-      setSuccess(`${d.validated} entree(s) approuvee(s)`);
+      setSuccess(`Semaine ${week} approuvée avec succès`);
       const res = await api.get(`/time-entries/team?week=${week}&year=${year}`);
       setData(res.team || []);
     } catch (err) { alert(err.message); }
@@ -1821,7 +1827,7 @@ function ValidationScreen() {
           <button onClick={() => changeWeek(-1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
             <Ic name="chevLeft" size={18} className="text-slate-600" />
           </button>
-          <span className="font-bold text-slate-800">Semaine {week} — {year}</span>
+          <span className="font-bold text-slate-800">Semaine {week} â {year}</span>
           <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
             <Ic name="chevRight" size={18} className="text-slate-600" />
           </button>
@@ -1844,16 +1850,16 @@ function ValidationScreen() {
           <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
             <Ic name="check" size={22} className="text-emerald-600" />
           </div>
-          <p className="text-emerald-700 font-medium">Toutes les heures sont validees</p>
+          <p className="text-emerald-700 font-medium">Toutes les heures sont validées</p>
         </Card>
       ) : (
         data.map(emp => (
-          <Card key={emp.user_id} className="p-4">
+          <Card key={emp.employee?.id} className="p-4">
             <div className="flex items-center gap-3">
-              <UserAvatar user={emp} size="sm" />
+              <UserAvatar user={emp.employee} size="sm" />
               <div className="flex-1">
-                <div className="font-semibold text-slate-800">{emp.first_name} {emp.last_name}</div>
-                <div className="text-xs text-slate-500">{fmt.duration(emp.total_work_min || 0)} travaillees</div>
+                <div className="font-semibold text-slate-800">{emp.employee?.first_name} {emp.employee?.last_name}</div>
+                <div className="text-xs text-slate-500">{fmt.duration(emp.total_min || 0)} travaillees</div>
               </div>
               {emp.has_pending
                 ? <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-full font-semibold">En attente</span>
@@ -1878,7 +1884,7 @@ function ValidationScreen() {
   );
 }
 
-// ─── MANAGER ABSENCES SCREEN ──────────────────────────────────────────────────
+// âââ MANAGER ABSENCES SCREEN ââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function ManagerAbsencesScreen() {
   const [absences, setAbsences] = useState([]);
@@ -1909,8 +1915,8 @@ function ManagerAbsencesScreen() {
 
   const filters = [
     { id: 'PENDING', label: 'En attente' },
-    { id: 'APPROVED', label: 'Approuves' },
-    { id: 'REJECTED', label: 'Refuses' },
+    { id: 'APPROVED', label: 'Approuvés' },
+    { id: 'REJECTED', label: 'Refusés' },
     { id: 'ALL', label: 'Tous' },
   ];
 
@@ -1960,7 +1966,7 @@ function ManagerAbsencesScreen() {
                   <UserAvatar user={a} size="sm" />
                   <div className="min-w-0">
                     <div className="font-semibold text-slate-800">{a.first_name} {a.last_name}</div>
-                    <div className="text-xs text-slate-500">{t.label} · {fmt.dateShort(a.start_date)} — {fmt.dateShort(a.end_date)} ({a.duration_days}j)</div>
+                    <div className="text-xs text-slate-500">{t.label} Â· {fmt.dateShort(a.start_date)} â {fmt.dateShort(a.end_date)} ({a.duration_days}j)</div>
                     {a.comment && <p className="text-xs text-slate-400 mt-0.5 truncate">{a.comment}</p>}
                   </div>
                 </div>
@@ -1987,7 +1993,7 @@ function ManagerAbsencesScreen() {
           <div className="space-y-4">
             <div className="bg-slate-50 rounded-xl p-3">
               <p className="font-semibold text-slate-800">{modal.absence.first_name} {modal.absence.last_name}</p>
-              <p className="text-sm text-slate-500">{ABSENCE_TYPES[modal.absence.type]?.label} · {modal.absence.duration_days} jour(s)</p>
+              <p className="text-sm text-slate-500">{ABSENCE_TYPES[modal.absence.type]?.label} Â· {modal.absence.duration_days} jour(s)</p>
             </div>
             {modal.action === 'reject' && (
               <div>
@@ -2018,7 +2024,7 @@ function ManagerAbsencesScreen() {
   );
 }
 
-// ─── ADMIN SCREEN ─────────────────────────────────────────────────────────────
+// âââ ADMIN SCREEN âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function AdminScreen() {
   const [users, setUsers] = useState([]);
@@ -2065,12 +2071,13 @@ function AdminScreen() {
     setSaving(true); setError('');
     try {
       if (modal.mode === 'create') {
-        await api.post('/admin/users', form);
+        await if (!form.first_name || !form.last_name) throw new Error('Prénom et nom obligatoires');
+      await api.post('/users', form);
       } else {
         const payload = { ...form };
         delete payload.id;
         if (!payload.password) delete payload.password;
-        await api.patch(`/admin/users/${modal.user.id}`, payload);
+        await api.patch(`/users/${modal.user.id}`, payload);
       }
       setModal(null);
       await load();
@@ -2080,7 +2087,7 @@ function AdminScreen() {
 
   const toggleActive = async (u) => {
     try {
-      await api.patch(`/admin/users/${u.id}`, { active: u.active ? 0 : 1 });
+      await api.patch(`/users/${u.id}`, { active: u.active ? 0 : 1 });
       await load();
     } catch (err) { alert(err.message); }
   };
@@ -2155,7 +2162,7 @@ function AdminScreen() {
                 <button onClick={() => openEdit(u)} className="text-xs text-blue-600 font-semibold hover:text-blue-700">Modifier</button>
                 <button onClick={() => toggleActive(u)}
                   className={`text-xs font-semibold ${u.active ? 'text-red-500 hover:text-red-600' : 'text-emerald-600 hover:text-emerald-700'}`}>
-                  {u.active ? 'Desactiver' : 'Activer'}
+                  {u.active ? 'Désactiver' : 'Activer'}
                 </button>
               </div>
             </div>
@@ -2168,12 +2175,12 @@ function AdminScreen() {
         {modal && (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <Input label="Prenom *" value={form.first_name || ''} onChange={v => setForm(f => ({ ...f, first_name: v }))} />
+              <Input label="Prénom *" value={form.first_name || ''} onChange={v => setForm(f => ({ ...f, first_name: v }))} />
               <Input label="Nom *" value={form.last_name || ''} onChange={v => setForm(f => ({ ...f, last_name: v }))} />
             </div>
             <Input label="Email" value={form.email || ''} onChange={v => setForm(f => ({ ...f, email: v }))} placeholder="prenom@ultima-interior.ch" />
             <Input
-              label={modal.mode === 'create' ? 'Mot de passe' : 'Nouveau mot de passe (vide = inchange)'}
+              label={modal.mode === 'create' ? 'Mot de passe' : 'Nouveau mot de passe (vide = inchangé)'}
               type="password" value={form.password || ''} onChange={v => setForm(f => ({ ...f, password: v }))}
             />
             <Input label="Telephone" value={form.phone || ''} onChange={v => setForm(f => ({ ...f, phone: v }))} placeholder="+41 79 000 00 00" />
@@ -2195,13 +2202,13 @@ function AdminScreen() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <Input label="H / semaine" type="number" value={form.weekly_target_h ?? 42} onChange={v => setForm(f => ({ ...f, weekly_target_h: parseFloat(v) || 42 }))} />
-              <Input label="Jours conges / an" type="number" value={form.annual_leave_d ?? 25} onChange={v => setForm(f => ({ ...f, annual_leave_d: parseInt(v) || 25 }))} />
+              <Input label="Jours congés / an" type="number" value={form.annual_leave_d ?? 25} onChange={v => setForm(f => ({ ...f, annual_leave_d: parseInt(v) || 25 }))} />
             </div>
             {error && <Alert type="error">{error}</Alert>}
             <div className="flex gap-3 pt-1">
               <Button onClick={() => setModal(null)} variant="secondary" className="flex-1">Annuler</Button>
               <Button onClick={save} loading={saving} className="flex-1">
-                {modal.mode === 'create' ? 'Creer' : 'Enregistrer'}
+                {modal.mode === 'create' ? 'Créer' : 'Enregistrer'}
               </Button>
             </div>
           </div>
@@ -2211,7 +2218,7 @@ function AdminScreen() {
   );
 }
 
-// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+// âââ MAIN APP âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function App() {
   const [auth, setAuth] = useState(null);
@@ -2309,13 +2316,16 @@ function App() {
 
   const info = pageInfo[view] || { title: 'Ultima Pointage', subtitle: null };
 
-  const exportAction = isManager && view === 'team' ? (
-    <a href="/api/time-entries/export" target="_blank"
-      className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors font-semibold">
-      <Ic name="download" size={13} />
-      Export
-    </a>
-  ) : null;
+  const exportAction = isManager && view === 'team' ? (() => {
+    const { week: ew, year: ey } = getISOWeek();
+    return (
+      <a href={`/api/time-entries/export?week=${ew}&year=${ey}`} target="_blank"
+        className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors font-semibold">
+        <Ic name="download" size={13} />
+        Export
+      </a>
+    );
+  })() : null;
 
   const renderView = () => {
     switch (view) {
@@ -2369,7 +2379,7 @@ function App() {
   );
 }
 
-// ─── MOUNT ────────────────────────────────────────────────────────────────────
+// âââ MOUNT ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
