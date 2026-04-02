@@ -1567,10 +1567,42 @@ function AccountScreen({ user, onLogout, onUserUpdate }) {
 
 // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ TEAM SCREEN ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
 
+
+function getPeriodLabel(mode, date) {
+  const d = new Date(date);
+  const M = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const J = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  if (mode === 'day')   return J[d.getDay()] + ' ' + d.getDate() + ' ' + M[d.getMonth()] + ' ' + d.getFullYear();
+  if (mode === 'week')  { const w = _isoWk(d); return 'Semaine ' + w.w + ' — ' + w.y; }
+  if (mode === 'month') return M[d.getMonth()] + ' ' + d.getFullYear();
+  return '' + d.getFullYear();
+}
+function _isoWk(d) {
+  const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = dt.getUTCDay() || 7; dt.setUTCDate(dt.getUTCDate() + 4 - day);
+  const y1 = new Date(Date.UTC(dt.getUTCFullYear(), 0, 1));
+  return { w: Math.ceil((((dt - y1) / 86400000) + 1) / 7), y: dt.getUTCFullYear() };
+}
+function getPeriodParams(mode, date) {
+  const d = new Date(date); const iso = x => x.toISOString().slice(0,10);
+  if (mode === 'day') return 'from_date=' + iso(d) + '&to_date=' + iso(d);
+  if (mode === 'week') {
+    const day = d.getDay() || 7; const mon = new Date(d); mon.setDate(d.getDate() + 1 - day);
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    return 'from_date=' + iso(mon) + '&to_date=' + iso(sun);
+  }
+  if (mode === 'month') {
+    return 'from_date=' + iso(new Date(d.getFullYear(), d.getMonth(), 1)) +
+           '&to_date='   + iso(new Date(d.getFullYear(), d.getMonth() + 1, 0));
+  }
+  return 'from_date=' + d.getFullYear() + '-01-01&to_date=' + d.getFullYear() + '-12-31';
+}
 function TeamScreen() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [{ week, year }, setWeekYear] = useState(() => getISOWeek());
+  const [viewMode, setViewMode] = useState('week');
+  const [anchorDate, setAnchorDate] = useState(() => new Date());
   const [selected, setSelected] = useState(null);
   const [userEntries, setUserEntries] = useState(null);
   const [userLoading, setUserLoading] = useState(false);
@@ -1578,19 +1610,20 @@ function TeamScreen() {
 
   useEffect(() => {
     setLoading(true);
-    api.get(`/time-entries/team?week=${week}&year=${year}`)
+    api.get('/time-entries/team?' + getPeriodParams(viewMode, anchorDate))
       .then(d => setData(d.team || []))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [week, year]);
+  }, [viewMode, anchorDate]);
 
   const changeWeek = (delta) => {
-    setWeekYear(({ week: w, year: y }) => {
-      let nw = w + delta;
-      let ny = y;
-      if (nw < 1) { nw = 52; ny -= 1; }
-      if (nw > 52) { nw = 1; ny += 1; }
-      return { week: nw, year: ny };
+    setAnchorDate(d => {
+      const nd = new Date(d);
+      if (viewMode === 'day') nd.setDate(nd.getDate() + delta);
+      else if (viewMode === 'week') nd.setDate(nd.getDate() + delta * 7);
+      else if (viewMode === 'month') nd.setMonth(nd.getMonth() + delta);
+      else nd.setFullYear(nd.getFullYear() + delta);
+      return nd;
     });
   };
 
@@ -1680,6 +1713,15 @@ function TeamScreen() {
 
   return (
     <div className="space-y-4 pb-6 max-w-2xl">
+      {/* View mode */}
+      <div className="flex gap-1 mb-3 bg-slate-100 p-1 rounded-xl">
+        {[{id:'day',label:'Jour'},{id:'week',label:'Semaine'},{id:'month',label:'Mois'},{id:'year',label:'Année'}].map(m => (
+          <button key={m.id}
+            onClick={() => { setViewMode(m.id); setAnchorDate(new Date()); }}
+            className={'flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ' + (viewMode === m.id ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700')}
+          >{m.label}</button>
+        ))}
+      </div>
       {/* Week nav */}
       <Card className="p-4">
         <div className="flex items-center justify-between">
@@ -1687,7 +1729,7 @@ function TeamScreen() {
             <Ic name="chevLeft" size={18} className="text-slate-600" />
           </button>
           <div className="text-center">
-            <div className="text-sm font-bold text-slate-800">Semaine {week} — {year}</div>
+            <div className="text-sm font-bold text-slate-800">{getPeriodLabel(viewMode, anchorDate)}</div>
           </div>
           <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
             <Ic name="chevRight" size={18} className="text-slate-600" />
