@@ -1143,7 +1143,7 @@ function HoursScreen({ user }) {
           <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
             <Ic name="clock" size={24} className="text-slate-400" />
           </div>
-          <p className="text-slate-500 font-medium">Aucune entree cette semaine</p>
+          <p className="text-slate-500 font-medium">Aucune entrée cette semaine</p>
         </Card>
       ) : (
         byDay.map(([day, dayEntries]) => {
@@ -1669,7 +1669,7 @@ function TeamScreen() {
           <div className="flex justify-center py-8"><Spinner size="lg" /></div>
         ) : entries.length === 0 ? (
           <Card className="p-8 text-center">
-            <p className="text-slate-400">Aucune entree cette semaine</p>
+            <p className="text-slate-400">Aucune entrée cette semaine</p>
           </Card>
         ) : (
           <Card>
