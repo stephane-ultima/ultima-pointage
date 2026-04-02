@@ -34,6 +34,11 @@ class UsersHandler(BaseHandler):
         if not all(data.get(k) for k in required):
             return self.error(f"Champs requis : {', '.join(required)}")
 
+        # ADMIN cannot create SUPERADMIN
+        requested_role = data.get('role', '')
+        if user['role'] == 'ADMIN' and requested_role == 'SUPERADMIN':
+            return self.error("Accès refusé : un ADMIN ne peut pas créer un SUPERADMIN")
+
         uid = db.fetchone("SELECT lower(hex(randomblob(16))) as id")['id']
         ph = auth_module.hash_password(data['password']) if data.get('password') else None
 
@@ -64,7 +69,7 @@ class UserDetailHandler(BaseHandler):
         if not user: return
         # Users can update their own profile; admins can update anyone
         if uid != user['id'] and user['role'] not in ('ADMIN', 'SUPERADMIN'):
-            return self.error('Accès refusé', 403)
+            return self.error('AccÃ¨s refusÃ©', 403)
         data = self.body()
         allowed = ['first_name', 'last_name', 'phone', 'geoloc_consent']
         if user['role'] in ('ADMIN', 'SUPERADMIN'):
