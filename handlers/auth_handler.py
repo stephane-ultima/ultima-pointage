@@ -50,7 +50,7 @@ class MagicLinkHandler(BaseHandler):
         data = self.body()
         phone_or_email = data.get('contact', '').strip()
         if not phone_or_email:
-            return self.error('Email ou tÃ©lÃ©phone requis')
+            return self.error('Email ou téléphone requis')
 
         user = db.fetchone("""
             SELECT * FROM users
