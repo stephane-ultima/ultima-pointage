@@ -1,12 +1,12 @@
 """
 Auth endpoints:
-POST /api/auth/login          â email + password (manager/admin)
-POST /api/auth/magic-link     â request magic link (employee)
-POST /api/auth/verify-link    â verify magic link token
-POST /api/auth/verify-pin     â verify PIN after link auth
-POST /api/auth/refresh        â refresh access token
+POST /api/auth/login          Ã¢ÂÂ email + password (manager/admin)
+POST /api/auth/magic-link     Ã¢ÂÂ request magic link (employee)
+POST /api/auth/verify-link    Ã¢ÂÂ verify magic link token
+POST /api/auth/verify-pin     Ã¢ÂÂ verify PIN after link auth
+POST /api/auth/refresh        Ã¢ÂÂ refresh access token
 POST /api/auth/logout
-GET  /api/auth/me             â current user profile
+GET  /api/auth/me             Ã¢ÂÂ current user profile
 """
 import time
 import db
@@ -29,7 +29,7 @@ class LoginHandler(BaseHandler):
         if not auth_module.check_password(password, user['password_hash']):
             return self.error('Identifiants incorrects', 401)
         if user['role'] not in ('MANAGER', 'ADMIN', 'SUPERADMIN'):
-            return self.error('Utilisez le lien d\'accÃ¨s pour les employÃ©s', 403)
+            return self.error('Utilisez le lien d\'accÃÂ¨s pour les employÃÂ©s', 403)
 
         access = auth_module.create_access_token(user['id'], user['role'])
         refresh = auth_module.create_refresh_token(user['id'])
@@ -64,18 +64,18 @@ class MagicLinkHandler(BaseHandler):
             db.execute("UPDATE users SET magic_token=?, magic_token_exp=? WHERE id=?",
                        (token, exp, user['id']))
             # In production: send SMS/email. Token logged server-side for demo.
-            print(f"[MAGIC LINK] User: {user['first_name']} {user['last_name']} â Token: {token}")
+            print(f"[MAGIC LINK] User: {user['first_name']} {user['last_name']} Ã¢ÂÂ Token: {token}")
             self.json({
-                'message': 'Lien envoyÃ©',
+                'message': 'Lien envoyÃÂ©',
                 '_demo_token': token,  # Remove in production!
                 '_demo_user_id': user['id']
             })
         else:
-            self.json({'message': 'Si ce contact est enregistrÃ©, vous recevrez un lien'})
+            self.json({'message': 'Si ce contact est enregistrÃÂ©, vous recevrez un lien'})
 
 
 class VerifyLinkHandler(BaseHandler):
-    """Verify magic link token â returns partial session, requires PIN next."""
+    """Verify magic link token Ã¢ÂÂ returns partial session, requires PIN next."""
     def post(self):
         data = self.body()
         token = data.get('token', '').strip()
@@ -87,11 +87,11 @@ class VerifyLinkHandler(BaseHandler):
             WHERE magic_token=? AND magic_token_exp > ? AND active=1
         """, (token, int(time.time())))
         if not user:
-            return self.error('Lien invalide ou expirÃ©', 401)
+            return self.error('Lien invalide ou expirÃÂ©', 401)
 
         # Check if user has a PIN set
         if not user['pin_hash']:
-            # First login â set PIN flow
+            # First login Ã¢ÂÂ set PIN flow
             temp = auth_module.create_access_token(user['id'] + '_setup', 'SETUP')
             db.execute("UPDATE users SET magic_token=NULL, magic_token_exp=NULL WHERE id=?",
                        (user['id'],))
@@ -102,7 +102,7 @@ class VerifyLinkHandler(BaseHandler):
                 'setup_token': temp
             })
         else:
-            # Has PIN â ask for it
+            # Has PIN Ã¢ÂÂ ask for it
             db.execute("UPDATE users SET magic_token=NULL, magic_token_exp=NULL WHERE id=?",
                        (user['id'],))
             self.json({
@@ -166,7 +166,7 @@ class LogoutHandler(BaseHandler):
     def post(self):
         self.clear_cookie('access_token')
         self.clear_cookie('refresh_token')
-        self.json({'message': 'DÃ©connectÃ©'})
+        self.json({'message': 'DÃÂ©connectÃÂ©'})
 
 
 class ChangePasswordHandler(BaseHandler):
@@ -180,7 +180,7 @@ class ChangePasswordHandler(BaseHandler):
         if not new_pw:
             return self.error('Nouveau mot de passe requis')
         if len(new_pw) < 8:
-            return self.error('Le mot de passe doit faire au moins 8 caractÃ¨res')
+            return self.error('Le mot de passe doit faire au moins 8 caractÃÂ¨res')
         # If user has an existing password, require current password
         if user['password_hash']:
             if not current_pw:
@@ -211,7 +211,7 @@ class MeHandler(BaseHandler):
         from utils import get_week_bounds
         start_ts, end_ts = get_week_bounds(week, year)
         week_min = db.fetchone("""
-            SELECT COALESCE(SUM(d uration_min), 0) as total
+            SELECT COALESCE(SUM(duration_min), 0) as total
             FROM time_entries
             WHERE user_id=? AND week_number=? AND week_year=?
             AND activity_type != 'BREAK' AND ended_at IS NOT NULL
