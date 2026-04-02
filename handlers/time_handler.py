@@ -304,6 +304,8 @@ class TeamEntriesHandler(BaseHandler):
 
         week = int(self.get_argument('week', get_week_number()[0]))
         year = int(self.get_argument('year', get_week_number()[1]))
+        from_date = self.get_argument('from_date', None)
+        to_date   = self.get_argument('to_date', None)
 
         # Get all employees under this manager
         if user['role'] == 'MANAGER':
@@ -315,13 +317,22 @@ class TeamEntriesHandler(BaseHandler):
 
         result = []
         for emp in employees:
-            entries = db.fetchall("""
-                SELECT te.*, p.name as project_name FROM time_entries te
-                LEFT JOIN projects p ON te.project_id = p.id
-                WHERE te.user_id=? AND te.week_number=? AND te.week_year=?
-                AND te.activity_type != 'BREAK'
-                ORDER BY te.started_at
-            """, (emp['id'], week, year))
+            if from_date and to_date:
+                entries = db.fetchall("""
+                    SELECT te.*, p.name as project_name FROM time_entries te
+                    LEFT JOIN projects p ON te.project_id = p.id
+                    WHERE te.user_id=? AND date(te.started_at, 'unixepoch') BETWEEN ? AND ?
+                    AND te.activity_type != 'BREAK'
+                    ORDER BY te.started_at
+                """, (emp['id'], from_date, to_date))
+            else:
+                entries = db.fetchall("""
+                    SELECT te.*, p.name as project_name FROM time_entries te
+                    LEFT JOIN projects p ON te.project_id = p.id
+                    WHERE te.user_id=? AND te.week_number=? AND te.week_year=?
+                    AND te.activity_type != 'BREAK'
+                    ORDER BY te.started_at
+                """, (emp['id'], week, year))
             total_min = sum(e['duration_min'] or 0 for e in entries if e['ended_at'])
             alerts = check_alerts(emp['id'], week, year)
             pending_count = sum(1 for e in entries if e['status'] in ('PENDING','RETURNED','CORRECTED'))
