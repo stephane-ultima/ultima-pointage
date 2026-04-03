@@ -9,6 +9,7 @@ import tornado.ioloop
 import tornado.web
 import db
 import auth as auth_module
+import backup
 
 from handlers.auth_handler import (
     LoginHandler, MagicLinkHandler, VerifyLinkHandler,
@@ -69,6 +70,22 @@ class SetupHandler(tornado.web.RequestHandler):
             self.finish(json.dumps({'status': 'created', 'email': email}))
 
 
+class BackupHandler(tornado.web.RequestHandler):
+    """Admin-only endpoint: POST /api/admin/backup triggers an immediate backup."""
+    def post(self):
+        import auth as auth_module
+        token = self.request.headers.get('Authorization', '').replace('Bearer ', '')
+        payload = auth_module.verify_token(token)
+        if not payload or payload.get('role') not in ('ADMIN', 'SUPERADMIN'):
+            self.set_status(403)
+            self.finish({'error': 'Acc\u00e8s refus\u00e9'})
+            return
+        result = backup.run_backup(db.DB_PATH)
+        self.set_header('Content-Type', 'application/json')
+        import json
+        self.finish(json.dumps(result))
+
+
 def make_app():
     settings = {
         'template_path': os.path.join(os.path.dirname(__file__), 'static'),
@@ -101,6 +118,7 @@ def make_app():
         (r'/api/projects/([^/]+)',  ProjectDetailHandler),
         (r'/api/users',             UsersHandler),
         (r'/api/users/([^/]+)',     UserDetailHandler),
+        (r'/api/admin/backup',      BackupHandler),
         (r'/api/stats',             StatsHandler),
         (r'/static/(.*)',           tornado.web.StaticFileHandler,
          {'path': os.path.join(os.path.dirname(__file__), 'static')}),
@@ -128,5 +146,8 @@ if __name__ == '__main__':
         import seed
         seed.run()
     tornado.ioloop.IOLoop.current().call_later(1.5, do_seed)
+
+    # Start hourly SQLite backup scheduler
+    backup.schedule(db.DB_PATH)
 
     tornado.ioloop.IOLoop.current().start()
