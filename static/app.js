@@ -638,7 +638,7 @@ function LoginScreen({ onLogin }) {
           {mode === 'password' ? (
             <form onSubmit={handlePassword} className="space-y-4">
               <Input label="Adresse email" type="email" value={email} onChange={setEmail} placeholder="vous@ultima-interior.ch" required autoFocus />
-              <Input label="Mot de passe" type="password" value={password} onChange={setPassword} placeholder="ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢" required />
+              <Input label="Mot de passe" type="password" value={password} onChange={setPassword} placeholder="••••••••" required />
               {error && <Alert type="error">{error}</Alert>}
               <Button type="submit" loading={loading} className="w-full" size="lg">
                 Se connecter
