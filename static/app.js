@@ -954,6 +954,29 @@ function HomeScreen({ user, meData, onRefresh }) {
         </Card>
       )}
 
+      {/* Solde vacances */}
+      {meData?.balance && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center">
+                <Ic name="star" size={16} className="text-emerald-600" />
+              </div>
+              <span className="text-sm font-semibold text-slate-700">Solde vacances</span>
+            </div>
+            <div className="text-right">
+              <span className="text-lg font-bold text-emerald-600">
+                {Math.max(0, meData.balance.holiday_total - meData.balance.holiday_taken - meData.balance.holiday_pending).toFixed(1)}j
+              </span>
+              <div className="text-xs text-slate-400">sur {meData.balance.holiday_total}j</div>
+            </div>
+          </div>
+          {meData.balance.holiday_pending > 0 && (
+            <p className="text-xs text-amber-600 mt-2">{meData.balance.holiday_pending}j en attente</p>
+          )}
+        </Card>
+      )}
+
       {/* Today entries */}
       {todayEntries.length > 0 && (
         <Card>
@@ -1597,6 +1620,27 @@ function getPeriodParams(mode, date) {
   }
   return 'from_date=' + d.getFullYear() + '-01-01&to_date=' + d.getFullYear() + '-12-31';
 }
+function workingDaysInMonth(date) {
+  const d = new Date(date), y = d.getFullYear(), m = d.getMonth();
+  let n = 0; const cur = new Date(y, m, 1);
+  while (cur.getMonth() === m) { const wd = cur.getDay(); if (wd && wd < 6) n++; cur.setDate(cur.getDate() + 1); }
+  return n;
+}
+function getTargetForPeriod(weeklyH, mode, anchorDate) {
+  const wh = weeklyH || 42;
+  if (mode === 'day')   return wh / 5 * 60;
+  if (mode === 'week')  return wh * 60;
+  if (mode === 'month') return wh / 5 * workingDaysInMonth(anchorDate) * 60;
+  return wh * 52 * 60;
+}
+function fmtTarget(weeklyH, mode, anchorDate) {
+  const wh = weeklyH || 42;
+  if (mode === 'day')   return (wh / 5).toFixed(1) + 'h';
+  if (mode === 'week')  return wh + 'h';
+  if (mode === 'month') return Math.round(wh / 5 * workingDaysInMonth(anchorDate)) + 'h';
+  return Math.round(wh * 52) + 'h';
+}
+
 function TeamScreen() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1781,7 +1825,7 @@ function TeamScreen() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {filtered.map(emp => {
             const totalWork = emp.total_min || 0;
-            const target = (emp.weekly_target_h || 42) * 60;
+            const target = getTargetForPeriod(emp.weekly_target_h || 42, viewMode, anchorDate);
             const pct = fmt.pct(totalWork, target);
             const hasAlerts = emp.alerts && emp.alerts.length > 0;
             const isActive = emp.is_active_now;
@@ -1799,7 +1843,7 @@ function TeamScreen() {
                   </div>
                   <div className="text-right flex-shrink-0">
                     <div className="font-bold text-slate-700 text-sm">{fmt.duration(totalWork)}</div>
-                    <div className="text-xs text-slate-400">/ {emp.weekly_target_h || 42}h</div>
+                    <div className="text-xs text-slate-400">/ {fmtTarget(emp.weekly_target_h || 42, viewMode, anchorDate)}</div>
                   </div>
                 </div>
                 <ProgressBar value={totalWork} max={target} />
