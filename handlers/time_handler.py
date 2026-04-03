@@ -290,6 +290,15 @@ class TimeEntryDetailHandler(BaseHandler):
             ended_ts   = int(_dt.datetime.combine(entry_date, _dt.time(eh, em)).timestamp())
             if ended_ts <= started_ts:
                 return self.error("L'heure de fin doit etre apres l'heure de debut")
+            # P1-06: Vérifier le chevauchement avec des entrées existantes
+            overlap = db.fetchone("""
+                SELECT id FROM time_entries
+                WHERE user_id=? AND id != ? AND ended_at IS NOT NULL
+                AND started_at < ? AND ended_at > ?
+                AND status NOT IN ('REJECTED')
+            """, (user['id'], entry_id, ended_ts, started_ts))
+            if overlap:
+                return self.error("Chevauchement avec une entrée de temps existante", 409)
             duration_min = round((ended_ts - started_ts) / 60)
             db.execute("""
                 UPDATE time_entries
@@ -411,13 +420,22 @@ class ValidateWeekHandler(BaseHandler):
             """, (user['id'], now, now, emp_id, int(week), int(year)))
             self.audit('WEEK_VALIDATED', 'time_entries', f"{emp_id}_{week}_{year}")
         else:
-            # Validate entire week for all employees
-            db.execute("""
-                UPDATE time_entries
-                SET status='APPROVED', validated_by=?, validated_at=?, updated_at=?
-                WHERE week_number=? AND week_year=?
-                AND status IN ('PENDING','CORRECTED')
-            """, (user['id'], now, now, int(week), int(year)))
+            # Validate week — MANAGERs limités à leur équipe seulement
+            if user['role'] == 'MANAGER':
+                db.execute("""
+                    UPDATE time_entries
+                    SET status='APPROVED', validated_by=?, validated_at=?, updated_at=?
+                    WHERE week_number=? AND week_year=?
+                    AND status IN ('PENDING','CORRECTED')
+                    AND user_id IN (SELECT id FROM users WHERE manager_id=?)
+                """, (user['id'], now, now, int(week), int(year), user['id']))
+            else:
+                db.execute("""
+                    UPDATE time_entries
+                    SET status='APPROVED', validated_by=?, validated_at=?, updated_at=?
+                    WHERE week_number=? AND week_year=?
+                    AND status IN ('PENDING','CORRECTED')
+                """, (user['id'], now, now, int(week), int(year)))
             self.audit('WEEK_VALIDATED_ALL', 'time_entries', f"all_{week}_{year}")
         self.json({'message': 'Semaine validée', 'validated': True})
 
@@ -453,8 +471,16 @@ class SubmitDayHandler(BaseHandler):
             WHERE user_id=? AND started_at>=? AND started_at<=?
             AND status='DRAFT' AND ended_at IS NOT NULL
         """, (now, user['id'], start_ts, end_ts))
+        open_count = (db.fetchone("""
+            SELECT COUNT(*) as cnt FROM time_entries
+            WHERE user_id=? AND started_at>=? AND started_at<=?
+            AND status='DRAFT' AND ended_at IS NULL
+        """, (user['id'], start_ts, end_ts)) or {}).get('cnt', 0)
         self.audit('DAY_SUBMITTED', 'time_entries', f"{user['id']}_{date_str}")
-        self.ok({'submitted': len(entries), 'date': date_str})
+        resp = {'submitted': len(entries), 'date': date_str}
+        if open_count:
+            resp['warning'] = f"{open_count} entrée(s) non terminée(s) ignorée(s) — pensez à pointer votre départ"
+        self.ok(resp)
 
 
 class ReturnHandler(BaseHandler):
