@@ -14,6 +14,12 @@ import auth as auth_module
 from handlers.base import BaseHandler
 
 
+# P1-01: Suivi des échecs de connexion par IP (en mémoire)
+_login_failures = {}   # ip -> [timestamp, ...]
+_RATE_LIMIT_MAX    = 5     # échecs max
+_RATE_LIMIT_WINDOW = 900   # fenêtre 15 min
+
+
 class LoginHandler(BaseHandler):
     """Email + password login for managers and admins."""
     def post(self):
@@ -23,12 +29,24 @@ class LoginHandler(BaseHandler):
         if not email or not password:
             return self.error('Email et mot de passe requis')
 
+        # P1-01: Vérifier la limite de tentatives
+        ip = self.request.remote_ip
+        now_ts = time.time()
+        recent = [t for t in _login_failures.get(ip, []) if now_ts - t < _RATE_LIMIT_WINDOW]
+        _login_failures[ip] = recent
+        if len(recent) >= _RATE_LIMIT_MAX:
+            self.set_header('Retry-After', '900')
+            return self.error('Trop de tentatives. Réessayez dans 15 minutes.', 429)
+
         user = db.fetchone("SELECT * FROM users WHERE email=? AND active=1", (email,))
         if not user or not user['password_hash']:
+            _login_failures.setdefault(ip, []).append(now_ts)
             return self.error('Identifiants incorrects', 401)
         if not auth_module.check_password(password, user['password_hash']):
+            _login_failures.setdefault(ip, []).append(now_ts)
             return self.error('Identifiants incorrects', 401)
 
+        _login_failures.pop(ip, None)  # succès → reset
         access = auth_module.create_access_token(user['id'], user['role'])
         refresh = auth_module.create_refresh_token(user['id'])
 
