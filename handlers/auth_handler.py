@@ -9,6 +9,7 @@ POST /api/auth/logout
 GET  /api/auth/me             — current user profile
 """
 import time
+import hashlib
 import db
 import auth as auth_module
 from handlers.base import BaseHandler
@@ -77,8 +78,10 @@ class MagicLinkHandler(BaseHandler):
         if user:
             token = auth_module.generate_magic_token()
             exp = int(time.time()) + auth_module.MAGIC_TTL
+            # P1-02: Stocker le hash du token (jamais le token brut)
+            token_hash = hashlib.sha256(token.encode()).hexdigest()
             db.execute("UPDATE users SET magic_token=?, magic_token_exp=? WHERE id=?",
-                       (token, exp, user['id']))
+                       (token_hash, exp, user['id']))
             # In production: send SMS/email. Token logged server-side for demo.
             print(f"[MAGIC LINK] User: {user['first_name']} {user['last_name']} — Token: {token}")
             self.json({
@@ -98,10 +101,12 @@ class VerifyLinkHandler(BaseHandler):
         if not token:
             return self.error('Token manquant')
 
+        # P1-02: Comparer contre le hash stocké
+        token_hash = hashlib.sha256(token.encode()).hexdigest()
         user = db.fetchone("""
             SELECT * FROM users
             WHERE magic_token=? AND magic_token_exp > ? AND active=1
-        """, (token, int(time.time())))
+        """, (token_hash, int(time.time())))
         if not user:
             return self.error('Lien invalide ou expiré', 401)
 
