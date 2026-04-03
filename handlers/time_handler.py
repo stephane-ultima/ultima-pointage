@@ -1,5 +1,5 @@
 """
-Time entry endpoints — pointage core
+Time entry endpoints â pointage core
 """
 import time
 import json
@@ -168,7 +168,7 @@ class TimeEntriesHandler(BaseHandler):
 
         activity = data.get('activity_type')
         if activity not in ('WORK_SITE','WORK_DEPOT','TRAVEL_PRO','WORK_SAV','WORK_REMOTE','BREAK'):
-            return self.error('Type d\'activité invalide')
+            return self.error('Type d\'activitÃ© invalide')
 
         # Close any open session first
         open_session = db.fetchone("""
@@ -224,13 +224,13 @@ class TimeEntryDetailHandler(BaseHandler):
 
         entry = db.fetchone("SELECT * FROM time_entries WHERE id=?", (entry_id,))
         if not entry:
-            return self.error('Entrée introuvable', 404)
+            return self.error('EntrÃ©e introuvable', 404)
 
         now = ts_now()
 
         if action == 'stop':
             if entry['user_id'] != user['id']:
-                return self.error('Accès refusé', 403)
+                return self.error('AccÃ¨s refusÃ©', 403)
             db.execute("""
                 UPDATE time_entries SET ended_at=?, status='PENDING', updated_at=?
                 WHERE id=? AND ended_at IS NULL
@@ -248,7 +248,7 @@ class TimeEntryDetailHandler(BaseHandler):
 
         elif action == 'validate':
             if user['role'] not in ('MANAGER', 'ADMIN', 'SUPERADMIN'):
-                return self.error('Accès refusé', 403)
+                return self.error('AccÃ¨s refusÃ©', 403)
             db.execute("""
                 UPDATE time_entries
                 SET status='APPROVED', validated_by=?, validated_at=?, updated_at=?
@@ -258,7 +258,7 @@ class TimeEntryDetailHandler(BaseHandler):
 
         elif action == 'return':
             if user['role'] not in ('MANAGER', 'ADMIN', 'SUPERADMIN'):
-                return self.error('Accès refusé', 403)
+                return self.error('AccÃ¨s refusÃ©', 403)
             data = self.body()
             note = data.get('note', '')
             db.execute("""
@@ -266,6 +266,39 @@ class TimeEntryDetailHandler(BaseHandler):
                 WHERE id=?
             """, (note, now, entry_id))
             self.audit('TIME_ENTRY_RETURNED', 'time_entries', entry_id)
+
+        elif action == 'edit':
+            # Employe corrige une entree RETURNED -> statut CORRECTED
+            if entry['user_id'] != user['id']:
+                return self.error('Acces refuse', 403)
+            if entry['status'] != 'RETURNED':
+                return self.error('Seules les entrees retournees peuvent etre corrigees')
+            data = self.body()
+            started_hm = (data.get('started_hm') or '').strip()
+            ended_hm   = (data.get('ended_hm')   or '').strip()
+            act_type   = data.get('activity_type', entry['activity_type'])
+            if not started_hm or not ended_hm:
+                return self.error('Heures de debut et fin requises')
+            import datetime as _dt
+            try:
+                sh, sm = map(int, started_hm.split(':'))
+                eh, em = map(int, ended_hm.split(':'))
+            except (ValueError, AttributeError):
+                return self.error('Format invalide (HH:MM)')
+            entry_date = _dt.date.fromtimestamp(entry['started_at'])
+            started_ts = int(_dt.datetime.combine(entry_date, _dt.time(sh, sm)).timestamp())
+            ended_ts   = int(_dt.datetime.combine(entry_date, _dt.time(eh, em)).timestamp())
+            if ended_ts <= started_ts:
+                return self.error("L'heure de fin doit etre apres l'heure de debut")
+            duration_min = round((ended_ts - started_ts) / 60)
+            db.execute("""
+                UPDATE time_entries
+                SET started_at=?, ended_at=?, activity_type=?, duration_min=?,
+                    status='CORRECTED', updated_at=?
+                WHERE id=? AND user_id=?
+            """, (started_ts, ended_ts, act_type, duration_min, now, entry_id, user['id']))
+            self.audit('TIME_ENTRY_CORRECTED', 'time_entries', entry_id)
+            self.json({'ok': True, 'duration_min': duration_min})
 
         elif action == 'correction':
             data = self.body()
@@ -363,7 +396,7 @@ class ValidateWeekHandler(BaseHandler):
         user = self.require_auth(['MANAGER', 'ADMIN', 'SUPERADMIN'])
         if not user: return
         data = self.body()
-        emp_id = data.get('user_id')  # optional – if omitted, validates ALL employees
+        emp_id = data.get('user_id')  # optional â if omitted, validates ALL employees
         week = data.get('week')
         year = data.get('year')
         if not week or not year:
@@ -386,7 +419,7 @@ class ValidateWeekHandler(BaseHandler):
                 AND status IN ('PENDING','CORRECTED')
             """, (user['id'], now, now, int(week), int(year)))
             self.audit('WEEK_VALIDATED_ALL', 'time_entries', f"all_{week}_{year}")
-        self.json({'message': 'Semaine validée', 'validated': True})
+        self.json({'message': 'Semaine validÃ©e', 'validated': True})
 
 
 
@@ -499,9 +532,9 @@ class ExportHandler(BaseHandler):
 
         output = io.StringIO()
         writer = csv.writer(output, delimiter=';')
-        writer.writerow(['Prénom', 'Nom', 'Activité', 'Début', 'Fin', 'Durée (min)',
+        writer.writerow(['PrÃ©nom', 'Nom', 'ActivitÃ©', 'DÃ©but', 'Fin', 'DurÃ©e (min)',
                           'Code chantier', 'Chantier', 'Statut', 'Ind. repas',
-                          'Semaine', 'Année'])
+                          'Semaine', 'AnnÃ©e'])
         import datetime
         for r in rows:
             def fmt_ts(ts):
