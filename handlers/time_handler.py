@@ -168,7 +168,7 @@ class TimeEntriesHandler(BaseHandler):
 
         activity = data.get('activity_type')
         if activity not in ('WORK_SITE','WORK_DEPOT','TRAVEL_PRO','WORK_SAV','WORK_REMOTE','BREAK'):
-            return self.error('Type d\'activitÃ© invalide')
+            return self.error('Type d\'activité invalide')
 
         # Close any open session first
         open_session = db.fetchone("""
@@ -224,13 +224,13 @@ class TimeEntryDetailHandler(BaseHandler):
 
         entry = db.fetchone("SELECT * FROM time_entries WHERE id=?", (entry_id,))
         if not entry:
-            return self.error('EntrÃ©e introuvable', 404)
+            return self.error('Entrée introuvable', 404)
 
         now = ts_now()
 
         if action == 'stop':
             if entry['user_id'] != user['id']:
-                return self.error('AccÃ¨s refusÃ©', 403)
+                return self.error('Accès refusé', 403)
             db.execute("""
                 UPDATE time_entries SET ended_at=?, status='PENDING', updated_at=?
                 WHERE id=? AND ended_at IS NULL
@@ -248,7 +248,7 @@ class TimeEntryDetailHandler(BaseHandler):
 
         elif action == 'validate':
             if user['role'] not in ('MANAGER', 'ADMIN', 'SUPERADMIN'):
-                return self.error('AccÃ¨s refusÃ©', 403)
+                return self.error('Accès refusé', 403)
             db.execute("""
                 UPDATE time_entries
                 SET status='APPROVED', validated_by=?, validated_at=?, updated_at=?
@@ -258,7 +258,7 @@ class TimeEntryDetailHandler(BaseHandler):
 
         elif action == 'return':
             if user['role'] not in ('MANAGER', 'ADMIN', 'SUPERADMIN'):
-                return self.error('AccÃ¨s refusÃ©', 403)
+                return self.error('Accès refusé', 403)
             data = self.body()
             note = data.get('note', '')
             db.execute("""
@@ -419,7 +419,7 @@ class ValidateWeekHandler(BaseHandler):
                 AND status IN ('PENDING','CORRECTED')
             """, (user['id'], now, now, int(week), int(year)))
             self.audit('WEEK_VALIDATED_ALL', 'time_entries', f"all_{week}_{year}")
-        self.json({'message': 'Semaine validÃ©e', 'validated': True})
+        self.json({'message': 'Semaine validée', 'validated': True})
 
 
 
@@ -532,9 +532,9 @@ class ExportHandler(BaseHandler):
 
         output = io.StringIO()
         writer = csv.writer(output, delimiter=';')
-        writer.writerow(['PrÃ©nom', 'Nom', 'ActivitÃ©', 'DÃ©but', 'Fin', 'DurÃ©e (min)',
+        writer.writerow(['Prénom', 'Nom', 'Activité', 'Début', 'Fin', 'Durée (min)',
                           'Code chantier', 'Chantier', 'Statut', 'Ind. repas',
-                          'Semaine', 'AnnÃ©e'])
+                          'Semaine', 'Année'])
         import datetime
         for r in rows:
             def fmt_ts(ts):
