@@ -2249,9 +2249,12 @@ function TeamScreen() {
     setUserLoading(true);
     try {
       const d = await api.get(`/time-entries/team?week=${week}&year=${year}&user_id=${emp.employee?.id}`);
-      setUserEntries(d.entries || []);
+      setUserEntries((d.team&&d.team[0]&&d.team[0].entries)||[]);
     } catch {}
     finally { setUserLoading(false); }
+  };
+  const toggleMealTeam = async (entryId) => {
+    try { await api.patch('/time-entries/' + entryId + '/meal_toggle', {}); await viewUser(selected); } catch(e) { console.error(e); }
   };
 
   // User detail view
@@ -2307,6 +2310,11 @@ function TeamScreen() {
                     </div>
                     <div className="text-right flex-shrink-0">
                       {e.ended_at && <div className="text-sm font-semibold">{fmt.duration(e.duration_min)}</div>}
+                      {e.meal_allowance ? (
+                        <span title="Indemnite repas" className="text-base leading-none" style={{cursor:'pointer'}} onClick={()=>toggleMealTeam(e.id)}>🍽</span>
+                      ) : (
+                        <span title="Ajouter indemnite repas" className="text-base leading-none opacity-20 hover:opacity-60" style={{cursor:'pointer'}} onClick={()=>toggleMealTeam(e.id)}>🍽</span>
+                      )}
                       <Badge status={e.status} />
                     </div>
                   </div>
