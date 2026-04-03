@@ -1483,6 +1483,9 @@ function HoursScreen({ user }) {
     } catch(err) { setEditError(err.message || 'Erreur'); }
     finally { setEditLoading(false); }
   };
+  const toggleMeal = async (entryId) => {
+    try { await api.patch('/time-entries/' + entryId + '/meal_toggle', {}); await loadWeek(); } catch(e) { console.error(e); }
+  };
   const exportPDF = async () => {
     if (!window.jspdf) {
       await new Promise((resolve, reject) => {
@@ -1682,6 +1685,11 @@ function HoursScreen({ user }) {
                           <button onClick={() => openEdit(e)} className="text-xs bg-orange-500 text-white px-2 py-1 rounded-lg font-medium">Corriger</button>
                         ) : (
                           e.ended_at && <div className="text-sm font-semibold text-slate-600">{fmt.duration(e.duration_min)}</div>
+                        )}
+                        {e.meal_allowance ? (
+                          <span title="Indemnite repas" className="text-base leading-none" style={{cursor:['MANAGER','ADMIN','SUPERADMIN'].includes(user&&user.role)?'pointer':'default'}} onClick={()=>['MANAGER','ADMIN','SUPERADMIN'].includes(user&&user.role)&&toggleMeal(e.id)}>🍽</span>
+                        ) : (
+                          user&&['MANAGER','ADMIN','SUPERADMIN'].includes(user.role)&&<span title="Ajouter indemnite repas" className="text-base leading-none opacity-20 hover:opacity-60" style={{cursor:'pointer'}} onClick={()=>toggleMeal(e.id)}>🍽</span>
                         )}
                         <Badge status={e.status} />
                       </div>
