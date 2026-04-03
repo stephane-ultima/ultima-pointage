@@ -7,6 +7,33 @@ from utils import ts_now, get_week_number
 import datetime
 
 
+def swiss_holidays(year):
+    """Jours fériés fédéraux suisses pour l'année donnée."""
+    a = year % 19
+    b, c = year // 100, year % 100
+    d, e = b // 4, b % 4
+    f = (b + 8) // 25
+    g = (b - f + 1) // 3
+    h = (19 * a + b - d - g + 15) % 30
+    i, k = c // 4, c % 4
+    l = (32 + 2 * e + 2 * i - h - k) % 7
+    m = (a + 11 * h + 22 * l) // 451
+    month, day = divmod(h + l - 7 * m + 114, 31)
+    easter = datetime.date(year, month, day + 1)
+    return {
+        datetime.date(year, 1, 1),              # Nouvel An
+        datetime.date(year, 1, 2),              # Berchtoldstag
+        easter - datetime.timedelta(days=2),    # Vendredi Saint
+        easter + datetime.timedelta(days=1),    # Lundi de Pâques
+        datetime.date(year, 5, 1),              # Fête du Travail
+        easter + datetime.timedelta(days=39),   # Ascension
+        easter + datetime.timedelta(days=50),   # Lundi de Pentecôte
+        datetime.date(year, 8, 1),              # Fête Nationale
+        datetime.date(year, 12, 25),            # Noël
+        datetime.date(year, 12, 26),            # Saint-Étienne
+    }
+
+
 class AbsencesHandler(BaseHandler):
 
     def get(self):
@@ -53,10 +80,14 @@ class AbsencesHandler(BaseHandler):
 
         duration = data.get('duration_days')
         if not duration:
-            # Calculate working days (Mon-Fri)
+            # P1-05: Working days Mon-Fri, hors jours fériés suisses
             delta = d_end - d_start
+            ch_holidays = swiss_holidays(d_start.year)
+            if d_start.year != d_end.year:
+                ch_holidays |= swiss_holidays(d_end.year)
             duration = sum(1 for i in range(delta.days + 1)
-                           if (d_start + datetime.timedelta(i)).weekday() < 5)
+                           if (d := d_start + datetime.timedelta(i)).weekday() < 5
+                           and d not in ch_holidays)
 
         abs_id = db.fetchone("SELECT lower(hex(randomblob(16))) as id")['id']
         db.execute("""
@@ -84,7 +115,7 @@ class AbsencesHandler(BaseHandler):
 class AbsenceDetailHandler(BaseHandler):
 
     def patch(self, abs_id, action):
-        user = self.require_auth(['MANAGER', 'ADMIN', 'SUPERADMIN'])
+        user = self.require_auth()
         if not user: return
         data = self.body()
         now = ts_now()
@@ -92,6 +123,10 @@ class AbsenceDetailHandler(BaseHandler):
         absence = db.fetchone("SELECT * FROM absence_requests WHERE id=?", (abs_id,))
         if not absence:
             return self.error('Absence introuvable', 404)
+
+        if action in ('approve', 'reject'):
+            if user['role'] not in ('MANAGER', 'ADMIN', 'SUPERADMIN'):
+                return self.error('Accès non autorisé', 403)
 
         if action == 'approve':
             db.execute("""
@@ -132,6 +167,27 @@ class AbsenceDetailHandler(BaseHandler):
                     WHERE user_id=? AND year=?
                 """, (absence['duration_days'], absence['user_id'], year))
             self.audit('ABSENCE_REJECTED', 'absence_requests', abs_id)
+
+        elif action == 'cancel':
+            # P1-04: L'employé peut annuler sa propre demande PENDING
+            if absence['user_id'] != user['id'] and user['role'] not in ('MANAGER', 'ADMIN', 'SUPERADMIN'):
+                return self.error('Accès non autorisé', 403)
+            if absence['status'] not in ('PENDING',):
+                return self.error('Seules les demandes en attente peuvent être annulées')
+            db.execute("""
+                UPDATE absence_requests
+                SET status='CANCELLED', reviewed_by=?, reviewed_at=?
+                WHERE id=?
+            """, (user['id'], now, abs_id))
+            # Remettre le solde en attente
+            if absence['type'] == 'HOLIDAY':
+                year = datetime.date.fromisoformat(absence['start_date']).year
+                db.execute("""
+                    UPDATE leave_balances
+                    SET holiday_pending = MAX(0, holiday_pending - ?)
+                    WHERE user_id=? AND year=?
+                """, (absence['duration_days'], absence['user_id'], year))
+            self.audit('ABSENCE_CANCELLED', 'absence_requests', abs_id)
 
         updated = db.fetchone("SELECT * FROM absence_requests WHERE id=?", (abs_id,))
         self.json(updated)
