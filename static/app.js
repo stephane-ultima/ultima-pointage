@@ -1,6 +1,6 @@
 // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-//  ULTIMA POINTAGE â React SPA v3.0
-//  Design premium â Apple-inspired HR time-tracking
+//  ULTIMA POINTAGE — React SPA v3.0
+//  Design premium — Apple-inspired HR time-tracking
 //  Ultima Interior SA
 // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
@@ -975,7 +975,7 @@ function HomeScreen({ user, meData, onRefresh }) {
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium text-slate-700">{at.label}</div>
                     <div className="text-xs text-slate-400">
-                      {fmt.time(e.started_at)} â {e.ended_at ? fmt.time(e.ended_at) : 'en cours'}
+                      {fmt.time(e.started_at)} — {e.ended_at ? fmt.time(e.ended_at) : 'en cours'}
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0">
@@ -1080,7 +1080,7 @@ function HoursScreen({ user }) {
             <Ic name="chevLeft" size={18} className="text-slate-600" />
           </button>
           <div className="text-center">
-            <div className="text-sm font-bold text-slate-800">Semaine {week} â {year}</div>
+            <div className="text-sm font-bold text-slate-800">Semaine {week} — {year}</div>
           </div>
           <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors">
             <Ic name="chevRight" size={18} className="text-slate-600" />
@@ -1170,7 +1170,7 @@ function HoursScreen({ user }) {
                       <div className="flex-1 min-w-0">
                         <div className="text-sm text-slate-700 font-medium">{at.label}</div>
                         <div className="text-xs text-slate-400">
-                          {fmt.time(e.started_at)} â {e.ended_at ? fmt.time(e.ended_at) : '...'}
+                          {fmt.time(e.started_at)} — {e.ended_at ? fmt.time(e.ended_at) : '...'}
                         </div>
                       </div>
                       <div className="text-right flex-shrink-0">
@@ -1265,7 +1265,7 @@ function AbsencesScreen({ user }) {
                   <div className="min-w-0">
                     <div className="font-semibold text-slate-800">{t.label}</div>
                     <div className="text-sm text-slate-500">
-                      {fmt.dateShort(a.start_date)} â {fmt.dateShort(a.end_date)}
+                      {fmt.dateShort(a.start_date)} — {fmt.dateShort(a.end_date)}
                       <span className="ml-2 text-xs text-slate-400">{a.duration_days}j</span>
                     </div>
                     {a.comment && <p className="text-xs text-slate-400 mt-0.5 truncate">{a.comment}</p>}
@@ -1381,7 +1381,7 @@ function CalendarScreen() {
                 <UserAvatar user={entry} size="sm" />
                 <div className="flex-1">
                   <div className="font-semibold text-slate-800">{entry.first_name} {entry.last_name}</div>
-                  <div className="text-sm text-slate-500">{t.label} ÃÂÃÂÃÂÃÂ· {fmt.dateShort(entry.start_date)} â {fmt.dateShort(entry.end_date)}</div>
+                  <div className="text-sm text-slate-500">{t.label} ÃÂÃÂÃÂÃÂ· {fmt.dateShort(entry.start_date)} — {fmt.dateShort(entry.end_date)}</div>
                 </div>
                 <Badge status={entry.status} />
               </div>
@@ -1511,10 +1511,10 @@ function AccountScreen({ user, onLogout, onUserUpdate }) {
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Email</label>
-            <div className="w-full border border-slate-100 rounded-xl px-4 py-2.5 text-slate-400 bg-slate-50 text-sm">{user.email || 'â'}</div>
+            <div className="w-full border border-slate-100 rounded-xl px-4 py-2.5 text-slate-400 bg-slate-50 text-sm">{user.email || '—'}</div>
             <p className="text-xs text-slate-400 mt-1">L'email est gere par l'administrateur</p>
           </div>
-          <Input label="TÃ©lÃ©phone" value={info.phone} onChange={v => setInfo(f => ({ ...f, phone: v }))} placeholder="+41 79 000 00 00" />
+          <Input label="Téléphone" value={info.phone} onChange={v => setInfo(f => ({ ...f, phone: v }))} placeholder="+41 79 000 00 00" />
         </div>
         {infoMsg && <div className="mt-3"><Alert type={infoMsg.type}>{infoMsg.text}</Alert></div>}
         <Button onClick={saveInfo} loading={savingInfo} className="w-full mt-4">Enregistrer</Button>
@@ -1570,10 +1570,10 @@ function AccountScreen({ user, onLogout, onUserUpdate }) {
 
 function getPeriodLabel(mode, date) {
   const d = new Date(date);
-  const M = ['Janvier','FÃ©vrier','Mars','Avril','Mai','Juin','Juillet','AoÃ»t','Septembre','Octobre','Novembre','DÃ©cembre'];
+  const M = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   const J = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
   if (mode === 'day')   return J[d.getDay()] + ' ' + d.getDate() + ' ' + M[d.getMonth()] + ' ' + d.getFullYear();
-  if (mode === 'week')  { const w = _isoWk(d); return 'Semaine ' + w.w + ' â ' + w.y; }
+  if (mode === 'week')  { const w = _isoWk(d); return 'Semaine ' + w.w + ' — ' + w.y; }
   if (mode === 'month') return M[d.getMonth()] + ' ' + d.getFullYear();
   return '' + d.getFullYear();
 }
@@ -1685,7 +1685,7 @@ function TeamScreen() {
                       <div className="text-sm font-medium text-slate-700">{at.label}</div>
                       <div className="text-xs text-slate-400">
                         {new Date(e.started_at * 1000).toLocaleDateString('fr-CH', { weekday: 'short', day: 'numeric' })}
-                        {' ÃÂÃÂÃÂÃÂ· '}{fmt.time(e.started_at)} â {e.ended_at ? fmt.time(e.ended_at) : '...'}
+                        {' ÃÂÃÂÃÂÃÂ· '}{fmt.time(e.started_at)} — {e.ended_at ? fmt.time(e.ended_at) : '...'}
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
@@ -1715,7 +1715,7 @@ function TeamScreen() {
     <div className="space-y-4 pb-6 max-w-2xl">
       {/* View mode */}
       <div className="flex gap-1 mb-3 bg-slate-100 p-1 rounded-xl">
-        {[{id:'day',label:'Jour'},{id:'week',label:'Semaine'},{id:'month',label:'Mois'},{id:'year',label:'AnnÃ©e'}].map(m => (
+        {[{id:'day',label:'Jour'},{id:'week',label:'Semaine'},{id:'month',label:'Mois'},{id:'year',label:'Année'}].map(m => (
           <button key={m.id}
             onClick={() => { setViewMode(m.id); setAnchorDate(new Date()); }}
             className={'flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all ' + (viewMode === m.id ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700')}
@@ -1852,7 +1852,7 @@ function ValidationScreen() {
     setValidating(true); setSuccess('');
     try {
       const d = await api.post('/time-entries/validate-week', { week, year });
-      setSuccess(`Semaine ${week} approuvÃ©e avec succÃ¨s`);
+      setSuccess(`Semaine ${week} approuvée avec succès`);
       const res = await api.get(`/time-entries/team?week=${week}&year=${year}`);
       setData(res.team || []);
     } catch (err) { alert(err.message); }
@@ -1869,7 +1869,7 @@ function ValidationScreen() {
           <button onClick={() => changeWeek(-1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
             <Ic name="chevLeft" size={18} className="text-slate-600" />
           </button>
-          <span className="font-bold text-slate-800">Semaine {week} â {year}</span>
+          <span className="font-bold text-slate-800">Semaine {week} — {year}</span>
           <button onClick={() => changeWeek(1)} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
             <Ic name="chevRight" size={18} className="text-slate-600" />
           </button>
@@ -1892,7 +1892,7 @@ function ValidationScreen() {
           <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
             <Ic name="check" size={22} className="text-emerald-600" />
           </div>
-          <p className="text-emerald-700 font-medium">Toutes les heures sont validÃ©es</p>
+          <p className="text-emerald-700 font-medium">Toutes les heures sont validées</p>
         </Card>
       ) : (
         data.map(emp => (
@@ -1957,8 +1957,8 @@ function ManagerAbsencesScreen() {
 
   const filters = [
     { id: 'PENDING', label: 'En attente' },
-    { id: 'APPROVED', label: 'ApprouvÃ©s' },
-    { id: 'REJECTED', label: 'RefusÃ©s' },
+    { id: 'APPROVED', label: 'Approuvés' },
+    { id: 'REJECTED', label: 'Refusés' },
     { id: 'ALL', label: 'Tous' },
   ];
 
@@ -2008,7 +2008,7 @@ function ManagerAbsencesScreen() {
                   <UserAvatar user={a} size="sm" />
                   <div className="min-w-0">
                     <div className="font-semibold text-slate-800">{a.first_name} {a.last_name}</div>
-                    <div className="text-xs text-slate-500">{t.label} ÃÂÃÂÃÂÃÂ· {fmt.dateShort(a.start_date)} â {fmt.dateShort(a.end_date)} ({a.duration_days}j)</div>
+                    <div className="text-xs text-slate-500">{t.label} ÃÂÃÂÃÂÃÂ· {fmt.dateShort(a.start_date)} — {fmt.dateShort(a.end_date)} ({a.duration_days}j)</div>
                     {a.comment && <p className="text-xs text-slate-400 mt-0.5 truncate">{a.comment}</p>}
                   </div>
                 </div>
@@ -2113,7 +2113,7 @@ function AdminScreen() {
     setSaving(true); setError('');
     try {
       if (modal.mode === 'create') {
-        if (!form.first_name || !form.last_name) throw new Error('PrÃ©nom et nom obligatoires');
+        if (!form.first_name || !form.last_name) throw new Error('Prénom et nom obligatoires');
       await api.post('/users', form);
       } else {
         const payload = { ...form };
@@ -2204,7 +2204,7 @@ function AdminScreen() {
                 <button onClick={() => openEdit(u)} className="text-xs text-blue-600 font-semibold hover:text-blue-700">Modifier</button>
                 <button onClick={() => toggleActive(u)}
                   className={`text-xs font-semibold ${u.active ? 'text-red-500 hover:text-red-600' : 'text-emerald-600 hover:text-emerald-700'}`}>
-                  {u.active ? 'DÃ©sactiver' : 'Activer'}
+                  {u.active ? 'Désactiver' : 'Activer'}
                 </button>
               </div>
             </div>
@@ -2217,12 +2217,12 @@ function AdminScreen() {
         {modal && (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <Input label="PrÃ©nom *" value={form.first_name || ''} onChange={v => setForm(f => ({ ...f, first_name: v }))} />
+              <Input label="Prénom *" value={form.first_name || ''} onChange={v => setForm(f => ({ ...f, first_name: v }))} />
               <Input label="Nom *" value={form.last_name || ''} onChange={v => setForm(f => ({ ...f, last_name: v }))} />
             </div>
             <Input label="Email" value={form.email || ''} onChange={v => setForm(f => ({ ...f, email: v }))} placeholder="prenom@ultima-interior.ch" />
             <Input
-              label={modal.mode === 'create' ? 'Mot de passe' : 'Nouveau mot de passe (vide = inchangÃ©)'}
+              label={modal.mode === 'create' ? 'Mot de passe' : 'Nouveau mot de passe (vide = inchangé)'}
               type="password" value={form.password || ''} onChange={v => setForm(f => ({ ...f, password: v }))}
             />
             <Input label="Telephone" value={form.phone || ''} onChange={v => setForm(f => ({ ...f, phone: v }))} placeholder="+41 79 000 00 00" />
@@ -2244,13 +2244,13 @@ function AdminScreen() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <Input label="H / semaine" type="number" value={form.weekly_target_h ?? 42} onChange={v => setForm(f => ({ ...f, weekly_target_h: parseFloat(v) || 42 }))} />
-              <Input label="Jours congÃ©s / an" type="number" value={form.annual_leave_d ?? 25} onChange={v => setForm(f => ({ ...f, annual_leave_d: parseInt(v) || 25 }))} />
+              <Input label="Jours congés / an" type="number" value={form.annual_leave_d ?? 25} onChange={v => setForm(f => ({ ...f, annual_leave_d: parseInt(v) || 25 }))} />
             </div>
             {error && <Alert type="error">{error}</Alert>}
             <div className="flex gap-3 pt-1">
               <Button onClick={() => setModal(null)} variant="secondary" className="flex-1">Annuler</Button>
               <Button onClick={save} loading={saving} className="flex-1">
-                {modal.mode === 'create' ? 'CrÃ©er' : 'Enregistrer'}
+                {modal.mode === 'create' ? 'Créer' : 'Enregistrer'}
               </Button>
             </div>
           </div>
