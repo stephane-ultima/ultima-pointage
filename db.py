@@ -8,7 +8,8 @@ import json
 import threading
 from contextlib import contextmanager
 
-DB_PATH = os.environ.get('DB_PATH', 'ultima.db')
+# Env var priority: DATABASE_PATH (Railway/Docker) > DB_PATH (legacy) > /data/ultima.db
+DB_PATH = os.environ.get('DATABASE_PATH', os.environ.get('DB_PATH', '/data/ultima.db'))
 
 _local = threading.local()
 

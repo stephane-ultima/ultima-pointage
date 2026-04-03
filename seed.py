@@ -9,7 +9,16 @@ from utils import get_week_number
 
 
 def run():
-    print("Seeding demo data...")
+    """Seed demo data. Safe to call on every startup: skips if data already exists."""
+    conn = db.get_conn()
+    try:
+        count = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+    except Exception:
+        count = 0
+    if count > 0:
+        print(f"[seed] {count} users already in DB. Skipping seed.", flush=True)
+        return
+    print("[seed] Empty DB detected. Seeding demo data...", flush=True)
 
     manager_id = 'mgr-marc-001'
     admin_id = 'adm-sophie-001'

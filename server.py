@@ -123,10 +123,10 @@ if __name__ == '__main__':
     app.listen(port)
     print(f"Ultima Pointage started on port {port}", flush=True)
 
-    # Seed on startup (idempotent)
+    # Seed: always runs but seed.run() is guarded (skips if DB not empty)
     def do_seed():
         import seed
         seed.run()
-    tornado.ioloop.IOLoop.current().call_later(1.0, do_seed)
+    tornado.ioloop.IOLoop.current().call_later(1.5, do_seed)
 
     tornado.ioloop.IOLoop.current().start()

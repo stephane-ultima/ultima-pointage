@@ -2,11 +2,15 @@
 builder = "dockerfile"
 
 [deploy]
-startCommand = "python server.py --seed"
+startCommand = "python server.py"
 healthcheckPath = "/"
 healthcheckTimeout = 60
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
+
+[[volumes]]
+  mountPath = "/data"
+  name = "ultima-db-volume"
 
 [[services]]
 name = "ultima-pointage"
