@@ -118,19 +118,23 @@ def check_alerts(user_id, week, year):
     return alerts
 
 def calc_meal_allowance(user_id, date_str):
-    """Return True if meal allowance should be triggered for given date."""
+    """MVP rule: MONTEUR employees working > 4h (240 min) get meal allowance CHF 20."""
     import db
+    user = db.fetchone("SELECT employee_type FROM users WHERE id=?", (user_id,))
+    if not user or user['employee_type'] != 'MONTEUR':
+        return False
     d = datetime.date.fromisoformat(date_str)
     start_ts = int(datetime.datetime.combine(d, datetime.time.min).timestamp())
     end_ts = int(datetime.datetime.combine(d, datetime.time.max).timestamp())
     work_entries = db.fetchall("""
-        SELECT * FROM time_entries
+        SELECT duration_min FROM time_entries
         WHERE user_id=? AND started_at>=? AND started_at<=?
         AND activity_type IN ('WORK_SITE','WORK_DEPOT','TRAVEL_PRO','WORK_SAV')
         AND ended_at IS NOT NULL
         AND status != 'REJECTED'
     """, (user_id, start_ts, end_ts))
-    return len(work_entries) > 0
+    total_min = sum(e['duration_min'] or 0 for e in work_entries)
+    return total_min > 240
 
 def json_serial(obj):
     if isinstance(obj, (datetime.date, datetime.datetime)):
