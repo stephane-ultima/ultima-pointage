@@ -801,6 +801,7 @@ function HomeScreen({ user, meData, onRefresh }) {
   const [actType, setActType] = useState('WORK_SITE');
   const [actError, setActError] = useState('');
   const [actLoading, setActLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [alerts, setAlerts] = useState([]);
 
   const loadData = useCallback(async () => {
@@ -859,6 +860,25 @@ function HomeScreen({ user, meData, onRefresh }) {
   const greetHour = new Date().getHours();
   const greet = greetHour < 12 ? 'Bonjour' : greetHour < 18 ? 'Bon apres-midi' : 'Bonsoir';
 
+  const completedToday = todayEntries.filter(e => e.ended_at);
+  const hasDraftComplete = completedToday.some(e => e.status === 'DRAFT');
+  const hasReturnedToday = completedToday.some(e => e.status === 'RETURNED');
+  const hasPendingToday = completedToday.some(e => ['PENDING','APPROVED'].includes(e.status));
+  const dayStatus = hasReturnedToday ? 'RETURNED' : hasPendingToday ? 'PENDING' : 'DRAFT';
+  const returnNote = hasReturnedToday
+    ? (completedToday.find(e => e.status === 'RETURNED' && e.note)?.note || '')
+    : '';
+
+  const submitDay = async () => {
+    setSubmitting(true);
+    try {
+      await api.post('/time-entries/submit-day', { date: today });
+      await loadData();
+      if (onRefresh) onRefresh();
+    } catch (err) { alert(err.message); }
+    finally { setSubmitting(false); }
+  };
+
   if (loading) return (
     <div className="flex items-center justify-center h-64"><Spinner size="lg" /></div>
   );
@@ -875,6 +895,23 @@ function HomeScreen({ user, meData, onRefresh }) {
       {alerts.map((a, i) => (
         <Alert key={i} type="warning" title="Anomalie">{a.message || a.code}</Alert>
       ))}
+
+      {/* Day status banners */}
+      {dayStatus === 'RETURNED' && (
+        <Alert type="error" title="Journee a corriger">
+          {returnNote || 'Votre journee a ete renvoyee pour correction par votre responsable.'}
+        </Alert>
+      )}
+      {dayStatus === 'PENDING' && (
+        <Alert type="info" title="En attente de validation">
+          Votre journee est soumise et attend la validation du responsable.
+        </Alert>
+      )}
+      {dayStatus === 'APPROVED' && (
+        <Alert type="success" title="Journee validee">
+          Votre journee a ete validee.
+        </Alert>
+      )}
 
       {/* Main pointage card */}
       <Card className="p-6">
@@ -1012,6 +1049,18 @@ function HomeScreen({ user, meData, onRefresh }) {
             })}
           </div>
         </Card>
+      )}
+
+      {/* Soumettre la journee */}
+      {hasDraftComplete && dayStatus === 'DRAFT' && !active && (
+        <button
+          onClick={submitDay}
+          disabled={submitting}
+          className="w-full py-3.5 rounded-2xl font-bold text-base flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.97] text-white shadow-lg shadow-emerald-200 transition-all disabled:opacity-60"
+        >
+          <Ic name="checkPlain" size={20} />
+          {submitting ? 'Envoi...' : 'Soumettre la journee'}
+        </button>
       )}
 
       {/* Start modal */}
@@ -1620,6 +1669,16 @@ function getPeriodParams(mode, date) {
   }
   return 'from_date=' + d.getFullYear() + '-01-01&to_date=' + d.getFullYear() + '-12-31';
 }
+function fmtStatus(status) {
+  const m = {
+    DRAFT:     { label: 'Brouillon',  cls: 'text-slate-500 bg-slate-100 border-slate-200' },
+    PENDING:   { label: 'En attente', cls: 'text-amber-700 bg-amber-50 border-amber-200' },
+    APPROVED:  { label: 'Valide',     cls: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
+    RETURNED:  { label: 'A corriger', cls: 'text-red-700 bg-red-50 border-red-200' },
+    CORRECTED: { label: 'Corrige',    cls: 'text-blue-700 bg-blue-50 border-blue-200' },
+  };
+  return m[status] || { label: status, cls: 'text-slate-500 bg-slate-100 border-slate-200' };
+}
 function workingDaysInMonth(date) {
   const d = new Date(date), y = d.getFullYear(), m = d.getMonth();
   let n = 0; const cur = new Date(y, m, 1);
@@ -1873,6 +1932,9 @@ function ValidationScreen() {
   const [{ week, year }, setWeekYear] = useState(() => getISOWeek());
   const [validating, setValidating] = useState(false);
   const [success, setSuccess] = useState('');
+  const [returnModal, setReturnModal] = useState(null); // { empId, empName }
+  const [returnComment, setReturnComment] = useState('');
+  const [returning, setReturning] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -1901,6 +1963,32 @@ function ValidationScreen() {
       setData(res.team || []);
     } catch (err) { alert(err.message); }
     finally { setValidating(false); }
+  };
+
+  const handleApproveEmp = async (empId) => {
+    setValidating(true); setSuccess('');
+    try {
+      await api.post('/time-entries/validate-week', { week, year, user_id: empId });
+      setSuccess('Semaine approuvee avec succes');
+      const res = await api.get(`/time-entries/team?week=${week}&year=${year}`);
+      setData(res.team || []);
+    } catch (err) { alert(err.message); }
+    finally { setValidating(false); }
+  };
+
+  const handleReturn = async () => {
+    if (!returnModal) return;
+    setReturning(true);
+    try {
+      await api.post('/time-entries/return', {
+        user_id: returnModal.empId, week, year,
+        comment: returnComment
+      });
+      setReturnModal(null); setReturnComment('');
+      const res = await api.get(`/time-entries/team?week=${week}&year=${year}`);
+      setData(res.team || []);
+    } catch (err) { alert(err.message); }
+    finally { setReturning(false); }
   };
 
   const pending = data.filter(e => e.has_pending);
@@ -1947,11 +2035,29 @@ function ValidationScreen() {
                 <div className="font-semibold text-slate-800">{emp.employee?.first_name} {emp.employee?.last_name}</div>
                 <div className="text-xs text-slate-500">{fmt.duration(emp.total_min || 0)} travaillées</div>
               </div>
-              {emp.has_pending
-                ? <span className="text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-full font-semibold">En attente</span>
-                : <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-semibold flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
+                {emp.has_pending ? (
+                  <>
+                    <button
+                      onClick={() => handleApproveEmp(emp.employee?.id)}
+                      disabled={validating}
+                      className="text-xs bg-emerald-600 text-white px-2.5 py-1.5 rounded-xl font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                    >
+                      Approuver
+                    </button>
+                    <button
+                      onClick={() => { setReturnModal({ empId: emp.employee?.id, empName: emp.employee?.first_name }); setReturnComment(''); }}
+                      className="text-xs bg-red-50 text-red-700 border border-red-200 px-2.5 py-1.5 rounded-xl font-semibold hover:bg-red-100 transition-colors"
+                    >
+                      Renvoyer
+                    </button>
+                  </>
+                ) : (
+                  <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-semibold flex items-center gap-1">
                     <Ic name="checkPlain" size={10} /> Valide
-                  </span>}
+                  </span>
+                )}
+              </div>
             </div>
             {emp.alerts && emp.alerts.length > 0 && (
               <div className="mt-3 space-y-1.5">
@@ -1968,6 +2074,34 @@ function ValidationScreen() {
       )}
     </div>
   );
+
+      {/* Return modal */}
+      <Modal open={!!returnModal} onClose={() => setReturnModal(null)} title="Renvoyer pour correction">
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">
+            Renvoyer les heures de <strong>{returnModal?.empName}</strong> pour la semaine {week} / {year}.
+          </p>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+              Motif de renvoi (optionnel)
+            </label>
+            <textarea
+              value={returnComment}
+              onChange={e => setReturnComment(e.target.value)}
+              placeholder="Ex: Heures de trajet manquantes, pause non pointee..."
+              rows={3}
+              className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"
+            />
+          </div>
+          <div className="flex gap-3 pt-1">
+            <Button onClick={() => setReturnModal(null)} variant="secondary" className="flex-1">Annuler</Button>
+            <Button onClick={handleReturn} loading={returning} variant="danger" className="flex-1">
+              <Ic name="warning" size={16} />
+              Renvoyer
+            </Button>
+          </div>
+        </div>
+      </Modal>
 }
 
 // ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ MANAGER ABSENCES SCREEN ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ
