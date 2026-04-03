@@ -17,7 +17,8 @@ from handlers.auth_handler import (
 )
 from handlers.time_handler import (
     TimeEntriesHandler, TimeEntryDetailHandler,
-    TeamEntriesHandler, ValidateWeekHandler, ExportHandler
+    TeamEntriesHandler, ValidateWeekHandler, ExportHandler,
+    SubmitDayHandler, ReturnHandler
 )
 from handlers.absence_handler import (
     AbsencesHandler, AbsenceDetailHandler, TeamAbsencesHandler, AbsenceCalendarHandler
@@ -89,6 +90,8 @@ def make_app():
         (r'/api/time-entries',              TimeEntriesHandler),
         (r'/api/time-entries/team',         TeamEntriesHandler),
         (r'/api/time-entries/validate-week',ValidateWeekHandler),
+        (r'/api/time-entries/submit-day',   SubmitDayHandler),
+        (r'/api/time-entries/return',       ReturnHandler),
         (r'/api/time-entries/export',       ExportHandler),
         (r'/api/time-entries/([^/]+)/(\w+)',TimeEntryDetailHandler),
         (r'/api/absences',              AbsencesHandler),
