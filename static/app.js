@@ -926,7 +926,7 @@ function TodayScreen({ user, meData, onRefresh }) {
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-sm text-slate-600">
                   <span>Progression journee</span>
-                  <span className="font-semibold">{fmt.dur(total)} / {fmt.dur(target)}</span>
+                  <span className="font-semibold">{fmt.duration(total)} / {fmt.duration(target)}</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
                   <div className={"h-3 rounded-full transition-all " + (pct>=100?"bg-emerald-500":"bg-blue-500")} style={{width:Math.min(pct,100)+'%'}} />
@@ -946,7 +946,7 @@ function TodayScreen({ user, meData, onRefresh }) {
           <div className="bg-white rounded-xl shadow-sm border p-4">
             <div className="flex justify-between items-center text-sm text-slate-600 mb-2">
               <span>Total travaille</span>
-              <span className="font-semibold">{fmt.dur(total)} / {fmt.dur(target)}</span>
+              <span className="font-semibold">{fmt.duration(total)} / {fmt.duration(target)}</span>
             </div>
             <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
               <div className={"h-3 rounded-full " + (pct>=100?"bg-emerald-500":"bg-blue-500")} style={{width:Math.min(pct,100)+'%'}} />
@@ -977,7 +977,7 @@ function TodayScreen({ user, meData, onRefresh }) {
                     <div className="text-xs text-slate-500">{e.started_at?e.started_at.slice(11,16):''} - {e.ended_at?e.ended_at.slice(11,16):''}</div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-600">{fmt.dur(e.duration_min||0)}</span>
+                    <span className="text-sm text-slate-600">{fmt.duration(e.duration_min||0)}</span>
                     <span className={"text-xs px-2 py-0.5 rounded-full border " + st.cls}>{st.label}</span>
                   </div>
                 </div>
