@@ -1173,7 +1173,7 @@ function HomeScreen({ user, meData, onRefresh }) {
   const dailyTarget = (user.weekly_target_h || 42) / 5 * 60;
   const pct = fmt.pct(totalWithActive, dailyTarget);
   const greetHour = new Date().getHours();
-  const greet = greetHour < 12 ? 'Bonjour' : greetHour < 18 ? 'Bon apres-midi' : 'Bonsoir';
+  const greet = greetHour < 12 ? 'Bonjour' : greetHour < 18 ? 'Bon après-midi' : 'Bonsoir';
 
   const completedToday = todayEntries.filter(e => e.ended_at);
   const hasDraftComplete = completedToday.some(e => e.status === 'DRAFT');
@@ -2461,6 +2461,7 @@ function ValidationScreen() {
   };
 
   const validateAll = async () => {
+    if (!window.confirm('Confirmer la validation de la semaine pour toute l\'équipe ?')) return;
     setValidating(true); setSuccess('');
     try {
       const d = await api.post('/time-entries/validate-week', { week, year });
@@ -3031,7 +3032,7 @@ function App() {
 
   const pageInfo = {
     home:       { title: 'Pointage',        subtitle: null },
-    hours:      { title: 'Mes heures',      subtitle: 'Recapitulatif hebdomadaire' },
+    hours:      { title: 'Mes heures',      subtitle: 'Récapitulatif hebdomadaire' },
     absences:   { title: isManager ? 'Absences equipe' : 'Mes absences', subtitle: null },
     account:    { title: 'Mon compte',      subtitle: null },
     team:       { title: 'Equipe',          subtitle: 'Semaine en cours' },
