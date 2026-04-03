@@ -64,12 +64,26 @@ class UsersHandler(BaseHandler):
 
 class UserDetailHandler(BaseHandler):
 
+    def get(self, uid):
+        user = self.require_auth()
+        if not user: return
+        if uid != user['id'] and user['role'] not in ('ADMIN', 'SUPERADMIN'):
+            return self.error('Accès refusé', 403)
+        target = db.fetchone("""
+            SELECT id, first_name, last_name, email, role, employee_type,
+                   weekly_target_h, annual_leave_d, phone, active, manager_id, avatar_url
+            FROM users WHERE id=?
+        """, (uid,))
+        if not target:
+            return self.error('Utilisateur introuvable', 404)
+        self.json(dict(target))
+
     def patch(self, uid):
         user = self.require_auth()
         if not user: return
         # Users can update their own profile; admins can update anyone
         if uid != user['id'] and user['role'] not in ('ADMIN', 'SUPERADMIN'):
-            return self.error('AccÃ¨s refusÃ©', 403)
+            return self.error('Accès refusé', 403)
         data = self.body()
         allowed = ['first_name', 'last_name', 'phone', 'geoloc_consent']
         if user['role'] in ('ADMIN', 'SUPERADMIN'):
@@ -96,6 +110,8 @@ class UserDetailHandler(BaseHandler):
         """, (uid,))
         self.json(updated)
 
+
+    put = patch
 
 class StatsHandler(BaseHandler):
     """Summary stats for dashboard."""
