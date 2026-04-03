@@ -309,6 +309,19 @@ class TimeEntryDetailHandler(BaseHandler):
             self.audit('TIME_ENTRY_CORRECTED', 'time_entries', entry_id)
             self.json({'ok': True, 'duration_min': duration_min})
 
+        elif action == 'meal_toggle':
+            # P1-11: MANAGER+ peut basculer l'indemnite repas manuellement
+            if user['role'] not in ('MANAGER', 'ADMIN', 'SUPERADMIN'):
+                return self.error('Acces non autorise', 403)
+            new_val = 0 if entry['meal_allowance'] else 1
+            db.execute("""
+                UPDATE time_entries SET meal_allowance=?, updated_at=?
+                WHERE id=?
+            """, (new_val, now, entry_id))
+            self.audit('TIME_MEAL_TOGGLED', 'time_entries', entry_id)
+            updated = db.fetchone("SELECT * FROM time_entries WHERE id=?", (entry_id,))
+            return self.json({'meal_allowance': updated['meal_allowance']})
+
         elif action == 'correction':
             data = self.body()
             if not data.get('reason_detail'):
