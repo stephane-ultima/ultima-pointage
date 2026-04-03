@@ -1800,7 +1800,7 @@ function AbsencesScreen({ user }) {
   if (loading) return <div className="flex justify-center py-8"><Spinner size="lg" /></div>;
 
   const absences = data?.absences || [];
-  const balances = data?.balances || {};
+  const balance = data?.balance || {};
 
   return (
     <div className="space-y-4 pb-6 max-w-lg">
@@ -1808,11 +1808,11 @@ function AbsencesScreen({ user }) {
       {balances && (
         <div className="grid grid-cols-2 gap-3">
           <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{balances.available_leave ?? (user.annual_leave_d || 25)}</div>
+            <div className="text-2xl font-bold text-blue-600">{balance.holiday_total != null ? Math.max(0, balance.holiday_total - balance.holiday_taken) : (user.annual_leave_d || 25)}</div>
             <div className="text-xs text-slate-500 mt-1">Jours disponibles</div>
           </Card>
           <Card className="p-4 text-center">
-            <div className="text-2xl font-bold text-amber-600">{balances.pending_days ?? 0}</div>
+            <div className="text-2xl font-bold text-amber-600">{balance.holiday_pending ?? 0}</div>
             <div className="text-xs text-slate-500 mt-1">En attente</div>
           </Card>
         </div>
