@@ -389,6 +389,83 @@ class ValidateWeekHandler(BaseHandler):
         self.json({'message': 'Semaine validée', 'validated': True})
 
 
+
+class SubmitDayHandler(BaseHandler):
+    """Employe: soumettre les entrees DRAFT completees d'un jour -> PENDING."""
+
+    def post(self):
+        user = self.require_auth()
+        if not user: return
+        data = self.body()
+        date_str = data.get('date')
+        if not date_str:
+            return self.error('date requis (YYYY-MM-DD)')
+        import datetime
+        try:
+            d = datetime.date.fromisoformat(date_str)
+        except ValueError:
+            return self.error('Format de date invalide')
+        start_ts = int(datetime.datetime.combine(d, datetime.time.min).timestamp())
+        end_ts = int(datetime.datetime.combine(d, datetime.time.max).timestamp())
+        entries = db.fetchall("""
+            SELECT id FROM time_entries
+            WHERE user_id=? AND started_at>=? AND started_at<=?
+            AND status='DRAFT' AND ended_at IS NOT NULL
+        """, (user['id'], start_ts, end_ts))
+        if not entries:
+            return self.error('Aucune entree complete a soumettre pour cette date')
+        now = ts_now()
+        db.execute("""
+            UPDATE time_entries SET status='PENDING', updated_at=?
+            WHERE user_id=? AND started_at>=? AND started_at<=?
+            AND status='DRAFT' AND ended_at IS NOT NULL
+        """, (now, user['id'], start_ts, end_ts))
+        self.audit('DAY_SUBMITTED', 'time_entries', f"{user['id']}_{date_str}")
+        self.ok({'submitted': len(entries), 'date': date_str})
+
+
+class ReturnHandler(BaseHandler):
+    """Manager: renvoyer les entrees d'un employe pour correction (jour ou semaine)."""
+
+    def post(self):
+        user = self.require_auth(['MANAGER', 'ADMIN', 'SUPERADMIN'])
+        if not user: return
+        data = self.body()
+        emp_id = data.get('user_id')
+        comment = data.get('comment', '')
+        if not emp_id:
+            return self.error('user_id requis')
+        import datetime
+        now = ts_now()
+        date_str = data.get('date')
+        week = data.get('week')
+        year = data.get('year')
+        if date_str:
+            try:
+                d = datetime.date.fromisoformat(date_str)
+            except ValueError:
+                return self.error('Format de date invalide')
+            start_ts = int(datetime.datetime.combine(d, datetime.time.min).timestamp())
+            end_ts = int(datetime.datetime.combine(d, datetime.time.max).timestamp())
+            db.execute("""
+                UPDATE time_entries SET status='RETURNED', note=?, updated_at=?
+                WHERE user_id=? AND started_at>=? AND started_at<=?
+                AND status IN ('PENDING', 'APPROVED')
+            """, (comment or None, now, emp_id, start_ts, end_ts))
+            self.audit('DAY_RETURNED', 'time_entries', f"{emp_id}_{date_str}")
+            self.ok({'returned': True, 'scope': 'day', 'date': date_str})
+        elif week and year:
+            db.execute("""
+                UPDATE time_entries SET status='RETURNED', note=?, updated_at=?
+                WHERE user_id=? AND week_number=? AND week_year=?
+                AND status IN ('PENDING', 'APPROVED')
+            """, (comment or None, now, emp_id, int(week), int(year)))
+            self.audit('WEEK_RETURNED', 'time_entries', f"{emp_id}_{week}_{year}")
+            self.ok({'returned': True, 'scope': 'week', 'week': week, 'year': year})
+        else:
+            return self.error('date ou (week + year) requis')
+
+
 class ExportHandler(BaseHandler):
     """Export time entries as CSV."""
 
