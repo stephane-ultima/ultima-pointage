@@ -469,7 +469,7 @@ function SideNav({ current, role, onNav, isOpen, onClose, user }) {
         { id: 'account',    icon: 'account',     label: 'Compte' },
       ]
     : [
-        { id: 'home',     icon: 'clock',    label: 'Pointage' },
+        { id: 'today',    icon: 'calendar', label: "Aujourd'hui" },
         { id: 'hours',    icon: 'absences', label: 'Mes heures' },
         { id: 'absences', icon: 'calendar', label: 'Absences' },
         { id: 'account',  icon: 'account',  label: 'Compte' },
@@ -791,6 +791,233 @@ function PinScreen({ token, onSuccess }) {
 }
 
 // ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ HOME SCREEN (Pointage) ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ
+
+
+function TodayScreen({ user, meData, onRefresh }) {
+  const today = new Date().toISOString().split('T')[0];
+  const [viewDate, setViewDate] = useState(today);
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [active, setActive] = useState(null);
+  const [elapsed, setElapsed] = useState('00:00:00');
+  const [showStart, setShowStart] = useState(false);
+  const [actType, setActType] = useState('WORK_SITE');
+  const [actError, setActError] = useState('');
+  const [actLoading, setActLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const isToday = viewDate === today;
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const te = await api.get('/time-entries?mode=day&date=' + viewDate);
+      setEntries(te.entries || []);
+      const act = isToday ? ((te.entries||[]).find(e => e.status==='DRAFT' && !e.ended_at)||null) : null;
+      setActive(act);
+    } catch(err) { console.error(err); }
+    finally { setLoading(false); }
+  }, [viewDate]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+  useInterval(() => { if (active) setElapsed(fmt.elapsed(active.started_at)); }, active ? 1000 : null);
+  useEffect(() => { if (active) setElapsed(fmt.elapsed(active.started_at)); }, [active]);
+
+  const prevDay = () => {
+    const d = new Date(viewDate + 'T12:00:00'); d.setDate(d.getDate()-1);
+    setViewDate(d.toISOString().split('T')[0]);
+  };
+  const nextDay = () => {
+    if (isToday) return;
+    const d = new Date(viewDate + 'T12:00:00'); d.setDate(d.getDate()+1);
+    setViewDate(d.toISOString().split('T')[0]);
+  };
+
+  const startEntry = async () => {
+    setActLoading(true); setActError('');
+    try { await api.post('/time-entries', { activity_type: actType }); setShowStart(false); await loadData(); }
+    catch(err) { setActError(err.message); } finally { setActLoading(false); }
+  };
+  const stopEntry = async () => {
+    if (!active) return; setActLoading(true);
+    try { await api.patch('/time-entries/'+active.id+'/stop'); await loadData(); }
+    catch(err) { alert(err.message); } finally { setActLoading(false); }
+  };
+  const submitDay = async () => {
+    setSubmitting(true);
+    try { await api.post('/time-entries/submit-day', { date: viewDate }); await loadData(); if (onRefresh) onRefresh(); }
+    catch(err) { alert(err.message); } finally { setSubmitting(false); }
+  };
+
+  const done = entries.filter(e => e.ended_at);
+  const work = done.filter(e => e.activity_type !== 'BREAK').reduce((s,e) => s+(e.duration_min||0), 0);
+  const activeMins = active ? fmt.elapsedMins(active.started_at) : 0;
+  const total = work + (active && active.activity_type !== 'BREAK' ? activeMins : 0);
+  const target = (user.weekly_target_h||42)/5*60;
+  const pct = fmt.pct(total, target);
+  const hasDraft = done.some(e => e.status==='DRAFT');
+  const hasReturned = done.some(e => e.status==='RETURNED');
+  const hasPending = done.some(e => ['PENDING','APPROVED'].includes(e.status));
+  const dayStatus = hasReturned ? 'RETURNED' : hasPending ? 'PENDING' : 'DRAFT';
+  const returnNote = hasReturned ? (done.find(e=>e.status==='RETURNED'&&e.note)?.note||'') : '';
+  const mealOk = done.some(e => e.meal_allowance);
+  const dateLabel = new Date(viewDate+'T12:00:00').toLocaleDateString('fr-CH',{weekday:'long',day:'numeric',month:'long'});
+
+  if (loading) return <div className="flex items-center justify-center h-64"><Spinner size="lg" /></div>;
+
+  return (
+    <div className="space-y-4 pb-6 max-w-lg">
+      {/* Date nav */}
+      <div className="flex items-center justify-between pt-2">
+        <button onClick={prevDay} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center">
+          <Ic name="chevLeft" size={18} className="text-slate-600" />
+        </button>
+        <div className="text-center">
+          <div className="text-base font-bold text-slate-900 capitalize">{dateLabel}</div>
+          {isToday && <div className="text-xs text-blue-600 font-medium mt-0.5">Aujourd'hui</div>}
+        </div>
+        <button onClick={nextDay} disabled={isToday} className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center disabled:opacity-30">
+          <Ic name="chevRight" size={18} className="text-slate-600" />
+        </button>
+      </div>
+
+      {/* Status banners */}
+      {dayStatus==='RETURNED' && <Alert type="error" title="Journee a corriger">{returnNote||'Votre journee a ete renvoyee pour correction.'}</Alert>}
+      {dayStatus==='PENDING' && <Alert type="info" title="En attente de validation">Votre journee est soumise et attend la validation.</Alert>}
+
+      {/* Timer card */}
+      <Card className="p-6">
+        <div className="flex flex-col items-center">
+          <div className="relative mb-6">
+            <ProgressRing value={total} max={target} size={180} strokeWidth={12} />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              {active ? (
+                <>
+                  <span className="text-xs font-semibold text-blue-600 uppercase tracking-widest mb-1">En cours</span>
+                  <span className="text-3xl font-mono font-bold text-slate-900 tabular-nums leading-none">{elapsed}</span>
+                  <span className="text-xs text-slate-400 mt-1">{ACTIVITY_TYPES[active.activity_type]?.label}</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-3xl font-bold text-slate-900">{fmt.duration(work)}</span>
+                  <span className="text-xs text-slate-400 mt-1">travaille</span>
+                  <span className="text-xs font-medium text-slate-500 mt-0.5">{pct}% de l'objectif</span>
+                </>
+              )}
+            </div>
+          </div>
+          {isToday ? (active ? (
+            <div className="w-full space-y-3">
+              <button onClick={stopEntry} disabled={actLoading} className={"w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-3 transition-all active:scale-[0.97] disabled:opacity-60 pulse-ring " + (actLoading ? 'bg-slate-200 text-slate-500' : 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-200')}>
+                <Ic name="stop" size={22} />{actLoading ? 'Arret en cours...' : 'Pointer la fin'}
+              </button>
+              <div className="flex items-center justify-center gap-2 text-xs text-slate-400">
+                <Ic name="clock" size={12} /><span>Demarre a {fmt.time(active.started_at)}</span>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => setShowStart(true)} className="w-full py-4 rounded-2xl font-bold text-base flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 active:scale-[0.97] text-white shadow-lg shadow-blue-200 transition-all">
+              <Ic name="play" size={22} />Pointer l'arrivee
+            </button>
+          )) : (
+            <div className="w-full py-3 text-center text-sm text-slate-400 bg-slate-50 rounded-2xl">Journee passee - lecture seule</div>
+          )}
+        </div>
+      </Card>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: 'Travaille', value: fmt.duration(work), color: 'text-slate-800' },
+          { label: 'Objectif',  value: fmt.duration(target), color: 'text-slate-500' },
+          { label: 'Reste', value: total>=target ? 'Atteint' : fmt.duration(Math.max(0,target-total)), color: total>=target ? 'text-emerald-600' : 'text-amber-600' },
+        ].map(item => (
+          <Card key={item.label} className="p-3 text-center">
+            <div className={"text-xl font-bold " + item.color}>{item.value}</div>
+            <div className="text-xs text-slate-400 mt-0.5">{item.label}</div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Meal allowance */}
+      {mealOk && (
+        <Card className="p-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-orange-50 rounded-xl flex items-center justify-center"><Ic name="star" size={16} className="text-orange-500" /></div>
+            <div>
+              <div className="text-sm font-semibold text-slate-700">Indemnite repas</div>
+              <div className="text-xs text-slate-400">CHF 20.00 - plus de 4h travaillees</div>
+            </div>
+            <div className="ml-auto text-sm font-bold text-orange-600">CHF 20</div>
+          </div>
+        </Card>
+      )}
+
+      {/* Entries */}
+      {entries.length > 0 ? (
+        <Card>
+          <div className="px-4 py-3 border-b border-slate-50 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-slate-600">Activites du jour</h3>
+            {dayStatus!=='DRAFT' && <span className={"text-xs px-2.5 py-1 rounded-full font-semibold border "+fmtStatus(dayStatus).cls}>{fmtStatus(dayStatus).label}</span>}
+          </div>
+          <div className="divide-y divide-slate-50">
+            {entries.map(e => {
+              const at = ACTIVITY_TYPES[e.activity_type]||ACTIVITY_TYPES.OTHER;
+              const st = fmtStatus(e.status);
+              return (
+                <div key={e.id} className="px-4 py-3 flex items-center gap-3">
+                  <div className={"w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border "+at.color}>
+                    <Ic name={e.activity_type==='WORK_SITE'?'briefcase':e.activity_type==='TRAVEL_PRO'?'truck':'clock'} size={16} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-slate-700">{at.label}</div>
+                    <div className="text-xs text-slate-400">{fmt.time(e.started_at)} - {e.ended_at?fmt.time(e.ended_at):'en cours'}</div>
+                    {e.note && <div className="text-xs text-red-600 mt-0.5 italic">{e.note}</div>}
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    {e.ended_at ? <span className="text-sm font-semibold text-slate-600">{fmt.duration(e.duration_min)}</span>
+                      : <span className="text-xs bg-blue-50 text-blue-600 font-medium px-2 py-0.5 rounded-full">En cours</span>}
+                    {e.status!=='DRAFT' && <div className={"text-xs mt-0.5 px-1.5 py-0.5 rounded border "+st.cls}>{st.label}</div>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      ) : (
+        <Card className="p-8 text-center">
+          <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-3"><Ic name="clock" size={22} className="text-slate-400" /></div>
+          <p className="text-slate-500 text-sm">{isToday ? "Pointez votre arrivee pour commencer" : "Aucune activite ce jour"}</p>
+        </Card>
+      )}
+
+      {/* Submit */}
+      {isToday && hasDraft && dayStatus==='DRAFT' && !active && (
+        <button onClick={submitDay} disabled={submitting} className="w-full py-3.5 rounded-2xl font-bold text-base flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.97] text-white shadow-lg shadow-emerald-200 transition-all disabled:opacity-60">
+          <Ic name="checkPlain" size={20} />{submitting ? 'Envoi...' : 'Soumettre la journee'}
+        </button>
+      )}
+
+      {/* Start modal */}
+      <Modal open={showStart} onClose={() => setShowStart(false)} title="Demarrer une activite">
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-2">
+            {Object.entries(ACTIVITY_TYPES).map(([k,v]) => (
+              <button key={k} onClick={() => setActType(k)} className={"p-3.5 rounded-xl border-2 text-left transition-all "+(actType===k?'border-blue-500 bg-blue-50':'border-slate-100 bg-white hover:border-slate-200')}>
+                <div className={"text-xs font-semibold mt-1 "+(actType===k?'text-blue-700':'text-slate-700')}>{v.label}</div>
+              </button>
+            ))}
+          </div>
+          {actError && <Alert type="error">{actError}</Alert>}
+          <div className="flex gap-3 pt-1">
+            <Button onClick={() => setShowStart(false)} variant="secondary" className="flex-1">Annuler</Button>
+            <Button onClick={startEntry} loading={actLoading} className="flex-1"><Ic name="play" size={16} />Demarrer</Button>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+}
 
 function HomeScreen({ user, meData, onRefresh }) {
   const [entries, setEntries] = useState([]);
@@ -2455,7 +2682,7 @@ function App() {
           setAuth(d.user);
           setMeData(d);
           const isManager = ['MANAGER', 'ADMIN', 'SUPERADMIN'].includes(d.user?.role);
-          setView(isManager ? 'team' : 'home');
+          setView(isManager ? 'team' : 'today');
         })
         .catch(() => { api.clearTokens(); setAuth(false); });
     } else {
@@ -2481,14 +2708,14 @@ function App() {
       setAuth(user);
       setPinData(null);
       const isManager = ['MANAGER', 'ADMIN', 'SUPERADMIN'].includes(user?.role);
-      setView(isManager ? 'team' : 'home');
+      setView(isManager ? 'team' : 'today');
     }
   };
 
   const handlePinSuccess = (user) => {
     setAuth(user);
     setPinData(null);
-    setView('home');
+    setView('today');
   };
 
   const handleLogout = () => {
@@ -2525,6 +2752,7 @@ function App() {
 
   const pageInfo = {
     home:       { title: 'Pointage',        subtitle: null },
+    today:      { title: "Aujourd'hui",     subtitle: null },
     hours:      { title: 'Mes heures',      subtitle: 'Recapitulatif hebdomadaire' },
     absences:   { title: isManager ? 'Absences equipe' : 'Mes absences', subtitle: null },
     account:    { title: 'Mon compte',      subtitle: null },
@@ -2550,6 +2778,7 @@ function App() {
   const renderView = () => {
     switch (view) {
       case 'home':       return <HomeScreen user={auth} meData={meData} onRefresh={refreshMe} />;
+      case 'today':      return <TodayScreen user={auth} meData={meData} onRefresh={refreshMe} />;
       case 'hours':      return <HoursScreen user={auth} />;
       case 'absences':   return isManager ? <ManagerAbsencesScreen /> : <AbsencesScreen user={auth} />;
       case 'account':    return <AccountScreen user={auth} onLogout={handleLogout} onUserUpdate={refreshMe} />;
