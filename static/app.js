@@ -955,7 +955,7 @@ function TodayScreen({ user, meData, onRefresh }) {
             ) : (
               <div className="space-y-3">
                 <div className="flex justify-between items-center text-sm text-slate-600">
-                  <span>Progression journee</span>
+                  <span>Progression journée</span>
                   <span className="font-semibold">{fmt.duration(total)} / {fmt.duration(target)}</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
@@ -1028,13 +1028,13 @@ function TodayScreen({ user, meData, onRefresh }) {
         )}
 
         {done.length===0 && !active && (
-          <div className="text-center text-slate-400 py-10 text-sm">Aucune entree pour cette journee</div>
+          <div className="text-center text-slate-400 py-10 text-sm">Aucune entrée pour cette journée</div>
         )}
 
         {isToday && hasDraft && !active && !hasPending && (
           <button onClick={submitDay} disabled={submitting}
             className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-colors">
-            {submitting ? 'Envoi...' : 'Soumettre la journee'}
+            {submitting ? 'Envoi...' : 'Soumettre la journée'}
           </button>
         )}
       </div>
@@ -1214,17 +1214,17 @@ function HomeScreen({ user, meData, onRefresh }) {
       {/* Day status banners */}
       {dayStatus === 'RETURNED' && (
         <Alert type="error" title="Journee a corriger">
-          {returnNote || 'Votre journee a ete renvoyee pour correction par votre responsable.'}
+          {returnNote || 'Votre journée a été renvoyée pour correction par votre responsable.'}
         </Alert>
       )}
       {dayStatus === 'PENDING' && (
         <Alert type="info" title="En attente de validation">
-          Votre journee est soumise et attend la validation du responsable.
+          Votre journée est soumise et attend la validation du responsable.
         </Alert>
       )}
       {dayStatus === 'APPROVED' && (
-        <Alert type="success" title="Journee validee">
-          Votre journee a ete validee.
+        <Alert type="success" title="Journee validée">
+          Votre journée a été validée.
         </Alert>
       )}
 
@@ -1366,7 +1366,7 @@ function HomeScreen({ user, meData, onRefresh }) {
         </Card>
       )}
 
-      {/* Soumettre la journee */}
+      {/* Soumettre la journée */}
       {hasDraftComplete && dayStatus === 'DRAFT' && !active && (
         <button
           onClick={submitDay}
@@ -1374,7 +1374,7 @@ function HomeScreen({ user, meData, onRefresh }) {
           className="w-full py-3.5 rounded-2xl font-bold text-base flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.97] text-white shadow-lg shadow-emerald-200 transition-all disabled:opacity-60"
         >
           <Ic name="checkPlain" size={20} />
-          {submitting ? 'Envoi...' : 'Soumettre la journee'}
+          {submitting ? 'Envoi...' : 'Soumettre la journée'}
         </button>
       )}
 
