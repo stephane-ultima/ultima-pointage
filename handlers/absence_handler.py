@@ -137,6 +137,9 @@ class AbsenceDetailHandler(BaseHandler):
             # Update actual taken balance
             if absence['type'] == 'HOLIDAY':
                 year = datetime.date.fromisoformat(absence['start_date']).year
+                absence_owner = db.fetchone(
+                    "SELECT annual_leave_d FROM users WHERE id=?", (absence['user_id'],))
+                annual_leave_d = absence_owner['annual_leave_d'] if absence_owner else 25
                 db.execute("""
                     INSERT INTO leave_balances (user_id, year, holiday_total, holiday_taken,
                                                holiday_pending)
@@ -144,8 +147,8 @@ class AbsenceDetailHandler(BaseHandler):
                     ON CONFLICT(user_id, year) DO UPDATE
                     SET holiday_taken = holiday_taken + ?,
                         holiday_pending = MAX(0, holiday_pending - ?)
-                """, (absence['user_id'], year, absence['duration_days'],
-                      absence['duration_days'], -absence['duration_days'],
+                """, (absence['user_id'], year, annual_leave_d,
+                      absence['duration_days'], 0,
                       absence['duration_days'], absence['duration_days']))
             self.audit('ABSENCE_APPROVED', 'absence_requests', abs_id)
 
