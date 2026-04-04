@@ -1813,7 +1813,7 @@ function AbsencesScreen({ user }) {
   return (
     <div className="space-y-4 pb-6 max-w-lg">
       {/* Balance cards */}
-      {balances && (
+      {balance && (
         <div className="grid grid-cols-2 gap-3">
           <Card className="p-4 text-center">
             <div className="text-2xl font-bold text-blue-600">{balance.holiday_total != null ? Math.max(0, balance.holiday_total - balance.holiday_taken) : (user.annual_leave_d || 25)}</div>
