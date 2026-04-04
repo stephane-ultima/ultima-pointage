@@ -602,6 +602,7 @@ function LoginScreen({ onLogin }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [halfDay, setHalfDay] = useState(false);
   const [sent, setSent] = useState(false);
 
   const handlePassword = async (e) => {
@@ -1797,8 +1798,8 @@ function AbsencesScreen({ user }) {
     if (!form.start_date || !form.end_date) return setError('Les dates sont requises');
     setSaving(true); setError('');
     try {
-      await api.post('/absences', form);
-      setShowNew(false);
+      await api.post('/absences', halfDay && form.start_date === form.end_date ? {...form, duration_days: 0.5} : form);
+      setShowNew(false); setHalfDay(false);
       setForm({ type: 'HOLIDAY', start_date: '', end_date: '', comment: '' });
       await load();
     } catch (err) { setError(err.message); }
@@ -1852,7 +1853,7 @@ function AbsencesScreen({ user }) {
                     <div className="font-semibold text-slate-800">{t.label}</div>
                     <div className="text-sm text-slate-500">
                       {fmt.dateShort(a.start_date)} — {fmt.dateShort(a.end_date)}
-                      <span className="ml-2 text-xs text-slate-400">{a.duration_days}j</span>
+                      <span className="ml-2 text-xs text-slate-400">{a.duration_days === 0.5 ? '½j' : a.duration_days + 'j'}</span>
                     </div>
                     {a.comment && <p className="text-xs text-slate-400 mt-0.5 truncate">{a.comment}</p>}
                   </div>
@@ -1882,6 +1883,12 @@ function AbsencesScreen({ user }) {
           <div className="grid grid-cols-2 gap-3">
             <Input label="Du" type="date" value={form.start_date} onChange={v => setForm(f => ({ ...f, start_date: v }))} required />
             <Input label="Au" type="date" value={form.end_date} onChange={v => setForm(f => ({ ...f, end_date: v }))} required />
+            {form.start_date && form.start_date === form.end_date && (
+              <div className="mt-2 flex items-center gap-2">
+                <input type="checkbox" id="halfDay" checked={halfDay} onChange={e => setHalfDay(e.target.checked)} className="rounded border-slate-300" />
+                <label htmlFor="halfDay" className="text-sm text-slate-600">Demi-journée (0.5j)</label>
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Commentaire (optionnel)</label>
