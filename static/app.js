@@ -1974,7 +1974,7 @@ function CalendarScreen() {
                 <UserAvatar user={entry} size="sm" />
                 <div className="flex-1">
                   <div className="font-semibold text-slate-800">{entry.first_name} {entry.last_name}</div>
-                  <div className="text-sm text-slate-500">{t.label} ÃÂÃÂÃÂÃÂ· {fmt.dateShort(entry.start_date)} — {fmt.dateShort(entry.end_date)}</div>
+                  <div className="text-sm text-slate-500">{t.label} · {fmt.dateShort(entry.start_date)} — {fmt.dateShort(entry.end_date)}</div>
                 </div>
                 <Badge status={entry.status} />
               </div>
@@ -2312,7 +2312,7 @@ function TeamScreen() {
                       <div className="text-sm font-medium text-slate-700">{at.label}</div>
                       <div className="text-xs text-slate-400">
                         {new Date(e.started_at * 1000).toLocaleDateString('fr-CH', { weekday: 'short', day: 'numeric' })}
-                        {' ÃÂÃÂÃÂÃÂ· '}{fmt.time(e.started_at)} — {e.ended_at ? fmt.time(e.ended_at) : '...'}
+                        {' · '}{fmt.time(e.started_at)} — {e.ended_at ? fmt.time(e.ended_at) : '...'}
                       </div>
                     </div>
                     <div className="text-right flex-shrink-0">
@@ -2716,7 +2716,7 @@ function ManagerAbsencesScreen() {
                   <UserAvatar user={a} size="sm" />
                   <div className="min-w-0">
                     <div className="font-semibold text-slate-800">{a.first_name} {a.last_name}</div>
-                    <div className="text-xs text-slate-500">{t.label} ÃÂÃÂÃÂÃÂ· {fmt.dateShort(a.start_date)} — {fmt.dateShort(a.end_date)} ({a.duration_days}j)</div>
+                    <div className="text-xs text-slate-500">{t.label} · {fmt.dateShort(a.start_date)} — {fmt.dateShort(a.end_date)} ({a.duration_days}j)</div>
                     {a.comment && <p className="text-xs text-slate-400 mt-0.5 truncate">{a.comment}</p>}
                   </div>
                 </div>
@@ -2743,7 +2743,7 @@ function ManagerAbsencesScreen() {
           <div className="space-y-4">
             <div className="bg-slate-50 rounded-xl p-3">
               <p className="font-semibold text-slate-800">{modal.absence.first_name} {modal.absence.last_name}</p>
-              <p className="text-sm text-slate-500">{ABSENCE_TYPES[modal.absence.type]?.label} ÃÂÃÂÃÂÃÂ· {modal.absence.duration_days} jour(s)</p>
+              <p className="text-sm text-slate-500">{ABSENCE_TYPES[modal.absence.type]?.label} · {modal.absence.duration_days} jour(s)</p>
             </div>
             {modal.action === 'reject' && (
               <div>
